@@ -50,24 +50,37 @@ function seite(titel, text, status, extraKoepfe = {}) {
 }
 
 // Vereinheitlicht die Adresse, damit Schreibvarianten wie /DASHBOARD/,
-// /%64ashboard/ oder //dashboard/ den Schutz nicht umgehen
+// /%64ashboard/, //dashboard/ oder /bilder/%2e%2e/dashboard/ den Schutz
+// nicht umgehen. Im Zweifel gilt die Adresse als Dashboard (Passwort nötig).
 function istDashboard(url) {
   let pfad = new URL(url).pathname;
-  for (let i = 0; i < 3; i++) {
-    try {
-      const entschluesselt = decodeURIComponent(pfad);
-      if (entschluesselt === pfad) break;
-      pfad = entschluesselt;
-    } catch {
-      break;
-    }
+
+  // Jede %XX-Folge einzeln entschlüsseln, auch mehrfach kodierte.
+  // Kaputte Folgen bleiben stehen, statt die Prüfung abzubrechen.
+  for (let i = 0; i < 5; i++) {
+    const neu = pfad.replace(/%([0-9a-f]{2})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+    if (neu === pfad) break;
+    pfad = neu;
   }
-  pfad = pfad.toLowerCase().replace(/\\/g, '/').replace(/\/{2,}/g, '/');
-  return pfad === '/dashboard' || pfad.startsWith('/dashboard/') || pfad.startsWith('/dashboard.');
+  if (/%[0-9a-f]{2}/i.test(pfad)) return true; // nach 5 Runden noch kodiert: sicherheitshalber schützen
+
+  pfad = pfad.replace(/\\/g, '/').replace(/\/{2,}/g, '/');
+
+  // Punkt-Segmente wie /bilder/../dashboard/ auflösen
+  const teile = [];
+  for (const teil of pfad.split('/')) {
+    if (teil === '..') teile.pop();
+    else if (teil !== '.' && teil !== '') teile.push(teil);
+  }
+  pfad = ('/' + teile.join('/')).toLowerCase();
+
+  // Alles, was mit /dashboard beginnt, gilt als Dashboard (auch /dashboard.html, /dashboard%00 usw.)
+  return pfad.startsWith('/dashboard');
 }
 
 export default async (request, context) => {
-  if (!istDashboard(request.url)) return; // alles andere ungeprüft weiterreichen
+  // Läuft für jede Adresse; alles außer dem Dashboard wird ungeprüft weitergereicht
+  if (!istDashboard(request.url)) return;
 
   const passwort = Netlify.env.get('DASHBOARD_PASSWORT') || '';
 
@@ -94,6 +107,6 @@ export default async (request, context) => {
   );
 };
 
-// Läuft für alle Adressen und entscheidet selbst, was zum Dashboard gehört.
-// Gestaltungsdateien und Bilder sind ausgenommen, sie enthalten keine Daten.
-export const config = { path: '/*', excludedPath: ['/_astro/*', '/bilder/*', '/favicon.svg'] };
+// Läuft für alle Adressen ohne Ausnahmen und entscheidet nach dem
+// Vereinheitlichen selbst, was zum Dashboard gehört.
+export const config = { path: '/*' };
