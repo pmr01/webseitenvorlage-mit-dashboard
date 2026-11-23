@@ -35,7 +35,7 @@ Gut zu wissen:
 | **Positionierung** | Strategie-Pyramide, Porter's 5 Kräfte, SWOT-Analyse, Persona / Empathy Map | Wofür Sie stehen, wie Ihr Markt aussieht, für wen Sie da sind |
 | **Promotion** | Checkliste und Aufbauplan des Storytelling Frameworks | Die Startseite Schritt für Schritt aufbauen und abhaken |
 | **Prozess** | Platzhalter | Inhalt noch nicht festgelegt |
-| **Plattform** | Liste der Tools: Astro, Netlify, Google Analytics, Google Search Console, bei Bedarf Google Ads und Meta Ads | Überblick, womit Sie arbeiten |
+| **Plattform** | Liste der Tools: Astro, Netlify, Google Analytics, Google Search Console, bei Bedarf Google Ads, Meta Ads und Neon als Datenbank | Überblick, womit Sie arbeiten |
 
 Solange Google Analytics nicht verbunden ist, zeigt Performance **Beispieldaten** mit dem gelben Hinweis „Beispieldaten“. Die Modelle zeigen Beispielinhalte einer fiktiven Firma mit dem Hinweis „Beispiel“.
 

@@ -5,6 +5,7 @@
     { "name": "Google Analytics", "zweck": "Erfasst Besuche und liefert die Kennzahlen für Performance", "link": "https://analytics.google.com", "bedarf": false },
     { "name": "Google Search Console", "zweck": "Zeigt, wie die Website in der Google-Suche gefunden wird", "link": "https://search.google.com/search-console", "bedarf": false },
     { "name": "Google Ads", "zweck": "Anzeigen in der Google-Suche", "link": "https://ads.google.com", "bedarf": true },
-    { "name": "Meta Ads", "zweck": "Anzeigen auf Facebook und Instagram", "link": "https://www.facebook.com/business/ads", "bedarf": true }
+    { "name": "Meta Ads", "zweck": "Anzeigen auf Facebook und Instagram", "link": "https://www.facebook.com/business/ads", "bedarf": true },
+    { "name": "Neon", "zweck": "Datenbank (Postgres) für Daten wie Anfragen, Kunden oder Logins", "link": "https://neon.tech", "bedarf": true }
   ]
 }
