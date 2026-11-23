@@ -73,7 +73,9 @@ Im Reiter **Prozess** legen Sie Projekte und Aufgaben direkt im Browser an:
 - **Liste:** alle Aufgaben nach Kategorie gruppiert, den Status ändern Sie direkt in der Tabelle.
 - **Zeitplan:** jede Aufgabe als Balken von Start bis Fälligkeit, mit Markierung für heute.
 
-**Wichtig:** Ihre Einträge speichert nur der Browser auf diesem Gerät. Andere Personen sehen sie nicht, und beim Löschen der Browserdaten sind sie weg. Sichern Sie deshalb regelmäßig über **Als Datei sichern** und laden Sie die Datei bei Bedarf über **Datei laden** wieder. Für gemeinsames Arbeiten im Team braucht es eine Datenbank, zum Beispiel Neon. Die Startdaten (Beispielprojekte) stehen in `src/inhalte/projekte.json`.
+**Wichtig:** Ihre Einträge speichert nur der Browser auf diesem Gerät. Andere Personen sehen sie nicht, und beim Löschen der Browserdaten sind sie weg. Sichern Sie deshalb regelmäßig über **Als Datei sichern** und laden Sie die Datei bei Bedarf über **Datei laden** wieder. Die Startdaten (Beispielprojekte) stehen in `src/inhalte/projekte.json`.
+
+**Für den echten Einsatz im Team: Neon einrichten.** Das Projektmanagement in der Vorlage ist ein Beispiel ohne Datenbank. Damit alle im Team dieselben Projekte und Aufgaben sehen, legen Sie auf https://neon.tech ein kostenloses Konto und eine Datenbank an. Den Verbindungs-Schlüssel hinterlegen Sie wie das Dashboard-Passwort als Umgebungsvariable bei Netlify, nie in einer Datei. Den Umbau übernimmt Ihr KI-Tool, zum Beispiel mit: *„Speichere Projekte und Aufgaben im Reiter Prozess in meiner Neon-Datenbank. Die Schnittstelle soll unter /dashboard/api/ liegen, damit der Passwortschutz greift.“*
 
 Ein weiteres Tool für den Reiter Plattform ergänzen Sie so:
 
