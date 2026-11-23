@@ -1,0 +1,9 @@
+---
+// Anleitung für die Website, gelesen aus anleitungen/anleitung-website.md
+import Dashboard from '../../../layouts/Dashboard.astro';
+import Anleitung from '../../../components/Anleitung.astro';
+import { Content } from '../../../../anleitungen/anleitung-website.md';
+---
+<Dashboard titel="Anleitungen" untertitel="Schritt für Schritt: die Website aufbauen und das Dashboard einrichten.">
+  <Anleitung aktiv="website"><Content /></Anleitung>
+</Dashboard>

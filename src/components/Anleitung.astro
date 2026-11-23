@@ -1,0 +1,40 @@
+---
+// Zeigt eine der beiden Anleitungen aus dem Ordner anleitungen/ im Dashboard an.
+// Der Text wird direkt aus den Markdown-Dateien gelesen: Änderungen dort erscheinen automatisch hier.
+interface Props { aktiv: 'website' | 'dashboard' }
+const { aktiv } = Astro.props;
+const seiten = [
+  { schluessel: 'website', name: 'Website mit dem Storytelling Framework', pfad: '/dashboard/anleitungen/' },
+  { schluessel: 'dashboard', name: 'Dashboard und Google Analytics', pfad: '/dashboard/anleitungen/dashboard/' },
+];
+---
+<nav class="anleitung-wahl" aria-label="Anleitungen">
+  {seiten.map((s) => (
+    <a href={s.pfad} aria-current={s.schluessel === aktiv ? 'page' : undefined}>{s.name}</a>
+  ))}
+</nav>
+<article class="karte anleitung">
+  <slot />
+</article>
+
+<style>
+  .anleitung-wahl { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .anleitung-wahl a { padding: 8px 14px; border-radius: 999px; background: #fff; border: 1px solid #dde3e6; text-decoration: none; font-weight: 600; font-size: .92rem; color: #47545a; }
+  .anleitung-wahl a[aria-current="page"] { background: var(--haupt); border-color: var(--haupt); color: #fff; }
+
+  .anleitung { max-width: 880px; padding: clamp(20px, 4vw, 40px); line-height: 1.65; overflow-wrap: anywhere; }
+  .anleitung :global(h1) { font-size: 1.7rem; }
+  .anleitung :global(h2) { font-size: 1.35rem; margin-top: 2em; padding-top: .6em; border-top: 1px solid #e6eaec; scroll-margin-top: 130px; }
+  .anleitung :global(h3) { font-size: 1.08rem; margin-top: 1.6em; scroll-margin-top: 130px; }
+  .anleitung :global(hr) { display: none; }
+  .anleitung :global(ul), .anleitung :global(ol) { padding-left: 1.4em; }
+  .anleitung :global(li) { margin-bottom: .35em; }
+  .anleitung :global(code) { background: #f1f4f5; padding: .1em .35em; border-radius: 4px; font-size: .9em; }
+  .anleitung :global(pre) { background: #1c2126; color: #f1f4f5; padding: 14px 16px; border-radius: 8px; overflow-x: auto; }
+  .anleitung :global(pre code) { background: none; padding: 0; color: inherit; }
+  .anleitung :global(table) { width: 100%; border-collapse: collapse; font-size: .93rem; margin: 1em 0 1.4em; display: block; overflow-x: auto; }
+  .anleitung :global(th) { text-align: left; background: #f1f4f5; }
+  .anleitung :global(th), .anleitung :global(td) { padding: 8px 10px; border: 1px solid #e1e6e8; vertical-align: top; }
+  .anleitung :global(blockquote) { margin: 1em 0; padding: 8px 16px; border-left: 4px solid var(--akzent); background: #fffaf0; }
+  .anleitung :global(input[type="checkbox"]) { margin-right: .4em; }
+</style>

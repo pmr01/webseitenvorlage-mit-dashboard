@@ -6,7 +6,7 @@ Diese Anleitung hat drei Teile:
 2. [Modelle mit dem 6P-Skill füllen](#2-modelle-mit-dem-6p-skill-füllen)
 3. [Performance mit Google Analytics verbinden](#3-performance-mit-google-analytics-verbinden)
 
-Das Dashboard liegt unter `/dashboard/` Ihrer Website, zum Beispiel `ihr-name.netlify.app/dashboard/`. Es steht nicht in der Navigation der Website und ist für Suchmaschinen gesperrt.
+Das Dashboard liegt unter `/dashboard/` Ihrer Website, zum Beispiel `ihr-name.netlify.app/dashboard/`. Es steht nicht in der Navigation der Website und ist für Suchmaschinen gesperrt. Beide Anleitungen finden Sie auch im Dashboard oben rechts unter **Anleitungen**.
 
 ## Zuerst: Passwort für das Dashboard festlegen
 

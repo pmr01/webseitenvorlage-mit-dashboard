@@ -51,6 +51,8 @@ src/
   pages/impressum.astro, datenschutz.astro
   pages/dashboard/           index (Performance), produkt, positionierung,
                              promotion, prozess, plattform
+  pages/dashboard/anleitungen/   zeigt die beiden Anleitungen aus anleitungen/
+                             im Dashboard an (Text nur in den .md-Dateien ändern)
   layouts/Website.astro      Kopfzeile, Fußbereich, Einwilligungsbanner
   layouts/Dashboard.astro    Reiter-Navigation des Dashboards
   components/                CTA, Einwilligungsbanner, Hinweise

@@ -35,7 +35,10 @@ const aktuell = Astro.url.pathname.replace(/\/?$/, '/');
           <img src={konfiguration.firma.logo} alt="" width="32" height="32" />
           <span>{konfiguration.firma.name} <small>Dashboard</small></span>
         </a>
-        <a class="d-zurueck" href="/">Zur Website</a>
+        <div class="d-links">
+          <a href="/dashboard/anleitungen/" aria-current={aktuell.startsWith('/dashboard/anleitungen/') ? 'page' : undefined}>Anleitungen</a>
+          <a href="/">Zur Website</a>
+        </div>
       </div>
       <nav class="d-breite d-reiter" aria-label="6P-Bereiche">
         <ol>
@@ -71,7 +74,8 @@ const aktuell = Astro.url.pathname.replace(/\/?$/, '/');
   .d-kopf-zeile { display: flex; justify-content: space-between; align-items: center; padding-block: 12px; gap: 12px; }
   .d-marke { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-weight: 700; }
   .d-marke small { font-weight: 500; color: #67747a; margin-left: 4px; }
-  .d-zurueck { font-size: .95rem; }
+  .d-links { display: flex; gap: 16px; font-size: .95rem; }
+  .d-links a[aria-current="page"] { font-weight: 700; text-decoration: none; }
   .d-reiter { overflow-x: auto; }
   .d-reiter ol { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
   .d-reiter a { display: flex; align-items: center; gap: 8px; padding: 10px 14px; color: #47545a; text-decoration: none; font-weight: 600; white-space: nowrap; border-bottom: 3px solid transparent; }
