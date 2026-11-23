@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+  <!-- Platzhalter für ein Foto von Ihnen oder Ihrem Team. -->
+  <rect width="600" height="600" fill="#dfe6e9"/>
+  <circle cx="300" cy="235" r="95" fill="#b9c7cd"/>
+  <path d="M120 540 C 130 400 470 400 480 540 Z" fill="#b9c7cd"/>
+  <text x="300" y="585" font-family="system-ui, sans-serif" font-size="22" fill="#5d6b71" text-anchor="middle">Platzhalter: Foto Team / Person</text>
+</svg>

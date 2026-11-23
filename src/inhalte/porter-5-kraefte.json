@@ -1,0 +1,42 @@
+{
+  "beispiel": true,
+  "einleitung": "Beispiel: Markt für Online-Beratung kleiner Unternehmen in einer Region.",
+  "kraefte": [
+    {
+      "titel": "Wettbewerb in der Branche",
+      "faktoren": [
+        { "punkt": "Viele Einzelberater", "begruendung": "Niedrige Einstiegshürden führen zu vielen Anbietern." },
+        { "punkt": "Preisdruck", "begruendung": "Kunden vergleichen Stundensätze direkt." }
+      ]
+    },
+    {
+      "titel": "Bedrohung durch neue Marktteilnehmer",
+      "faktoren": [
+        { "punkt": "Geringe Startkosten", "begruendung": "Beratung braucht kaum Investitionen." },
+        { "punkt": "Vertrauen als Hürde", "begruendung": "Neue Anbieter haben noch keine Referenzen." }
+      ]
+    },
+    {
+      "titel": "Verhandlungsmacht der Lieferanten",
+      "faktoren": [
+        { "punkt": "Software-Anbieter", "begruendung": "Preiserhöhungen wirken direkt auf die Kosten." },
+        { "punkt": "Freie Mitarbeitende", "begruendung": "Gute Fachkräfte sind gefragt." }
+      ]
+    },
+    {
+      "titel": "Verhandlungsmacht der Kunden",
+      "faktoren": [
+        { "punkt": "Kleine Budgets", "begruendung": "Kunden achten stark auf den Preis." },
+        { "punkt": "Leichter Anbieterwechsel", "begruendung": "Keine langfristigen Verträge üblich." }
+      ]
+    },
+    {
+      "titel": "Bedrohung durch Ersatzprodukte",
+      "faktoren": [
+        { "punkt": "Baukasten-Websites", "begruendung": "Kunden bauen selbst, ohne Beratung." },
+        { "punkt": "KI-Werkzeuge", "begruendung": "Beantworten viele Fragen kostenlos." }
+      ]
+    }
+  ],
+  "fazit": "Beispiel-Fazit: Der Wettbewerb ist hoch. Vorteile entstehen durch Vertrauen, Spezialisierung und persönliche Betreuung, die Ersatzprodukte nicht bieten."
+}

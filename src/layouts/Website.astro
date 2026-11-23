@@ -1,0 +1,99 @@
+---
+// Rahmen für alle Seiten der Website: Kopfzeile mit (1) Logo, (2) Navigation
+// und (9) Call-to-Action, Fußbereich (12) und Einwilligungsbanner.
+import '../styles/global.css';
+import Farben from '../components/Farben.astro';
+import Einwilligung from '../components/Einwilligung.astro';
+import { konfiguration } from '../konfiguration.mjs';
+
+interface Props { titel?: string; beschreibung?: string }
+const { titel, beschreibung = konfiguration.firma.beschreibung } = Astro.props;
+const seitentitel = titel ? `${titel} | ${konfiguration.firma.name}` : konfiguration.firma.name;
+const startseite = Astro.url.pathname === '/';
+// Anker der Navigation zeigen auf Unterseiten zurück zur Startseite
+const link = (ziel: string) => (ziel.startsWith('#') && !startseite ? '/' + ziel : ziel);
+const jahr = new Date().getFullYear();
+---
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{seitentitel}</title>
+    <meta name="description" content={beschreibung} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <Farben />
+  </head>
+  <body>
+    <a class="visuell-versteckt" href="#hauptinhalt">Zum Inhalt springen</a>
+    <header class="kopf">
+      <div class="inhalt kopf-zeile">
+        <a class="logo" href="/" aria-label={`${konfiguration.firma.name}, zur Startseite`}>
+          <img src={konfiguration.firma.logo} alt="" width="40" height="40" />
+          <span>{konfiguration.firma.name}</span>
+        </a>
+        <nav class="navigation" aria-label="Hauptnavigation">
+          <ul>
+            {konfiguration.navigation.map((n) => <li><a href={link(n.ziel)}>{n.text}</a></li>)}
+          </ul>
+        </nav>
+        <a class="button kopf-cta" href={link(konfiguration.cta.ziel)}>{konfiguration.cta.text}</a>
+      </div>
+    </header>
+
+    <main id="hauptinhalt">
+      <slot />
+    </main>
+
+    <footer class="fuss">
+      <div class="inhalt fuss-zeile">
+        <p>© {jahr} {konfiguration.firma.name}</p>
+        <ul>
+          <li><a href="/impressum/">Impressum</a></li>
+          <li><a href="/datenschutz/">Datenschutz</a></li>
+          {konfiguration.analytics.messId.trim() && <li><a href="#" data-einwilligung-oeffnen>Cookie-Einstellungen</a></li>}
+        </ul>
+      </div>
+    </footer>
+
+    <Einwilligung />
+  </body>
+</html>
+
+<style>
+  .kopf {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--hintergrund) 94%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+  }
+  .kopf-zeile {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px 24px;
+    padding-block: 12px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text); text-decoration: none; font-size: 1.15rem; }
+  .logo img { width: 40px; height: 40px; }
+  .navigation ul { display: flex; justify-content: center; gap: 4px 20px; list-style: none; margin: 0; padding: 0; }
+  .navigation a { color: var(--text); text-decoration: none; font-weight: 500; white-space: nowrap; }
+  .navigation a:hover { color: var(--haupt); text-decoration: underline; }
+  .kopf-cta { padding: .55em 1em; font-size: .95rem; }
+
+  @media (max-width: 900px) {
+    .kopf-zeile { grid-template-columns: 1fr auto; }
+    .navigation { grid-column: 1 / -1; grid-row: 2; overflow-x: auto; }
+    .navigation ul { justify-content: flex-start; }
+  }
+  @media (max-width: 480px) {
+    .kopf-cta { font-size: .85rem; padding: .5em .8em; max-width: 12em; text-align: center; line-height: 1.25; }
+    .logo span { display: none; }
+  }
+
+  .fuss { background: var(--text); color: #fff; padding-block: 28px; margin-top: 0; font-size: .95rem; }
+  .fuss-zeile { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+  .fuss p { margin: 0; }
+  .fuss ul { display: flex; flex-wrap: wrap; gap: 8px 20px; list-style: none; margin: 0; padding: 0; }
+  .fuss a { color: #fff; }
+</style>

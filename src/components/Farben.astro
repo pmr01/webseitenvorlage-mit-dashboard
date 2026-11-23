@@ -1,0 +1,7 @@
+---
+// Schreibt die Farben aus der Konfigurationsdatei als CSS-Variablen.
+import { konfiguration } from '../konfiguration.mjs';
+const f = konfiguration.farben;
+const css = `:root{--haupt:${f.haupt};--akzent:${f.akzent};--text:${f.text};--hintergrund:${f.hintergrund};--flaeche:${f.flaeche};}`;
+---
+<style is:global set:html={css}></style>

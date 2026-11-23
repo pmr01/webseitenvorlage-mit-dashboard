@@ -1,0 +1,22 @@
+---
+// Rahmen für Impressum und Datenschutz mit deutlichem Hinweis auf Platzhalter.
+interface Props { titel: string }
+const { titel } = Astro.props;
+---
+<div class="inhalt rechtstext">
+  <h1>{titel}</h1>
+  <aside class="hinweis" role="note">
+    <strong>Platzhalter – bitte selbst ausfüllen.</strong>
+    Diese Seite ist eine Vorlage und keine Rechtsberatung. Ersetzen Sie alle Angaben in
+    eckigen Klammern durch Ihre eigenen und lassen Sie den Text im Zweifel prüfen,
+    zum Beispiel mit einem Generator für Rechtstexte oder durch eine Rechtsberatung.
+  </aside>
+  <slot />
+</div>
+
+<style>
+  .rechtstext { max-width: 760px; padding-block: 56px 80px; }
+  .hinweis { background: #fff4dd; border: 2px solid var(--akzent); border-radius: 10px; padding: 16px 20px; margin-bottom: 2rem; }
+  .rechtstext :global(h2) { font-size: 1.3rem; margin-top: 2rem; }
+  .rechtstext :global(mark) { background: #fff4dd; padding: 0 .2em; }
+</style>

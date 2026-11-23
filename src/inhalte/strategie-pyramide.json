@@ -1,0 +1,19 @@
+{
+  "beispiel": true,
+  "purpose": {
+    "text": "Kleine Unternehmen sollen im Internet genauso gut gefunden werden wie große.",
+    "werte": [
+      { "wert": "Klarheit", "erklaerung": "Wir sprechen verständlich und machen Schritte sichtbar." },
+      { "wert": "Ehrlichkeit", "erklaerung": "Wir empfehlen nur, was dem Kunden wirklich hilft." },
+      { "wert": "Nähe", "erklaerung": "Wir kennen unsere Kunden persönlich." }
+    ]
+  },
+  "vision": "In fünf Jahren die erste Adresse für kleine Unternehmen in der Region, wenn es um den Auftritt im Internet geht.",
+  "mission": "Wir geben kleinen Unternehmen einen klaren Plan und begleiten sie, bis ihre Website Kunden bringt.",
+  "strategien": [
+    { "strategie": "Fokus auf eine Zielgruppe", "erklaerung": "Nur Selbstständige und kleine Betriebe, keine Konzerne." },
+    { "strategie": "Feste Pakete", "erklaerung": "Vergleichbare Leistungen zu festen Preisen." },
+    { "strategie": "Wachstum über Empfehlungen", "erklaerung": "Jeder zufriedene Kunde wird aktiv um eine Empfehlung gebeten." }
+  ],
+  "zusammenfassung": "Beispiel-Zusammenfassung: Der Purpose gibt die Richtung vor, Vision und Mission machen sie greifbar, und die Strategien legen fest, wie die Musterfirma dorthin kommt."
+}

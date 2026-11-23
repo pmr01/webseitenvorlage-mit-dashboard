@@ -1,0 +1,50 @@
+{
+  "beispiel": true,
+  "einleitung": "Beispiel: Die fiktive Musterfirma berät kleine Unternehmen beim Auftritt im Internet. Ersetzen Sie die Punkte durch Ihr eigenes Geschäftsmodell, erstellt mit dem 6P-Skill.",
+  "felder": {
+    "schluesselpartner": [
+      { "punkt": "Webdesign-Agenturen", "begruendung": "Übernehmen die technische Umsetzung größerer Aufträge." },
+      { "punkt": "Lokale Wirtschaftsverbände", "begruendung": "Vermitteln Kontakte zu neuen Kunden." },
+      { "punkt": "Software-Anbieter", "begruendung": "Stellen Werkzeuge und Partnerkonditionen bereit." }
+    ],
+    "schluesselaktivitaeten": [
+      { "punkt": "Beratungsgespräche", "begruendung": "Kern der Leistung und Einstieg für jeden Kunden." },
+      { "punkt": "Workshops", "begruendung": "Bedienen mehrere Kunden gleichzeitig." },
+      { "punkt": "Inhalte erstellen", "begruendung": "Artikel und Videos machen das Angebot sichtbar." }
+    ],
+    "schluesselressourcen": [
+      { "punkt": "Erfahrung des Teams", "begruendung": "Begründet das Vertrauen der Kunden." },
+      { "punkt": "Vorlagen und Checklisten", "begruendung": "Machen Beratungen schneller und vergleichbar." },
+      { "punkt": "Kundenstimmen", "begruendung": "Belegen den Nutzen gegenüber Interessenten." }
+    ],
+    "wertangebote": [
+      { "punkt": "Klarer Plan statt Ratlosigkeit", "begruendung": "Kunden wissen nach dem Gespräch, was zu tun ist." },
+      { "punkt": "Verständliche Sprache", "begruendung": "Keine Fachbegriffe, die Laien abschrecken." },
+      { "punkt": "Feste Preise", "begruendung": "Kunden können die Kosten vorher planen." }
+    ],
+    "kundenbeziehungen": [
+      { "punkt": "Persönliche Betreuung", "begruendung": "Ein fester Ansprechpartner pro Kunde." },
+      { "punkt": "Newsletter", "begruendung": "Hält den Kontakt nach dem Auftrag." }
+    ],
+    "vertriebskanaele": [
+      { "punkt": "Eigene Website", "begruendung": "Erster Anlaufpunkt und Terminbuchung." },
+      { "punkt": "Empfehlungen", "begruendung": "Zufriedene Kunden bringen neue Kunden." },
+      { "punkt": "Soziale Netzwerke", "begruendung": "Erreichen Selbstständige dort, wo sie sich informieren." }
+    ],
+    "kundensegmente": [
+      { "punkt": "Selbstständige", "begruendung": "Wenig Zeit, kein eigenes Marketing-Team." },
+      { "punkt": "Kleine Betriebe bis 20 Mitarbeitende", "begruendung": "Brauchen Unterstützung, aber keine Großagentur." }
+    ],
+    "kostenstruktur": [
+      { "punkt": "Personal", "begruendung": "Größter Posten, da die Leistung Beratung ist." },
+      { "punkt": "Software und Hosting", "begruendung": "Laufende Kosten für Werkzeuge." },
+      { "punkt": "Werbung", "begruendung": "Anzeigen für neue Kunden." }
+    ],
+    "einnahmequellen": [
+      { "punkt": "Beratungspakete", "begruendung": "Feste Preise pro Paket." },
+      { "punkt": "Workshop-Gebühren", "begruendung": "Pro Teilnehmer." },
+      { "punkt": "Betreuung im Abo", "begruendung": "Monatlicher Beitrag für laufende Unterstützung." }
+    ]
+  },
+  "fazit": "Beispiel-Fazit: Das Geschäftsmodell lebt von Vertrauen und Empfehlungen. Feste Preise und verständliche Sprache unterscheiden die Musterfirma von großen Agenturen."
+}

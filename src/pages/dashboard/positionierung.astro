@@ -1,0 +1,150 @@
+---
+// Reiter Positionierung: Strategie-Pyramide, Porter's 5 Kräfte, SWOT-Analyse, Persona und Empathy Map.
+// Jedes Modell hat eine eigene Inhaltsdatei in src/inhalte/.
+import Dashboard from '../../layouts/Dashboard.astro';
+import BeispielHinweis from '../../components/BeispielHinweis.astro';
+import pyramide from '../../inhalte/strategie-pyramide.json';
+import porter from '../../inhalte/porter-5-kraefte.json';
+import swot from '../../inhalte/swot-analyse.json';
+import persona from '../../inhalte/persona-empathy-map.json';
+
+const swotFelder = [
+  { titel: 'Stärken', englisch: 'Strengths', punkte: swot.staerken, klasse: 's' },
+  { titel: 'Schwächen', englisch: 'Weaknesses', punkte: swot.schwaechen, klasse: 'w' },
+  { titel: 'Chancen', englisch: 'Opportunities', punkte: swot.chancen, klasse: 'o' },
+  { titel: 'Risiken', englisch: 'Threats', punkte: swot.risiken, klasse: 't' },
+];
+---
+<Dashboard titel="Positionierung" untertitel="Wofür das Unternehmen steht, wie der Markt aussieht und für wen es da ist.">
+  <nav class="sprungmarken" aria-label="Modelle auf dieser Seite">
+    <a href="#pyramide">Strategie-Pyramide</a>
+    <a href="#porter">Porter's 5 Kräfte</a>
+    <a href="#swot">SWOT-Analyse</a>
+    <a href="#persona">Persona / Empathy Map</a>
+  </nav>
+
+  <!-- Strategie-Pyramide -->
+  <section id="pyramide" class="abschnitt-modell">
+    <h2>Strategie-Pyramide</h2>
+    {pyramide.beispiel && <BeispielHinweis datei="src/inhalte/strategie-pyramide.json" />}
+    <div class="pyramide">
+      <div class="ebene e1">
+        <div class="form"><span>Purpose &amp; Werte</span></div>
+        <div class="karte text">
+          <p><strong>{pyramide.purpose.text}</strong></p>
+          <ul class="punkte">
+            {pyramide.purpose.werte.map((w) => <li><strong>{w.wert}</strong><span>{w.erklaerung}</span></li>)}
+          </ul>
+        </div>
+      </div>
+      <div class="ebene e2">
+        <div class="form"><span>Mission &amp; Vision</span></div>
+        <div class="karte text">
+          <p><strong>Vision:</strong> {pyramide.vision}</p>
+          <p><strong>Mission:</strong> {pyramide.mission}</p>
+        </div>
+      </div>
+      <div class="ebene e3">
+        <div class="form"><span>Strategie</span></div>
+        <div class="karte text">
+          <ul class="punkte">
+            {pyramide.strategien.map((s) => <li><strong>{s.strategie}</strong><span>{s.erklaerung}</span></li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+    {pyramide.zusammenfassung && <p class="fazit">{pyramide.zusammenfassung}</p>}
+  </section>
+
+  <!-- Porter's 5 Kräfte -->
+  <section id="porter" class="abschnitt-modell">
+    <h2>Porter's 5 Kräfte</h2>
+    {porter.beispiel && <BeispielHinweis datei="src/inhalte/porter-5-kraefte.json" />}
+    {porter.einleitung && <p>{porter.einleitung}</p>}
+    <div class="porter">
+      {porter.kraefte.slice(0, 5).map((k, i) => (
+        <div class:list={['karte', 'kraft', `k${i + 1}`]}>
+          <h3>{k.titel}</h3>
+          <ul class="punkte">
+            {k.faktoren.slice(0, 4).map((f) => <li><strong>{f.punkt}</strong><span>{f.begruendung}</span></li>)}
+          </ul>
+        </div>
+      ))}
+    </div>
+    {porter.fazit && <p class="fazit">{porter.fazit}</p>}
+  </section>
+
+  <!-- SWOT-Analyse -->
+  <section id="swot" class="abschnitt-modell">
+    <h2>SWOT-Analyse</h2>
+    {swot.beispiel && <BeispielHinweis datei="src/inhalte/swot-analyse.json" />}
+    {swot.einleitung && <p>{swot.einleitung}</p>}
+    <div class="swot">
+      {swotFelder.map((f) => (
+        <div class:list={['karte', 'swot-feld', f.klasse]}>
+          <h3>{f.titel} <small>{f.englisch}</small></h3>
+          <ul class="punkte">
+            {f.punkte.slice(0, 5).map((p) => <li><strong>{p.punkt}</strong><span>{p.begruendung}</span></li>)}
+          </ul>
+        </div>
+      ))}
+    </div>
+    {swot.fazit && <p class="fazit">{swot.fazit}</p>}
+  </section>
+
+  <!-- Persona / Empathy Map -->
+  <section id="persona" class="abschnitt-modell">
+    <h2>Persona / Empathy Map</h2>
+    {persona.beispiel && <BeispielHinweis datei="src/inhalte/persona-empathy-map.json" />}
+    <div class="karte">
+      <h3>{persona.name}</h3>
+      <dl class="empathy">
+        {persona.dimensionen.map((d) => (
+          <div>
+            <dt>{d.frage}</dt>
+            <dd><ul>{d.antworten.map((a) => <li>{a}</li>)}</ul></dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+</Dashboard>
+
+<style>
+  .sprungmarken { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+  .sprungmarken a { padding: 6px 12px; border-radius: 999px; background: #fff; border: 1px solid #dde3e6; text-decoration: none; font-weight: 600; font-size: .9rem; }
+  .abschnitt-modell { scroll-margin-top: 130px; }
+
+  .pyramide { display: grid; gap: 10px; }
+  .ebene { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: stretch; }
+  .form { display: grid; place-items: center; color: #fff; font-weight: 700; text-align: center; padding: 20px 12px; background: var(--haupt); }
+  .e1 .form { clip-path: polygon(33% 0, 67% 0, 78% 100%, 22% 100%); background: color-mix(in srgb, var(--haupt) 100%, black 15%); }
+  .e2 .form { clip-path: polygon(22% 0, 78% 0, 89% 100%, 11% 100%); }
+  .e3 .form { clip-path: polygon(11% 0, 89% 0, 100% 100%, 0 100%); background: color-mix(in srgb, var(--haupt) 80%, white); }
+  .form span { max-width: 9em; font-size: .95rem; }
+  .text p:last-child { margin-bottom: 0; }
+  .text .punkte { margin-top: 10px; }
+  @media (max-width: 700px) {
+    .ebene { grid-template-columns: 1fr; gap: 0; }
+    .form { clip-path: none !important; border-radius: 10px 10px 0 0; padding: 10px; }
+    .ebene .karte { border-radius: 0 0 12px 12px; }
+  }
+
+  .porter { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: ". k2 ." "k4 k1 k3" ". k5 ."; }
+  .k1 { grid-area: k1; border: 2px solid var(--haupt); } .k2 { grid-area: k2; } .k3 { grid-area: k3; } .k4 { grid-area: k4; } .k5 { grid-area: k5; }
+  .kraft h3 { color: var(--haupt); }
+  @media (max-width: 900px) { .porter { grid-template-columns: 1fr; grid-template-areas: "k1" "k2" "k3" "k4" "k5"; } }
+
+  .swot { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .swot-feld { border-top: 4px solid; }
+  .swot-feld small { font-weight: 500; color: #6b777c; }
+  .s { border-top-color: #3d8b5a; } .w { border-top-color: #c0773a; } .o { border-top-color: #2f6fa6; } .t { border-top-color: #b04646; }
+  @media (max-width: 640px) { .swot { grid-template-columns: 1fr; } }
+
+  .empathy { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; }
+  .empathy > div { background: #f6f8f9; border-radius: 10px; padding: 12px 14px; }
+  .empathy dt { font-weight: 700; color: var(--haupt); margin-bottom: 4px; }
+  .empathy dd { margin: 0; }
+  .empathy ul { margin: 0; padding-left: 1.1em; }
+  @media (max-width: 640px) { .empathy { grid-template-columns: 1fr; } }
+</style>

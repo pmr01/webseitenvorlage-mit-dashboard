@@ -1,0 +1,32 @@
+---
+import Website from '../layouts/Website.astro';
+import Rechtstext from '../components/Rechtstext.astro';
+---
+<Website titel="Impressum">
+  <Rechtstext titel="Impressum">
+    <h2>Angaben gemäß § 5 DDG</h2>
+    <p>
+      <mark>[Name des Unternehmens / Vor- und Nachname]</mark><br />
+      <mark>[Straße und Hausnummer]</mark><br />
+      <mark>[PLZ und Ort]</mark>
+    </p>
+
+    <h2>Vertreten durch</h2>
+    <p><mark>[Name der vertretungsberechtigten Person, bei Firmen]</mark></p>
+
+    <h2>Kontakt</h2>
+    <p>
+      Telefon: <mark>[Telefonnummer]</mark><br />
+      E-Mail: <mark>[E-Mail-Adresse]</mark>
+    </p>
+
+    <h2>Registereintrag</h2>
+    <p><mark>[Registergericht und Registernummer, falls vorhanden]</mark></p>
+
+    <h2>Umsatzsteuer-ID</h2>
+    <p><mark>[Umsatzsteuer-Identifikationsnummer, falls vorhanden]</mark></p>
+
+    <h2>Verantwortlich für den Inhalt</h2>
+    <p><mark>[Name und Anschrift, falls journalistisch-redaktionelle Inhalte angeboten werden]</mark></p>
+  </Rechtstext>
+</Website>

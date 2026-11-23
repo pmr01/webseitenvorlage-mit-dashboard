@@ -1,0 +1,60 @@
+---
+// Reiter Produkt: Business Model Canvas.
+// Inhalte ändern in src/inhalte/business-model-canvas.json (höchstens 4 Punkte je Feld).
+import Dashboard from '../../layouts/Dashboard.astro';
+import BeispielHinweis from '../../components/BeispielHinweis.astro';
+import bmc from '../../inhalte/business-model-canvas.json';
+
+const felder = [
+  { schluessel: 'schluesselpartner', titel: 'Schlüsselpartner', bereich: 'kp' },
+  { schluessel: 'schluesselaktivitaeten', titel: 'Schlüsselaktivitäten', bereich: 'ka' },
+  { schluessel: 'schluesselressourcen', titel: 'Schlüsselressourcen', bereich: 'kr' },
+  { schluessel: 'wertangebote', titel: 'Wertangebote', bereich: 'wa' },
+  { schluessel: 'kundenbeziehungen', titel: 'Kundenbeziehungen', bereich: 'kb' },
+  { schluessel: 'vertriebskanaele', titel: 'Vertriebskanäle', bereich: 'vk' },
+  { schluessel: 'kundensegmente', titel: 'Kundensegmente', bereich: 'ks' },
+  { schluessel: 'kostenstruktur', titel: 'Kostenstruktur', bereich: 'ko' },
+  { schluessel: 'einnahmequellen', titel: 'Einnahmequellen', bereich: 'ei' },
+] as const;
+---
+<Dashboard titel="Produkt" untertitel="Das Business Model Canvas: wie das Unternehmen Werte schafft, liefert und damit Geld verdient.">
+  {bmc.beispiel && <BeispielHinweis datei="src/inhalte/business-model-canvas.json" />}
+  {bmc.einleitung && <p class="einleitung">{bmc.einleitung}</p>}
+
+  <div class="canvas">
+    {felder.map((f) => (
+      <section class={`karte feld ${f.bereich}`} aria-label={f.titel}>
+        <h2>{f.titel}</h2>
+        <ul class="punkte">
+          {(bmc.felder[f.schluessel] ?? []).slice(0, 4).map((p) => (
+            <li><strong>{p.punkt}</strong><span>{p.begruendung}</span></li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+  {bmc.fazit && <p class="fazit">{bmc.fazit}</p>}
+</Dashboard>
+
+<style>
+  .einleitung { max-width: 80ch; }
+  .canvas {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    grid-template-areas:
+      "kp kp ka ka wa wa kb kb ks ks"
+      "kp kp kr kr wa wa vk vk ks ks"
+      "ko ko ko ko ko ei ei ei ei ei";
+  }
+  .feld h2 { font-size: .95rem; text-transform: uppercase; letter-spacing: .04em; color: var(--haupt); }
+  .kp { grid-area: kp; } .ka { grid-area: ka; } .kr { grid-area: kr; } .wa { grid-area: wa; }
+  .kb { grid-area: kb; } .vk { grid-area: vk; } .ks { grid-area: ks; } .ko { grid-area: ko; } .ei { grid-area: ei; }
+  .wa { border-top: 4px solid var(--akzent); }
+  @media (max-width: 1000px) {
+    .canvas { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "wa wa" "ks kb" "vk ka" "kr kp" "ko ei"; }
+  }
+  @media (max-width: 560px) {
+    .canvas { grid-template-columns: 1fr; grid-template-areas: "wa" "ks" "kb" "vk" "ka" "kr" "kp" "ko" "ei"; }
+  }
+</style>

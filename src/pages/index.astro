@@ -1,0 +1,144 @@
+---
+// Startseite nach dem Storytelling Framework.
+// Die Reihenfolge der Abschnitte ist die Geschichte: nicht umstellen.
+// Alle Texte stehen in src/konfiguration.mjs.
+import Website from '../layouts/Website.astro';
+import CTA from '../components/CTA.astro';
+import { konfiguration as k } from '../konfiguration.mjs';
+---
+<Website>
+  <!-- (3) Hauptbild / Video, (4) Main Headline, (5) Einleitung, (9) CTA -->
+  <section class="hero" aria-labelledby="hero-titel">
+    {k.hero.video
+      ? <video class="hero-medium" src={k.hero.video} autoplay muted loop playsinline aria-hidden="true"></video>
+      : <img class="hero-medium" src={k.hero.bild} alt={k.hero.bildAlt} width="1600" height="900" />}
+    <div class="hero-text inhalt">
+      <h1 id="hero-titel">{k.hero.ueberschrift}</h1>
+      <p class="einleitung">{k.hero.einleitung}</p>
+      <CTA hell zentriert={false} />
+    </div>
+  </section>
+
+  <!-- (6) Painpoints: 3 bis 6, gemäß Persona -->
+  <section id="painpoints" class="abschnitt" aria-labelledby="painpoints-titel">
+    <div class="inhalt">
+      <h2 id="painpoints-titel" class="zentriert">{k.painpoints.ueberschrift}</h2>
+      <ul class="painpoints">
+        {k.painpoints.punkte.map((p) => (
+          <li><h3>{p.titel}</h3><p>{p.text}</p></li>
+        ))}
+      </ul>
+      <CTA />
+    </div>
+  </section>
+
+  <!-- (7) Vorstellung: Autorität, warum wir -->
+  <section id="vorstellung" class="abschnitt flaeche" aria-labelledby="vorstellung-titel">
+    <div class="inhalt vorstellung">
+      <div>
+        <h2 id="vorstellung-titel">{k.vorstellung.ueberschrift}</h2>
+        {k.vorstellung.text.map((absatz) => <p>{absatz}</p>)}
+        <CTA zentriert={false} />
+      </div>
+      <img src={k.vorstellung.bild} alt={k.vorstellung.bildAlt} width="600" height="600" loading="lazy" />
+    </div>
+  </section>
+
+  <!-- (8) Plan: So einfach geht es, 3 Schritte -->
+  <section id="plan" class="abschnitt" aria-labelledby="plan-titel">
+    <div class="inhalt">
+      <h2 id="plan-titel" class="zentriert">{k.plan.ueberschrift}</h2>
+      <ol class="plan">
+        {k.plan.schritte.map((s, i) => (
+          <li><span class="nummer" aria-hidden="true">{i + 1}</span><h3>{s.titel}</h3><p>{s.text}</p></li>
+        ))}
+      </ol>
+      <CTA />
+    </div>
+  </section>
+
+  <!-- (10) Auszeichnungen / Logos / Siegel: nur wenn vorhanden -->
+  {k.auszeichnungen.eintraege.length > 0 && (
+    <section id="auszeichnungen" class="abschnitt flaeche schmal" aria-labelledby="auszeichnungen-titel">
+      <div class="inhalt">
+        <h2 id="auszeichnungen-titel" class="zentriert klein">{k.auszeichnungen.ueberschrift}</h2>
+        <ul class="siegel">
+          {k.auszeichnungen.eintraege.map((e) => <li>{e}</li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <!-- (11) Testimonials -->
+  <section id="testimonials" class="abschnitt" aria-labelledby="testimonials-titel">
+    <div class="inhalt">
+      <h2 id="testimonials-titel" class="zentriert">{k.testimonials.ueberschrift}</h2>
+      <ul class="stimmen">
+        {k.testimonials.stimmen.map((s) => (
+          <li>
+            <blockquote><p>„{s.zitat}“</p></blockquote>
+            <p class="person"><strong>{s.name}</strong><br />{s.rolle}</p>
+          </li>
+        ))}
+      </ul>
+      <CTA />
+    </div>
+  </section>
+
+  <!-- (12) Weitere Elemente: Kontakt (der Footer steht im Layout) -->
+  <section id="kontakt" class="abschnitt flaeche" aria-labelledby="kontakt-titel">
+    <div class="inhalt kontakt">
+      <h2 id="kontakt-titel">{k.kontakt.ueberschrift}</h2>
+      <p>{k.kontakt.text}</p>
+      <ul>
+        <li><span>E-Mail</span><a href={`mailto:${k.kontakt.email}`}>{k.kontakt.email}</a></li>
+        <li><span>Telefon</span><a href={`tel:${k.kontakt.telefon.replace(/\s/g, '')}`}>{k.kontakt.telefon}</a></li>
+        <li><span>Adresse</span>{k.kontakt.adresse}</li>
+      </ul>
+    </div>
+  </section>
+</Website>
+
+<style>
+  .zentriert { text-align: center; }
+  .klein { font-size: 1.1rem; font-weight: 600; color: color-mix(in srgb, var(--text) 70%, transparent); }
+
+  .hero { position: relative; isolation: isolate; min-height: min(78vh, 720px); display: grid; align-items: center; color: #fff; overflow: hidden; }
+  .hero-medium { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+  .hero::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, color-mix(in srgb, var(--haupt) 88%, black) 0%, color-mix(in srgb, var(--haupt) 55%, transparent) 70%, transparent 100%); }
+  .hero-text { padding-block: 72px; }
+  .hero h1 { max-width: 16ch; }
+  .einleitung { font-size: 1.2rem; max-width: 52ch; }
+
+  .abschnitt { padding-block: clamp(56px, 8vw, 96px); }
+  .abschnitt.schmal { padding-block: 40px; }
+  .flaeche { background: var(--flaeche); }
+
+  .painpoints { list-style: none; margin: 2rem 0 0; padding: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+  .painpoints li { background: var(--hintergrund); border: 1px solid color-mix(in srgb, var(--text) 12%, transparent); border-left: 4px solid var(--akzent); border-radius: 10px; padding: 20px; }
+  .painpoints p { margin: 0; color: color-mix(in srgb, var(--text) 80%, transparent); }
+
+  .vorstellung { display: grid; gap: 40px; grid-template-columns: 1.2fr 1fr; align-items: center; }
+  .vorstellung img { border-radius: 14px; width: 100%; }
+  @media (max-width: 768px) { .vorstellung { grid-template-columns: 1fr; } }
+
+  .plan { list-style: none; margin: 2rem 0 0; padding: 0; display: grid; gap: 16px; grid-template-columns: repeat(3, 1fr); counter-reset: schritt; }
+  .plan li { position: relative; background: var(--flaeche); border-radius: 12px; padding: 24px; }
+  .plan li:not(:last-child)::after { content: "›"; position: absolute; right: -14px; top: 50%; transform: translateY(-50%); font-size: 2rem; color: var(--akzent); }
+  .nummer { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--haupt); color: #fff; font-weight: 700; margin-bottom: 12px; }
+  .plan p { margin: 0; }
+  @media (max-width: 768px) { .plan { grid-template-columns: 1fr; } .plan li::after { display: none; } }
+
+  .siegel { list-style: none; margin: 1rem 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+  .siegel li { min-width: 140px; padding: 18px 20px; border: 2px dashed color-mix(in srgb, var(--text) 25%, transparent); border-radius: 10px; text-align: center; color: color-mix(in srgb, var(--text) 65%, transparent); font-weight: 600; }
+
+  .stimmen { list-style: none; margin: 2rem 0 0; padding: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+  .stimmen li { border: 1px solid color-mix(in srgb, var(--text) 12%, transparent); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; }
+  .stimmen blockquote { margin: 0; font-size: 1.1rem; }
+  .person { margin: 0; color: color-mix(in srgb, var(--text) 70%, transparent); font-size: .95rem; }
+
+  .kontakt ul { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; gap: 10px; }
+  .kontakt li { display: grid; grid-template-columns: 7rem 1fr; gap: 12px; }
+  .kontakt span { font-weight: 600; }
+  @media (max-width: 480px) { .kontakt li { grid-template-columns: 1fr; gap: 0; } }
+</style>

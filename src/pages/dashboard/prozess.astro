@@ -1,0 +1,19 @@
+---
+// Reiter Prozess: Inhalt ist noch nicht festgelegt (Lastenheft D8, offen).
+import Dashboard from '../../layouts/Dashboard.astro';
+---
+<Dashboard titel="Prozess" untertitel="Wie die Arbeit im Unternehmen abläuft.">
+  <div class="karte platzhalter" role="note">
+    <p class="marke">Platzhalter</p>
+    <h2>Der Inhalt dieses Bereichs ist noch nicht festgelegt.</h2>
+    <p>Das Kurs-Team entscheidet noch, welches Modell oder welche Übersicht hier erscheint. Bis dahin bleibt der Bereich leer.</p>
+    <p>Die Seite liegt in <code>src/pages/dashboard/prozess.astro</code>.</p>
+  </div>
+</Dashboard>
+
+<style>
+  .platzhalter { border: 2px dashed #cfd8dc; background: #fbfcfc; text-align: center; padding: 48px 24px; }
+  .platzhalter h2 { font-size: 1.2rem; }
+  .platzhalter p { color: #5a676d; max-width: 60ch; margin-inline: auto; }
+  .marke { display: inline-block; padding: 2px 12px; border-radius: 999px; background: #fff4dd; border: 1px solid #f0d199; font-weight: 700; font-size: .85rem; color: #6b4e12 !important; }
+</style>

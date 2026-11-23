@@ -1,0 +1,21 @@
+{
+  "elemente": [
+    { "nr": 1, "element": "Logo", "kommentar": "Oben links platzieren", "quellen": "AI-Logo-Tools, Canva" },
+    { "nr": 2, "element": "Navigation", "kommentar": "3 bis max. 7 Punkte", "quellen": "Recherche beliebter Webseiten" },
+    { "nr": 3, "element": "Hauptbild / Video", "kommentar": "Etwas Emotionales, Verbindendes", "quellen": "Bild- und Video-Datenbanken" },
+    { "nr": 4, "element": "Main Headline", "kommentar": "„Was bieten wir wem an?“ – knackig", "quellen": "ChatGPT" },
+    { "nr": 5, "element": "Einleitung", "kommentar": "Erläutert das Angebot", "quellen": "ChatGPT" },
+    { "nr": 6, "element": "Painpoints", "kommentar": "3–6 Painpoints gemäß Persona", "quellen": "ChatGPT" },
+    { "nr": 7, "element": "Vorstellung / Produkt", "kommentar": "Autorität zeigen, warum wir", "quellen": "Selbst, ggf. ChatGPT zur Hilfe" },
+    { "nr": 8, "element": "Plan", "kommentar": "Aufzeigen, wie leicht es zu buchen / starten ist – 3 Schritte", "quellen": "Selbst, evtl. ChatGPT" },
+    { "nr": 9, "element": "Call-to-Action", "kommentar": "Prominent und häufig auf der Webseite (immer gleich)", "quellen": "Selbst" },
+    { "nr": 10, "element": "Auszeichnungen / Logos / Siegel", "kommentar": "Soweit vorhanden einsetzen", "quellen": "Selbst, ggf. Recherche nach Siegel, ggf. erwerben, z. B. Trusted Shops" },
+    { "nr": 11, "element": "Testimonials", "kommentar": "Bisherige Kundenstimmen abbilden", "quellen": "Mit Kunden" },
+    { "nr": 12, "element": "Weitere Elemente und Footer", "kommentar": "z. B. Anfahrt oder Kontaktformular, Footer mit wichtigen Links", "quellen": "Selbst" }
+  ],
+  "voraussetzungen": [
+    { "element": "Persona", "kommentar": "Für wen ist die Seite? Steuert Painpoints und Tonalität.", "quellen": "6P-Skill: Persona / Empathy Map (Reiter Positionierung)" },
+    { "element": "Impressum", "kommentar": "Rechtlich verpflichtend", "quellen": "Selbst, ggf. Generator oder Rechtsberatung" },
+    { "element": "Datenschutz", "kommentar": "Rechtlich verpflichtend", "quellen": "Selbst, ggf. Generator oder Rechtsberatung" }
+  ]
+}

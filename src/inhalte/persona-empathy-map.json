@@ -1,0 +1,14 @@
+{
+  "beispiel": true,
+  "name": "Beispiel-Persona: Sabine, 44, Inhaberin eines kleinen Betriebs",
+  "dimensionen": [
+    { "frage": "Wer ist die Person?", "antworten": ["Inhaberin eines Betriebs mit 6 Mitarbeitenden", "Seit 12 Jahren selbstständig", "Wenig Zeit für Marketing"] },
+    { "frage": "Was muss sie TUN?", "antworten": ["Neue Kunden gewinnen", "Entscheiden, wofür sie Geld ausgibt", "Erfolg an Anfragen messen"] },
+    { "frage": "Was SIEHT sie?", "antworten": ["Mitbewerber mit moderner Website", "Viele Werbeangebote von Agenturen", "Ratgeber-Videos im Internet"] },
+    { "frage": "Was SAGT sie?", "antworten": ["„Ich weiß nicht, wo ich anfangen soll.“", "„Das muss bezahlbar bleiben.“"] },
+    { "frage": "Was MACHT sie?", "antworten": ["Pflegt die Website selten", "Fragt Bekannte nach Empfehlungen"] },
+    { "frage": "Was HÖRT sie?", "antworten": ["Kollegen loben ihre neue Website", "Medien berichten über KI im Marketing"] },
+    { "frage": "Verluste / Probleme", "antworten": ["Angst, Geld zu verschwenden", "Frust über Fachbegriffe", "Sorge, abgehängt zu werden"] },
+    { "frage": "Gewinne / Wünsche", "antworten": ["Mehr Anfragen über die Website", "Einen klaren Plan", "Einen Ansprechpartner, dem sie vertraut"] }
+  ]
+}

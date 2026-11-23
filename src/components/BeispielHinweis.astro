@@ -1,0 +1,9 @@
+---
+// Kennzeichnet Beispielinhalte und nennt die Datei, in der sie geändert werden.
+interface Props { datei: string }
+const { datei } = Astro.props;
+---
+<p class="beispiel-hinweis" role="note">
+  <strong>Beispiel</strong>
+  <span>Inhalte einer fiktiven Firma. Ersetzen Sie sie durch Ihre eigenen, erstellt mit dem 6P-Skill, in der Datei <code>{datei}</code>.</span>
+</p>

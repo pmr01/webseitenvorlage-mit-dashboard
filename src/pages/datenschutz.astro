@@ -1,0 +1,46 @@
+---
+import Website from '../layouts/Website.astro';
+import Rechtstext from '../components/Rechtstext.astro';
+import { konfiguration } from '../konfiguration.mjs';
+const analyticsAktiv = konfiguration.analytics.messId.trim() !== '';
+---
+<Website titel="Datenschutz">
+  <Rechtstext titel="Datenschutzerklärung">
+    <h2>1. Verantwortliche Stelle</h2>
+    <p>
+      <mark>[Name, Anschrift, E-Mail-Adresse und Telefonnummer der verantwortlichen Stelle]</mark>
+    </p>
+
+    <h2>2. Hosting</h2>
+    <p>
+      Diese Website wird bei <mark>[Hosting-Anbieter, z. B. Netlify, Inc.]</mark> gehostet.
+      Beim Aufruf verarbeitet der Anbieter technisch notwendige Daten wie IP-Adresse,
+      Zeitpunkt und aufgerufene Seite. <mark>[Rechtsgrundlage, Speicherdauer und Hinweis auf
+      Datenübermittlung in Drittländer ergänzen]</mark>
+    </p>
+
+    <h2>3. Kontaktaufnahme</h2>
+    <p>
+      Wenn Sie uns per E-Mail oder Telefon kontaktieren, verarbeiten wir Ihre Angaben, um Ihre
+      Anfrage zu beantworten. <mark>[Rechtsgrundlage und Speicherdauer ergänzen]</mark>
+    </p>
+
+    <h2>4. Webanalyse mit Google Analytics</h2>
+    <p>
+      {analyticsAktiv
+        ? 'Diese Website nutzt Google Analytics, aber nur, wenn Sie über das Einwilligungsbanner zugestimmt haben.'
+        : 'Diese Website kann Google Analytics nutzen. Die Erfassung ist derzeit nicht aktiv.'}
+      {' '}Google Analytics setzt Cookies und überträgt Nutzungsdaten an Google.
+      Sie können Ihre Einwilligung jederzeit über „Cookie-Einstellungen“ im Fußbereich widerrufen.
+      <mark>[Anbieter, Zweck, Rechtsgrundlage (Einwilligung), Speicherdauer, Drittlandübermittlung
+      und Link zur Datenschutzerklärung von Google ergänzen]</mark>
+    </p>
+
+    <h2>5. Ihre Rechte</h2>
+    <p>
+      Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung,
+      Datenübertragbarkeit und Widerspruch sowie das Recht auf Beschwerde bei einer
+      Aufsichtsbehörde. <mark>[Zuständige Aufsichtsbehörde ergänzen]</mark>
+    </p>
+  </Rechtstext>
+</Website>

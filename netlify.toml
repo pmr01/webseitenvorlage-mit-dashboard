@@ -1,0 +1,13 @@
+# Einstellungen für Netlify: wie die Website gebaut und veröffentlicht wird.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+
+# Das Dashboard soll nicht in Suchmaschinen erscheinen
+[[headers]]
+  for = "/dashboard/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

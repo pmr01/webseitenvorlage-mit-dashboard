@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <!-- Platzhalter für das Hauptbild. Ersetzen durch ein eigenes Foto (z. B. heroshot.jpg) und den Pfad in src/konfiguration.mjs anpassen. -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9fb8c2"/>
+      <stop offset="1" stop-color="#d9c3a5"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#g)"/>
+  <circle cx="1220" cy="300" r="260" fill="#fff" opacity=".18"/>
+  <circle cx="1380" cy="640" r="180" fill="#fff" opacity=".12"/>
+  <path d="M0 720 C 400 620 800 820 1600 640 L1600 900 L0 900Z" fill="#fff" opacity=".15"/>
+  <text x="1180" y="820" font-family="system-ui, sans-serif" font-size="30" fill="#fff" opacity=".85" text-anchor="middle">Platzhalter: Hauptbild / Heroshot</text>
+</svg>

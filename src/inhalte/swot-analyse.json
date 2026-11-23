@@ -1,0 +1,21 @@
+{
+  "beispiel": true,
+  "einleitung": "Beispiel: SWOT-Analyse der fiktiven Musterfirma.",
+  "staerken": [
+    { "punkt": "Persönliche Betreuung", "begruendung": "Kunden haben einen festen Ansprechpartner." },
+    { "punkt": "Feste Preise", "begruendung": "Kosten sind vorher klar." }
+  ],
+  "schwaechen": [
+    { "punkt": "Kleines Team", "begruendung": "Begrenzte Kapazität bei vielen Anfragen." },
+    { "punkt": "Geringe Bekanntheit", "begruendung": "Noch wenige Kundenstimmen." }
+  ],
+  "chancen": [
+    { "punkt": "Digitalisierung kleiner Betriebe", "begruendung": "Viele Betriebe haben noch keine gute Website." },
+    { "punkt": "Förderprogramme", "begruendung": "Zuschüsse senken die Kosten für Kunden." }
+  ],
+  "risiken": [
+    { "punkt": "KI-Werkzeuge", "begruendung": "Kunden versuchen es zuerst selbst." },
+    { "punkt": "Preiskampf", "begruendung": "Günstige Anbieter unterbieten Pakete." }
+  ],
+  "fazit": "Beispiel-Fazit: Die Stärken in Betreuung und Preisklarheit passen gut zur Chance, dass viele Betriebe jetzt Hilfe brauchen."
+}

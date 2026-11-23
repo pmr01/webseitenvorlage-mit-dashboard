@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <!-- Platzhalter-Logo. Ersetzen durch das eigene Logo (SVG oder PNG). -->
+  <rect width="40" height="40" rx="9" fill="#1f4e5f"/>
+  <path d="M10 28V12l10 10 10-10v16" fill="none" stroke="#e0a458" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

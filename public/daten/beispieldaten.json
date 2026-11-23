@@ -1,0 +1,41 @@
+{
+  "hinweis": "Beispieldaten für die Vorlage. Sie erscheinen, solange keine Analytics-Anbindung eingerichtet ist. Die Werte sind erfunden.",
+  "besucherProTag": [49,51,43,46,50,36,31,59,54,51,50,59,40,33,55,51,59,50,58,40,37,50,67,68,53,59,48,39,60,63,66,59,57,51,44,60,66,63,60,71,45,45,60,76,64,76,69,46,51,69,76,75,66,68,51,46,66,73,78,78,84,51,53,77,77,84,78,78,53,53,85,74,77,87,89,64,64,90,89,87,86,77,58,59,82,85,91,92,84,68],
+  "seitenaufrufeJeBesucher": 2.3,
+  "seiten": [
+    {
+      "pfad": "/",
+      "anteil": 0.86
+    },
+    {
+      "pfad": "/datenschutz/",
+      "anteil": 0.08
+    },
+    {
+      "pfad": "/impressum/",
+      "anteil": 0.06
+    }
+  ],
+  "herkunft": [
+    {
+      "quelle": "google",
+      "anteil": 0.48
+    },
+    {
+      "quelle": "(direct)",
+      "anteil": 0.27
+    },
+    {
+      "quelle": "instagram.com",
+      "anteil": 0.12
+    },
+    {
+      "quelle": "facebook.com",
+      "anteil": 0.08
+    },
+    {
+      "quelle": "bing",
+      "anteil": 0.05
+    }
+  ]
+}

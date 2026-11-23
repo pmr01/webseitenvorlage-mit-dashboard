@@ -1,0 +1,84 @@
+---
+// Einwilligungsbanner für Google Analytics.
+// Erscheint nur, wenn in der Konfiguration eine Mess-ID eingetragen ist.
+// Das Erfassungsskript lädt erst, nachdem der Besucher zugestimmt hat.
+import { konfiguration } from '../konfiguration.mjs';
+const messId = konfiguration.analytics.messId.trim();
+---
+{messId && (
+  <div class="einwilligung" id="einwilligung" role="dialog" aria-labelledby="einwilligung-titel" hidden data-mess-id={messId}>
+    <div class="box">
+      <p id="einwilligung-titel"><strong>Dürfen wir Ihren Besuch anonym auswerten?</strong></p>
+      <p>Mit Ihrer Zustimmung nutzen wir Google Analytics, um zu verstehen, wie unsere Website genutzt wird. Dabei werden Cookies gesetzt und Daten an Google übertragen. Details stehen in der <a href="/datenschutz/">Datenschutzerklärung</a>. Sie können Ihre Wahl jederzeit über „Cookie-Einstellungen“ im Fußbereich ändern.</p>
+      <div class="knoepfe">
+        <button type="button" class="button" data-wahl="nein">Ablehnen</button>
+        <button type="button" class="button" data-wahl="ja">Zustimmen</button>
+      </div>
+    </div>
+  </div>
+)}
+
+<script>
+  const SCHLUESSEL = 'analytics-einwilligung';
+  const banner = document.getElementById('einwilligung');
+
+  function lesen() {
+    try { return localStorage.getItem(SCHLUESSEL); } catch { return null; }
+  }
+  function speichern(wert: string) {
+    try { localStorage.setItem(SCHLUESSEL, wert); } catch { /* ohne Speicher: Wahl gilt nur für diese Seite */ }
+  }
+  function analyticsLaden(messId: string) {
+    if ((window as any).__analyticsGeladen) return;
+    (window as any).__analyticsGeladen = true;
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(messId);
+    document.head.appendChild(s);
+    const w = window as any;
+    w.dataLayer = w.dataLayer || [];
+    w.gtag = function () { w.dataLayer.push(arguments); };
+    w.gtag('js', new Date());
+    w.gtag('config', messId);
+  }
+
+  if (banner) {
+    const messId = banner.dataset.messId || '';
+    const wahl = lesen();
+    if (wahl === 'ja') analyticsLaden(messId);
+    else if (wahl !== 'nein') banner.hidden = false;
+
+    banner.querySelectorAll<HTMLButtonElement>('button[data-wahl]').forEach((knopf) => {
+      knopf.addEventListener('click', () => {
+        const w = knopf.dataset.wahl === 'ja' ? 'ja' : 'nein';
+        const vorher = lesen();
+        speichern(w);
+        banner.hidden = true;
+        if (w === 'ja') analyticsLaden(messId);
+        // Widerruf: neu laden, damit kein Skript mehr aktiv ist
+        else if (vorher === 'ja') location.reload();
+      });
+    });
+
+    document.querySelectorAll('[data-einwilligung-oeffnen]').forEach((link) => {
+      link.addEventListener('click', (e) => { e.preventDefault(); banner.hidden = false; });
+    });
+  }
+</script>
+
+<style>
+  .einwilligung {
+    position: fixed; inset: auto 0 0 0; z-index: 50;
+    padding: 16px;
+  }
+  .box {
+    max-width: 720px; margin-inline: auto;
+    background: #fff; color: var(--text);
+    border-radius: 12px; padding: 20px;
+    box-shadow: 0 6px 30px rgba(0,0,0,.25);
+    font-size: .95rem;
+  }
+  .knoepfe { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
+  .knoepfe .button[data-wahl="nein"] { background: #fff; color: var(--haupt); }
+  .knoepfe .button { cursor: pointer; font: inherit; font-weight: 600; }
+</style>
