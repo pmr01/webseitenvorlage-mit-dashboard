@@ -49,7 +49,26 @@ function seite(titel, text, status, extraKoepfe = {}) {
   });
 }
 
+// Vereinheitlicht die Adresse, damit Schreibvarianten wie /DASHBOARD/,
+// /%64ashboard/ oder //dashboard/ den Schutz nicht umgehen
+function istDashboard(url) {
+  let pfad = new URL(url).pathname;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const entschluesselt = decodeURIComponent(pfad);
+      if (entschluesselt === pfad) break;
+      pfad = entschluesselt;
+    } catch {
+      break;
+    }
+  }
+  pfad = pfad.toLowerCase().replace(/\\/g, '/').replace(/\/{2,}/g, '/');
+  return pfad === '/dashboard' || pfad.startsWith('/dashboard/') || pfad.startsWith('/dashboard.');
+}
+
 export default async (request, context) => {
+  if (!istDashboard(request.url)) return; // alles andere ungeprüft weiterreichen
+
   const passwort = Netlify.env.get('DASHBOARD_PASSWORT') || '';
 
   if (!passwort) {
@@ -75,4 +94,6 @@ export default async (request, context) => {
   );
 };
 
-export const config = { path: ['/dashboard', '/dashboard/*'] };
+// Läuft für alle Adressen und entscheidet selbst, was zum Dashboard gehört.
+// Gestaltungsdateien und Bilder sind ausgenommen, sie enthalten keine Daten.
+export const config = { path: '/*', excludedPath: ['/_astro/*', '/bilder/*', '/favicon.svg'] };
