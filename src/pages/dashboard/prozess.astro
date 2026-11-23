@@ -1,19 +1,509 @@
 ---
-// Reiter Prozess: Inhalt ist noch nicht festgelegt (Lastenheft D8, offen).
+// Reiter Prozess: Projektmanagement mit Projekten und Aufgaben.
+// Ansichten: Board (nach Status), Liste (nach Kategorie), Zeitplan.
+// Startdaten kommen aus src/inhalte/projekte.json. Änderungen speichert der Browser
+// auf diesem Gerät; über "Als Datei sichern" lassen sie sich exportieren und wieder laden.
 import Dashboard from '../../layouts/Dashboard.astro';
+import startdaten from '../../inhalte/projekte.json';
 ---
-<Dashboard titel="Prozess" untertitel="Wie die Arbeit im Unternehmen abläuft.">
-  <div class="karte platzhalter" role="note">
-    <p class="marke">Platzhalter</p>
-    <h2>Der Inhalt dieses Bereichs ist noch nicht festgelegt.</h2>
-    <p>Das Kurs-Team entscheidet noch, welches Modell oder welche Übersicht hier erscheint. Bis dahin bleibt der Bereich leer.</p>
-    <p>Die Seite liegt in <code>src/pages/dashboard/prozess.astro</code>.</p>
+<Dashboard titel="Prozess" untertitel="Projekte und Aufgaben planen: wer macht was bis wann, und wo hakt es?">
+  <p class="beispiel-hinweis" role="note" id="pm-hinweis">
+    <strong>Hinweis</strong>
+    <span>Änderungen werden nur in diesem Browser gespeichert. Sichern Sie sie über „Als Datei sichern“. Für gemeinsames Arbeiten im Team braucht es eine Datenbank, zum Beispiel Neon (siehe Plattform).</span>
+  </p>
+
+  <section aria-labelledby="pm-projekte-titel">
+    <div class="pm-kopf">
+      <h2 id="pm-projekte-titel">Projekte</h2>
+      <div class="pm-knoepfe">
+        <button type="button" class="pm-btn" data-aktion="neues-projekt">+ Projekt</button>
+      </div>
+    </div>
+    <div class="pm-projekte" id="pm-projekte"></div>
+  </section>
+
+  <section aria-labelledby="pm-aufgaben-titel" class="pm-aufgaben">
+    <div class="pm-kopf">
+      <h2 id="pm-aufgaben-titel">Aufgaben</h2>
+      <div class="pm-knoepfe">
+        <label class="pm-filter">Projekt
+          <select id="pm-filter-projekt"></select>
+        </label>
+        <div class="pm-ansicht" role="tablist" aria-label="Ansicht">
+          <button type="button" role="tab" data-ansicht="board" aria-selected="true">Board</button>
+          <button type="button" role="tab" data-ansicht="liste" aria-selected="false">Liste</button>
+          <button type="button" role="tab" data-ansicht="zeitplan" aria-selected="false">Zeitplan</button>
+        </div>
+        <button type="button" class="pm-btn primaer" data-aktion="neue-aufgabe">+ Aufgabe</button>
+      </div>
+    </div>
+    <div id="pm-inhalt"></div>
+  </section>
+
+  <div class="pm-daten">
+    <button type="button" class="pm-link" data-aktion="exportieren">Als Datei sichern</button>
+    <label class="pm-link">Datei laden<input type="file" accept="application/json,.json" id="pm-import" hidden /></label>
+    <button type="button" class="pm-link" data-aktion="zuruecksetzen">Beispieldaten wiederherstellen</button>
   </div>
+
+  <!-- Formular für Aufgaben -->
+  <dialog id="pm-dialog-aufgabe" class="pm-dialog" aria-labelledby="pm-dialog-aufgabe-titel">
+    <form method="dialog" id="pm-form-aufgabe">
+      <h2 id="pm-dialog-aufgabe-titel">Aufgabe</h2>
+      <label class="breit">Titel<input name="titel" required maxlength="200" /></label>
+      <label>Projekt<select name="projekt" required></select></label>
+      <label>Kategorie<input name="kategorie" list="pm-kategorien" maxlength="60" placeholder="z. B. Konzept" /></label>
+      <datalist id="pm-kategorien"></datalist>
+      <label>Zuständig<input name="zustaendig" maxlength="60" /></label>
+      <label>Status<select name="status"></select></label>
+      <label>Start<input name="start" type="date" /></label>
+      <label>Fällig<input name="faellig" type="date" /></label>
+      <label class="breit">Fortschritt: <output name="fortschritt-anzeige">0 %</output><input name="fortschritt" type="range" min="0" max="100" step="5" value="0" /></label>
+      <label class="breit">Beschreibung<textarea name="beschreibung" rows="3" maxlength="2000"></textarea></label>
+      <div class="pm-dialog-knoepfe breit">
+        <button type="button" class="pm-btn gefahr" data-aktion="aufgabe-loeschen">Löschen</button>
+        <span></span>
+        <button type="button" class="pm-btn" data-aktion="schliessen">Abbrechen</button>
+        <button type="submit" class="pm-btn primaer" value="speichern">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Formular für Projekte -->
+  <dialog id="pm-dialog-projekt" class="pm-dialog" aria-labelledby="pm-dialog-projekt-titel">
+    <form method="dialog" id="pm-form-projekt">
+      <h2 id="pm-dialog-projekt-titel">Projekt</h2>
+      <label class="breit">Name<input name="name" required maxlength="120" /></label>
+      <label>Kunde<input name="kunde" maxlength="120" /></label>
+      <label>Status<select name="status"></select></label>
+      <label>Start<input name="start" type="date" /></label>
+      <label>Fällig<input name="faellig" type="date" /></label>
+      <label>Wert in Euro<input name="wert" type="number" min="0" step="1" /></label>
+      <label>Fortschritt in %<input name="fortschritt" type="number" min="0" max="100" step="5" /></label>
+      <label class="breit">Notizen<textarea name="notizen" rows="3" maxlength="2000"></textarea></label>
+      <div class="pm-dialog-knoepfe breit">
+        <button type="button" class="pm-btn gefahr" data-aktion="projekt-loeschen">Löschen</button>
+        <span></span>
+        <button type="button" class="pm-btn" data-aktion="schliessen">Abbrechen</button>
+        <button type="submit" class="pm-btn primaer" value="speichern">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="application/json" id="pm-startdaten" set:html={JSON.stringify(startdaten)}></script>
 </Dashboard>
 
+<script>
+  type ProjektStatus = 'planned' | 'active' | 'on-hold' | 'completed';
+  type AufgabeStatus = 'todo' | 'in_progress' | 'blocked' | 'done';
+  type Projekt = { id: string; name: string; kunde: string; status: ProjektStatus; start: string; faellig: string; fortschritt: number; wert: number; notizen: string };
+  type Aufgabe = { id: string; projekt: string; titel: string; kategorie: string; zustaendig: string; status: AufgabeStatus; start: string; faellig: string; fortschritt: number; beschreibung: string };
+  type Daten = { version: 1; projekte: Projekt[]; aufgaben: Aufgabe[] };
+
+  const SPEICHER = 'prozess-projektmanagement';
+  const PROJEKT_STATUS: Record<ProjektStatus, string> = { planned: 'Geplant', active: 'Aktiv', 'on-hold': 'Pausiert', completed: 'Abgeschlossen' };
+  const AUFGABE_STATUS: Record<AufgabeStatus, string> = { todo: 'Offen', in_progress: 'In Arbeit', blocked: 'Blockiert', done: 'Erledigt' };
+  const datum = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const datumKurz = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit' });
+  const euro = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+
+  // ---------- Hilfsfunktionen ----------
+  function el<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, any> = {}, ...kinder: (Node | string | null | false | undefined)[]) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v === undefined || v === null || v === false) continue;
+      if (k === 'class') e.className = v;
+      else if (k.startsWith('on') && typeof v === 'function') e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v === true ? '' : String(v));
+    }
+    for (const k of kinder) if (k !== null && k !== undefined && k !== false) e.append(k);
+    return e;
+  }
+  const heute = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  const isoTag = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const verschoben = (tage: number) => { const d = heute(); d.setDate(d.getDate() + tage); return isoTag(d); };
+  const alsDatum = (s: string) => (s ? new Date(s + 'T00:00:00') : null);
+  const zeigeDatum = (s: string) => (s ? datum.format(alsDatum(s)!) : '–');
+  const neueId = (p: string) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const istUeberfaellig = (a: Aufgabe) => a.status !== 'done' && !!a.faellig && alsDatum(a.faellig)! < heute();
+  const begrenzen = (n: unknown, min: number, max: number) => Math.min(max, Math.max(min, Number(n) || 0));
+
+  // ---------- Daten laden und speichern ----------
+  function startdaten(): Daten {
+    const roh = JSON.parse(document.getElementById('pm-startdaten')!.textContent || '{}');
+    return {
+      version: 1,
+      projekte: (roh.projekte || []).map((p: any) => ({ ...p, start: verschoben(p.start), faellig: verschoben(p.faellig) })),
+      aufgaben: (roh.aufgaben || []).map((a: any) => ({ ...a, start: verschoben(a.start), faellig: verschoben(a.faellig) })),
+    };
+  }
+  function pruefen(d: any): Daten | null {
+    if (!d || !Array.isArray(d.projekte) || !Array.isArray(d.aufgaben)) return null;
+    const text = (v: unknown, max = 2000) => String(v ?? '').slice(0, max);
+    const tag = (v: unknown) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v)) ? String(v) : '');
+    const projekte: Projekt[] = d.projekte.map((p: any) => ({
+      id: text(p.id, 40) || neueId('p'), name: text(p.name, 120) || 'Ohne Namen', kunde: text(p.kunde, 120),
+      status: (p.status in PROJEKT_STATUS ? p.status : 'planned') as ProjektStatus,
+      start: tag(p.start), faellig: tag(p.faellig), fortschritt: begrenzen(p.fortschritt, 0, 100), wert: begrenzen(p.wert, 0, 1e9), notizen: text(p.notizen),
+    }));
+    const ids = new Set(projekte.map((p) => p.id));
+    const aufgaben: Aufgabe[] = d.aufgaben.filter((a: any) => ids.has(String(a.projekt))).map((a: any) => ({
+      id: text(a.id, 40) || neueId('a'), projekt: String(a.projekt), titel: text(a.titel, 200) || 'Ohne Titel', kategorie: text(a.kategorie, 60),
+      zustaendig: text(a.zustaendig, 60), status: (a.status in AUFGABE_STATUS ? a.status : 'todo') as AufgabeStatus,
+      start: tag(a.start), faellig: tag(a.faellig), fortschritt: begrenzen(a.fortschritt, 0, 100), beschreibung: text(a.beschreibung),
+    }));
+    return { version: 1, projekte, aufgaben };
+  }
+  function laden(): Daten {
+    try {
+      const gespeichert = localStorage.getItem(SPEICHER);
+      if (gespeichert) { const d = pruefen(JSON.parse(gespeichert)); if (d) return d; }
+    } catch { /* kein Speicher verfügbar */ }
+    return startdaten();
+  }
+  let daten = laden();
+  function speichern() {
+    try { localStorage.setItem(SPEICHER, JSON.stringify(daten)); } catch { /* nur für diese Sitzung */ }
+    zeichnen();
+  }
+
+  // ---------- Zustand der Ansicht ----------
+  let ansicht: 'board' | 'liste' | 'zeitplan' = 'board';
+  let filterProjekt = 'alle';
+  const projektName = (id: string) => daten.projekte.find((p) => p.id === id)?.name ?? '–';
+  const sichtbareAufgaben = () => daten.aufgaben.filter((a) => filterProjekt === 'alle' || a.projekt === filterProjekt);
+
+  // ---------- Projekte ----------
+  function projektKarten() {
+    const box = document.getElementById('pm-projekte')!;
+    box.replaceChildren(...daten.projekte.map((p) => {
+      const aufgaben = daten.aufgaben.filter((a) => a.projekt === p.id);
+      const offen = aufgaben.filter((a) => a.status !== 'done').length;
+      const blockiert = aufgaben.filter((a) => a.status === 'blocked').length;
+      return el('button', { type: 'button', class: `pm-projekt status-${p.status}`, 'aria-label': `Projekt ${p.name} bearbeiten`, onclick: () => projektDialog(p) },
+        el('span', { class: 'pm-projekt-kopf' }, el('strong', {}, p.name), el('span', { class: `pm-marke p-${p.status}` }, PROJEKT_STATUS[p.status])),
+        p.kunde ? el('span', { class: 'pm-klein' }, p.kunde) : null,
+        el('span', { class: 'pm-balken', role: 'progressbar', 'aria-valuenow': p.fortschritt, 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-label': 'Fortschritt' }, el('span', { style: `width:${p.fortschritt}%` })),
+        el('span', { class: 'pm-projekt-fuss' },
+          el('span', {}, `${p.fortschritt} %`),
+          el('span', {}, `${offen} offen${blockiert ? `, ${blockiert} blockiert` : ''}`),
+          el('span', {}, p.faellig ? `bis ${zeigeDatum(p.faellig)}` : ''),
+          p.wert ? el('span', {}, euro.format(p.wert)) : null),
+      );
+    }));
+    if (!daten.projekte.length) box.append(el('p', { class: 'pm-leer' }, 'Noch keine Projekte. Legen Sie mit „+ Projekt“ das erste an.'));
+
+    const auswahl = document.getElementById('pm-filter-projekt') as HTMLSelectElement;
+    auswahl.replaceChildren(el('option', { value: 'alle' }, 'Alle Projekte'), ...daten.projekte.map((p) => el('option', { value: p.id }, p.name)));
+    if (filterProjekt !== 'alle' && !daten.projekte.some((p) => p.id === filterProjekt)) filterProjekt = 'alle';
+    auswahl.value = filterProjekt;
+  }
+
+  // ---------- Board ----------
+  function board() {
+    const spalten = (Object.keys(AUFGABE_STATUS) as AufgabeStatus[]).map((status) => {
+      const liste = sichtbareAufgaben().filter((a) => a.status === status);
+      const spalte = el('div', { class: `pm-spalte s-${status}`, 'data-status': status },
+        el('h3', {}, AUFGABE_STATUS[status], el('span', { class: 'pm-anzahl' }, String(liste.length))),
+        ...liste.map((a) => aufgabenKarte(a)),
+        liste.length ? null : el('p', { class: 'pm-leer' }, 'Keine Aufgaben'),
+      );
+      spalte.addEventListener('dragover', (e) => { e.preventDefault(); spalte.classList.add('ziel'); });
+      spalte.addEventListener('dragleave', () => spalte.classList.remove('ziel'));
+      spalte.addEventListener('drop', (e) => {
+        e.preventDefault(); spalte.classList.remove('ziel');
+        const id = e.dataTransfer?.getData('text/plain');
+        const a = daten.aufgaben.find((x) => x.id === id);
+        if (a && a.status !== status) { a.status = status; if (status === 'done') a.fortschritt = 100; speichern(); }
+      });
+      return spalte;
+    });
+    return el('div', { class: 'pm-board' }, ...spalten);
+  }
+  function aufgabenKarte(a: Aufgabe) {
+    const karte = el('article', { class: 'pm-karte', draggable: 'true' },
+      el('button', { type: 'button', class: 'pm-karte-titel', onclick: () => aufgabeDialog(a) }, a.titel),
+      el('span', { class: 'pm-klein' }, projektName(a.projekt), a.kategorie ? ` · ${a.kategorie}` : ''),
+      el('span', { class: 'pm-karte-fuss' },
+        a.zustaendig ? el('span', { class: 'pm-person', title: a.zustaendig }, a.zustaendig) : el('span'),
+        a.faellig ? el('span', { class: istUeberfaellig(a) ? 'pm-faellig ueber' : 'pm-faellig' }, datumKurz.format(alsDatum(a.faellig)!)) : null),
+      a.fortschritt > 0 && a.status !== 'done' ? el('span', { class: 'pm-balken klein' }, el('span', { style: `width:${a.fortschritt}%` })) : null,
+      el('label', { class: 'visuell-versteckt' }, 'Status', statusAuswahl(a)),
+    );
+    karte.addEventListener('dragstart', (e) => { e.dataTransfer?.setData('text/plain', a.id); karte.classList.add('zieht'); });
+    karte.addEventListener('dragend', () => karte.classList.remove('zieht'));
+    return karte;
+  }
+  function statusAuswahl(a: Aufgabe) {
+    const s = el('select', { 'aria-label': `Status von ${a.titel}` }, ...(Object.keys(AUFGABE_STATUS) as AufgabeStatus[]).map((k) => el('option', { value: k }, AUFGABE_STATUS[k]))) as HTMLSelectElement;
+    s.value = a.status;
+    s.addEventListener('change', () => { a.status = s.value as AufgabeStatus; if (a.status === 'done') a.fortschritt = 100; speichern(); });
+    return s;
+  }
+
+  // ---------- Liste ----------
+  function liste() {
+    const gruppen = new Map<string, Aufgabe[]>();
+    for (const a of sichtbareAufgaben()) {
+      const k = a.kategorie || 'Ohne Kategorie';
+      if (!gruppen.has(k)) gruppen.set(k, []);
+      gruppen.get(k)!.push(a);
+    }
+    if (!gruppen.size) return el('p', { class: 'pm-leer karte' }, 'Keine Aufgaben. Legen Sie mit „+ Aufgabe“ die erste an.');
+    const tabelle = el('table', { class: 'pm-tabelle' },
+      el('thead', {}, el('tr', {}, ...['Aufgabe', 'Projekt', 'Zuständig', 'Status', 'Fällig', 'Fortschritt'].map((t) => el('th', { scope: 'col' }, t)))),
+      ...[...gruppen.entries()].sort(([x], [y]) => x.localeCompare(y, 'de')).map(([kategorie, aufgaben]) =>
+        el('tbody', {},
+          el('tr', { class: 'pm-gruppe' }, el('th', { colspan: 6, scope: 'colgroup' }, `${kategorie} (${aufgaben.length})`)),
+          ...aufgaben.sort((x, y) => (x.faellig || '9').localeCompare(y.faellig || '9')).map((a) =>
+            el('tr', { class: a.status === 'done' ? 'erledigt' : '' },
+              el('td', {}, el('button', { type: 'button', class: 'pm-link', onclick: () => aufgabeDialog(a) }, a.titel)),
+              el('td', {}, projektName(a.projekt)),
+              el('td', {}, a.zustaendig || '–'),
+              el('td', {}, statusAuswahl(a)),
+              el('td', { class: istUeberfaellig(a) ? 'pm-faellig ueber' : '' }, zeigeDatum(a.faellig)),
+              el('td', {}, el('span', { class: 'pm-balken klein' }, el('span', { style: `width:${a.fortschritt}%` })), ` ${a.fortschritt} %`),
+            )),
+        )),
+    );
+    return el('div', { class: 'karte pm-tabelle-rahmen' }, tabelle);
+  }
+
+  // ---------- Zeitplan ----------
+  function zeitplan() {
+    const aufgaben = sichtbareAufgaben().filter((a) => a.start || a.faellig);
+    if (!aufgaben.length) return el('p', { class: 'pm-leer karte' }, 'Keine Aufgaben mit Datum.');
+    const anfang = (a: Aufgabe) => alsDatum(a.start || a.faellig)!.getTime();
+    const ende = (a: Aufgabe) => alsDatum(a.faellig || a.start)!.getTime();
+    const tag = 86400000;
+    const min = Math.min(...aufgaben.map(anfang), heute().getTime()) - 2 * tag;
+    const max = Math.max(...aufgaben.map(ende), heute().getTime()) + 3 * tag;
+    const spanne = max - min;
+    const prozent = (t: number) => ((t - min) / spanne) * 100;
+
+    const wochen: HTMLElement[] = [];
+    const w = new Date(min); w.setDate(w.getDate() + ((8 - w.getDay()) % 7)); // nächster Montag
+    for (; w.getTime() <= max; w.setDate(w.getDate() + 7)) {
+      wochen.push(el('span', { class: 'pm-woche', style: `left:${prozent(w.getTime())}%` }, datumKurz.format(w)));
+    }
+    const zeilen = aufgaben.sort((x, y) => anfang(x) - anfang(y)).map((a) => {
+      const links = prozent(anfang(a));
+      const breite = Math.max(1.2, prozent(ende(a) + tag) - links);
+      return el('div', { class: 'pm-zeile' },
+        el('button', { type: 'button', class: 'pm-zeile-name pm-link', onclick: () => aufgabeDialog(a), title: a.titel }, a.titel),
+        el('div', { class: 'pm-spur' },
+          el('span', { class: `pm-zeitbalken s-${a.status}`, style: `left:${links}%;width:${breite}%`, title: `${a.titel}: ${zeigeDatum(a.start)} bis ${zeigeDatum(a.faellig)} (${AUFGABE_STATUS[a.status]})` },
+            el('span', { class: 'pm-zeitbalken-fortschritt', style: `width:${a.fortschritt}%` }))));
+    });
+    return el('div', { class: 'karte pm-zeitplan' },
+      el('div', { class: 'pm-zeile pm-achse' }, el('span'), el('div', { class: 'pm-spur' }, ...wochen, el('span', { class: 'pm-heute', style: `left:${prozent(heute().getTime())}%` }, 'Heute'))),
+      ...zeilen,
+      el('div', { class: 'pm-legende' }, ...(Object.keys(AUFGABE_STATUS) as AufgabeStatus[]).map((k) => el('span', {}, el('i', { class: `s-${k}` }), AUFGABE_STATUS[k]))),
+    );
+  }
+
+  // ---------- Zeichnen ----------
+  function zeichnen() {
+    projektKarten();
+    const inhalt = document.getElementById('pm-inhalt')!;
+    inhalt.replaceChildren(ansicht === 'board' ? board() : ansicht === 'liste' ? liste() : zeitplan());
+    document.querySelectorAll<HTMLButtonElement>('[data-ansicht]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.ansicht === ansicht)));
+    const kategorien = [...new Set(daten.aufgaben.map((a) => a.kategorie).filter(Boolean))];
+    document.getElementById('pm-kategorien')!.replaceChildren(...kategorien.map((k) => el('option', { value: k })));
+  }
+
+  // ---------- Dialoge ----------
+  const dlgAufgabe = document.getElementById('pm-dialog-aufgabe') as HTMLDialogElement;
+  const formAufgabe = document.getElementById('pm-form-aufgabe') as HTMLFormElement;
+  const dlgProjekt = document.getElementById('pm-dialog-projekt') as HTMLDialogElement;
+  const formProjekt = document.getElementById('pm-form-projekt') as HTMLFormElement;
+  let bearbeiteteAufgabe: Aufgabe | null = null;
+  let bearbeitetesProjekt: Projekt | null = null;
+  const feld = (f: HTMLFormElement, n: string) => f.elements.namedItem(n) as HTMLInputElement;
+
+  (formAufgabe.elements.namedItem('status') as HTMLSelectElement).append(...(Object.keys(AUFGABE_STATUS) as AufgabeStatus[]).map((k) => el('option', { value: k }, AUFGABE_STATUS[k])));
+  (formProjekt.elements.namedItem('status') as HTMLSelectElement).append(...(Object.keys(PROJEKT_STATUS) as ProjektStatus[]).map((k) => el('option', { value: k }, PROJEKT_STATUS[k])));
+  feld(formAufgabe, 'fortschritt').addEventListener('input', () => { (formAufgabe.elements.namedItem('fortschritt-anzeige') as HTMLOutputElement).value = `${feld(formAufgabe, 'fortschritt').value} %`; });
+
+  function aufgabeDialog(a: Aufgabe | null) {
+    if (!daten.projekte.length) { alert('Legen Sie zuerst ein Projekt an.'); return; }
+    bearbeiteteAufgabe = a;
+    const projektFeld = formAufgabe.elements.namedItem('projekt') as HTMLSelectElement;
+    projektFeld.replaceChildren(...daten.projekte.map((p) => el('option', { value: p.id }, p.name)));
+    const w = a ?? { titel: '', projekt: filterProjekt !== 'alle' ? filterProjekt : daten.projekte[0].id, kategorie: '', zustaendig: '', status: 'todo', start: isoTag(heute()), faellig: '', fortschritt: 0, beschreibung: '' } as any;
+    for (const n of ['titel', 'projekt', 'kategorie', 'zustaendig', 'status', 'start', 'faellig', 'fortschritt', 'beschreibung']) feld(formAufgabe, n).value = String(w[n] ?? '');
+    (formAufgabe.elements.namedItem('fortschritt-anzeige') as HTMLOutputElement).value = `${w.fortschritt} %`;
+    document.getElementById('pm-dialog-aufgabe-titel')!.textContent = a ? 'Aufgabe bearbeiten' : 'Neue Aufgabe';
+    (formAufgabe.querySelector('[data-aktion="aufgabe-loeschen"]') as HTMLElement).hidden = !a;
+    dlgAufgabe.showModal();
+    feld(formAufgabe, 'titel').focus();
+  }
+  function projektDialog(p: Projekt | null) {
+    bearbeitetesProjekt = p;
+    const w = p ?? { name: '', kunde: '', status: 'planned', start: isoTag(heute()), faellig: '', wert: '', fortschritt: 0, notizen: '' } as any;
+    for (const n of ['name', 'kunde', 'status', 'start', 'faellig', 'wert', 'fortschritt', 'notizen']) feld(formProjekt, n).value = String(w[n] ?? '');
+    document.getElementById('pm-dialog-projekt-titel')!.textContent = p ? 'Projekt bearbeiten' : 'Neues Projekt';
+    (formProjekt.querySelector('[data-aktion="projekt-loeschen"]') as HTMLElement).hidden = !p;
+    dlgProjekt.showModal();
+    feld(formProjekt, 'name').focus();
+  }
+
+  formAufgabe.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const w = (n: string) => feld(formAufgabe, n).value.trim();
+    const neu: Aufgabe = {
+      id: bearbeiteteAufgabe?.id ?? neueId('a'), titel: w('titel'), projekt: w('projekt'), kategorie: w('kategorie'), zustaendig: w('zustaendig'),
+      status: w('status') as AufgabeStatus, start: w('start'), faellig: w('faellig'), fortschritt: begrenzen(w('fortschritt'), 0, 100), beschreibung: w('beschreibung'),
+    };
+    if (neu.status === 'done') neu.fortschritt = 100;
+    if (bearbeiteteAufgabe) Object.assign(bearbeiteteAufgabe, neu); else daten.aufgaben.push(neu);
+    dlgAufgabe.close(); speichern();
+  });
+  formProjekt.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const w = (n: string) => feld(formProjekt, n).value.trim();
+    const neu: Projekt = {
+      id: bearbeitetesProjekt?.id ?? neueId('p'), name: w('name'), kunde: w('kunde'), status: w('status') as ProjektStatus,
+      start: w('start'), faellig: w('faellig'), wert: begrenzen(w('wert'), 0, 1e9), fortschritt: begrenzen(w('fortschritt'), 0, 100), notizen: w('notizen'),
+    };
+    if (bearbeitetesProjekt) Object.assign(bearbeitetesProjekt, neu); else daten.projekte.push(neu);
+    dlgProjekt.close(); speichern();
+  });
+
+  document.addEventListener('click', (e) => {
+    const knopf = (e.target as HTMLElement).closest<HTMLElement>('[data-aktion]');
+    if (!knopf) return;
+    const aktion = knopf.dataset.aktion;
+    if (aktion === 'neue-aufgabe') aufgabeDialog(null);
+    else if (aktion === 'neues-projekt') projektDialog(null);
+    else if (aktion === 'schliessen') (knopf.closest('dialog') as HTMLDialogElement).close();
+    else if (aktion === 'aufgabe-loeschen' && bearbeiteteAufgabe && confirm(`Aufgabe „${bearbeiteteAufgabe.titel}“ löschen?`)) {
+      daten.aufgaben = daten.aufgaben.filter((a) => a !== bearbeiteteAufgabe); dlgAufgabe.close(); speichern();
+    } else if (aktion === 'projekt-loeschen' && bearbeitetesProjekt) {
+      const p = bearbeitetesProjekt;
+      const anzahl = daten.aufgaben.filter((a) => a.projekt === p.id).length;
+      if (confirm(`Projekt „${p.name}“${anzahl ? ` mit ${anzahl} Aufgaben` : ''} löschen?`)) {
+        daten.projekte = daten.projekte.filter((x) => x !== p);
+        daten.aufgaben = daten.aufgaben.filter((a) => a.projekt !== p.id);
+        dlgProjekt.close(); speichern();
+      }
+    } else if (aktion === 'exportieren') {
+      const blob = new Blob([JSON.stringify(daten, null, 2)], { type: 'application/json' });
+      const a = el('a', { href: URL.createObjectURL(blob), download: `projekte-${isoTag(heute())}.json` });
+      document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    } else if (aktion === 'zuruecksetzen' && confirm('Alle eigenen Projekte und Aufgaben in diesem Browser durch die Beispieldaten ersetzen?')) {
+      daten = startdaten(); speichern();
+    }
+  });
+
+  document.getElementById('pm-import')!.addEventListener('change', async (e) => {
+    const datei = (e.target as HTMLInputElement).files?.[0];
+    if (!datei) return;
+    try {
+      const d = pruefen(JSON.parse(await datei.text()));
+      if (!d) throw new Error();
+      if (confirm(`${d.projekte.length} Projekte und ${d.aufgaben.length} Aufgaben laden? Der bisherige Stand in diesem Browser wird ersetzt.`)) { daten = d; speichern(); }
+    } catch { alert('Die Datei konnte nicht gelesen werden. Erwartet wird eine Datei, die mit „Als Datei sichern“ erstellt wurde.'); }
+    (e.target as HTMLInputElement).value = '';
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('[data-ansicht]').forEach((b) => b.addEventListener('click', () => { ansicht = b.dataset.ansicht as typeof ansicht; zeichnen(); }));
+  document.getElementById('pm-filter-projekt')!.addEventListener('change', (e) => { filterProjekt = (e.target as HTMLSelectElement).value; zeichnen(); });
+
+  zeichnen();
+</script>
+
 <style>
-  .platzhalter { border: 2px dashed #cfd8dc; background: #fbfcfc; text-align: center; padding: 48px 24px; }
-  .platzhalter h2 { font-size: 1.2rem; }
-  .platzhalter p { color: #5a676d; max-width: 60ch; margin-inline: auto; }
-  .marke { display: inline-block; padding: 2px 12px; border-radius: 999px; background: #fff4dd; border: 1px solid #f0d199; font-weight: 700; font-size: .85rem; color: #6b4e12 !important; }
+  .pm-kopf { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .pm-kopf h2 { font-size: 1.25rem; margin: 0; }
+  .pm-knoepfe { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .pm-aufgaben { margin-top: 32px; }
+  :global(.pm-btn) { font: inherit; font-weight: 600; font-size: .92rem; padding: 7px 14px; border-radius: 8px; border: 1px solid #cfd8dc; background: #fff; color: var(--text); cursor: pointer; }
+  :global(.pm-btn:hover) { border-color: var(--haupt); }
+  :global(.pm-btn.primaer) { background: var(--haupt); border-color: var(--haupt); color: #fff; }
+  :global(.pm-btn.gefahr) { color: #a33; border-color: #e3b9b9; }
+  :global(.pm-link) { font: inherit; background: none; border: 0; padding: 0; color: var(--haupt); text-decoration: underline; cursor: pointer; text-align: left; }
+  .pm-filter { display: flex; align-items: center; gap: 6px; font-size: .92rem; font-weight: 600; color: #4c595f; }
+  .pm-filter select, :global(.pm-tabelle select), :global(.pm-karte select) { font: inherit; font-size: .9rem; padding: 5px 8px; border: 1px solid #cfd8dc; border-radius: 6px; background: #fff; }
+  .pm-ansicht { display: flex; border: 1px solid #cfd8dc; border-radius: 8px; overflow: hidden; background: #fff; }
+  .pm-ansicht button { font: inherit; font-size: .92rem; font-weight: 600; padding: 7px 14px; border: 0; background: none; cursor: pointer; color: #47545a; }
+  .pm-ansicht button + button { border-left: 1px solid #cfd8dc; }
+  .pm-ansicht button[aria-selected="true"] { background: var(--haupt); color: #fff; }
+
+  :global(.pm-projekte) { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
+  :global(.pm-projekt) { font: inherit; text-align: left; display: flex; flex-direction: column; gap: 8px; background: #fff; border: 1px solid #dde3e6; border-radius: 12px; padding: 16px; cursor: pointer; color: var(--text); }
+  :global(.pm-projekt:hover) { border-color: var(--haupt); }
+  :global(.pm-projekt-kopf) { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+  :global(.pm-projekt-fuss) { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .85rem; color: #5a676d; }
+  :global(.pm-marke) { font-size: .75rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  :global(.p-planned) { background: #e7f1fb; color: #24527a; }
+  :global(.p-active) { background: #e3f4e8; color: #22663a; }
+  :global(.p-on-hold) { background: #fff4dd; color: #6b4e12; }
+  :global(.p-completed) { background: #eceff1; color: #4c595f; }
+  :global(.pm-klein) { font-size: .85rem; color: #5a676d; }
+  :global(.pm-balken) { display: block; height: 6px; border-radius: 999px; background: #e7ecee; overflow: hidden; }
+  :global(.pm-balken > span) { display: block; height: 100%; background: var(--haupt); border-radius: inherit; }
+  :global(.pm-balken.klein) { display: inline-block; width: 60px; height: 5px; vertical-align: middle; }
+  :global(.pm-leer) { color: #67747a; font-size: .9rem; margin: 4px 0; }
+
+  :global(.pm-board) { display: grid; gap: 12px; grid-template-columns: repeat(4, minmax(220px, 1fr)); overflow-x: auto; padding-bottom: 6px; }
+  :global(.pm-spalte) { background: #eaeef0; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 160px; border-top: 4px solid #9aa6ab; }
+  :global(.pm-spalte.ziel) { outline: 2px dashed var(--haupt); outline-offset: -2px; }
+  :global(.pm-spalte h3) { font-size: .95rem; margin: 2px 4px 4px; display: flex; justify-content: space-between; }
+  :global(.pm-anzahl) { font-size: .8rem; background: #fff; border-radius: 999px; padding: 0 8px; color: #5a676d; }
+  :global(.s-todo) { border-top-color: #9aa6ab; }
+  :global(.s-in_progress) { border-top-color: #2f6fa6; }
+  :global(.s-blocked) { border-top-color: #b04646; }
+  :global(.s-done) { border-top-color: #3d8b5a; }
+  :global(.pm-karte) { background: #fff; border: 1px solid #dde3e6; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; cursor: grab; }
+  :global(.pm-karte.zieht) { opacity: .5; }
+  :global(.pm-karte-titel) { font: inherit; font-weight: 600; text-align: left; background: none; border: 0; padding: 0; color: var(--text); cursor: pointer; line-height: 1.35; }
+  :global(.pm-karte-titel:hover) { color: var(--haupt); text-decoration: underline; }
+  :global(.pm-karte-fuss) { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: .82rem; }
+  :global(.pm-person) { background: #eef2f4; border-radius: 999px; padding: 1px 8px; font-weight: 600; color: #3f4a4f; }
+  :global(.pm-faellig) { color: #5a676d; }
+  :global(.pm-faellig.ueber) { color: #b04646; font-weight: 700; }
+  @media (pointer: coarse), (max-width: 700px) {
+    :global(.pm-karte .visuell-versteckt) { position: static; width: auto; height: auto; clip: auto; overflow: visible; white-space: normal; font-size: .8rem; color: #5a676d; display: flex; align-items: center; gap: 6px; }
+  }
+
+  :global(.pm-tabelle-rahmen) { overflow-x: auto; padding: 8px 12px; }
+  :global(.pm-tabelle) { width: 100%; min-width: 720px; border-collapse: collapse; font-size: .93rem; }
+  :global(.pm-tabelle th), :global(.pm-tabelle td) { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eef1f2; vertical-align: middle; }
+  :global(.pm-tabelle thead th) { color: #5a676d; font-weight: 600; border-bottom-color: #dde3e6; }
+  :global(.pm-gruppe th) { background: #f4f6f7; font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; color: #3f4a4f; }
+  :global(.pm-tabelle tr.erledigt td:first-child .pm-link) { color: #7d898e; text-decoration: line-through; }
+
+  :global(.pm-zeitplan) { overflow-x: auto; }
+  :global(.pm-zeile) { display: grid; grid-template-columns: minmax(140px, 220px) minmax(520px, 1fr); align-items: center; gap: 12px; min-height: 34px; border-bottom: 1px solid #f0f3f4; }
+  :global(.pm-zeile-name) { font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  :global(.pm-spur) { position: relative; height: 22px; }
+  :global(.pm-achse) { border-bottom: 1px solid #dde3e6; }
+  :global(.pm-achse .pm-spur) { height: 26px; }
+  :global(.pm-woche) { position: absolute; top: 4px; font-size: .75rem; color: #6b777c; transform: translateX(-50%); white-space: nowrap; }
+  :global(.pm-heute) { position: absolute; top: 2px; font-size: .72rem; font-weight: 700; color: #fff; background: #b04646; border-radius: 4px; padding: 0 4px; transform: translateX(-50%); }
+  :global(.pm-zeitbalken) { position: absolute; top: 4px; height: 14px; border-radius: 4px; background: #c7d0d4; overflow: hidden; border: 0; }
+  :global(.pm-zeitbalken.s-in_progress) { background: #a9c6df; }
+  :global(.pm-zeitbalken.s-blocked) { background: #e2b0b0; }
+  :global(.pm-zeitbalken.s-done) { background: #a8d0b5; }
+  :global(.pm-zeitbalken-fortschritt) { display: block; height: 100%; background: rgba(0,0,0,.18); }
+  :global(.pm-legende) { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: .82rem; color: #5a676d; }
+  :global(.pm-legende i) { display: inline-block; width: 14px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: middle; border-top: 0; }
+  :global(.pm-legende i.s-todo) { background: #c7d0d4; }
+  :global(.pm-legende i.s-in_progress) { background: #a9c6df; }
+  :global(.pm-legende i.s-blocked) { background: #e2b0b0; }
+  :global(.pm-legende i.s-done) { background: #a8d0b5; }
+
+  .pm-daten { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 20px; font-size: .9rem; }
+
+  :global(.pm-dialog) { border: 0; border-radius: 14px; padding: 0; width: min(560px, 100% - 32px); box-shadow: 0 10px 40px rgba(0,0,0,.3); }
+  :global(.pm-dialog::backdrop) { background: rgba(28,33,38,.45); }
+  :global(.pm-dialog form) { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; padding: 22px; }
+  :global(.pm-dialog h2) { grid-column: 1 / -1; font-size: 1.2rem; margin: 0; }
+  :global(.pm-dialog label) { display: flex; flex-direction: column; gap: 4px; font-size: .88rem; font-weight: 600; color: #3f4a4f; }
+  :global(.pm-dialog .breit) { grid-column: 1 / -1; }
+  :global(.pm-dialog input:not([type="range"])), :global(.pm-dialog select), :global(.pm-dialog textarea) { font: inherit; font-weight: 400; font-size: .95rem; padding: 7px 9px; border: 1px solid #cfd8dc; border-radius: 7px; background: #fff; color: var(--text); }
+  :global(.pm-dialog-knoepfe) { display: flex; gap: 10px; align-items: center; margin-top: 4px; }
+  :global(.pm-dialog-knoepfe span) { flex: 1; }
+  @media (max-width: 480px) { :global(.pm-dialog form) { grid-template-columns: 1fr; } }
 </style>

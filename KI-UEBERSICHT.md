@@ -71,6 +71,6 @@ anleitungen/                 Anleitungen für Menschen
 - `npm run dev` – Vorschau unter http://localhost:4321
 - `npm run build` – erzeugt die fertige Website im Ordner `dist/`
 
-## Offene Punkte
+## Projektmanagement (Reiter Prozess)
 
-- Der Reiter **Prozess** hat noch keinen festgelegten Inhalt (Platzhalter).
+`src/pages/dashboard/prozess.astro` enthält ein Projektmanagement mit Projekten (Status: planned, active, on-hold, completed) und Aufgaben (Status: todo, in_progress, blocked, done; Felder Kategorie, Zuständig, Start, Fällig, Fortschritt). Ansichten: Board, Liste, Zeitplan. Startdaten: `src/inhalte/projekte.json` (Datumsangaben dort sind Tage relativ zu heute). Änderungen speichert der Browser im `localStorage`; Export und Import als JSON-Datei. Für gemeinsames Arbeiten wäre eine Datenbank nötig (z. B. Neon) mit einer Serverfunktion unter `/dashboard/api/`, damit der Passwortschutz greift.

@@ -34,7 +34,7 @@ Gut zu wissen:
 | **Produkt** | Business Model Canvas mit neun Feldern | Wie Ihr Unternehmen Werte schafft und Geld verdient |
 | **Positionierung** | Strategie-Pyramide, Porter's 5 Kräfte, SWOT-Analyse, Persona / Empathy Map | Wofür Sie stehen, wie Ihr Markt aussieht, für wen Sie da sind |
 | **Promotion** | Checkliste und Aufbauplan des Storytelling Frameworks | Die Startseite Schritt für Schritt aufbauen und abhaken |
-| **Prozess** | Platzhalter | Inhalt noch nicht festgelegt |
+| **Prozess** | Projektmanagement: Projekte mit Status, Kunde, Termin und Fortschritt; Aufgaben als Board, Liste oder Zeitplan | Wer macht was bis wann, und wo hakt es? |
 | **Plattform** | Liste der Tools: Astro, Netlify, Google Analytics, Google Search Console, bei Bedarf Google Ads, Meta Ads und Neon als Datenbank | Überblick, womit Sie arbeiten |
 
 Solange Google Analytics nicht verbunden ist, zeigt Performance **Beispieldaten** mit dem gelben Hinweis „Beispieldaten“. Die Modelle zeigen Beispielinhalte einer fiktiven Firma mit dem Hinweis „Beispiel“.
@@ -63,6 +63,17 @@ So gehen Sie vor:
 3. Prüfen Sie das Ergebnis in der Vorschau (`npm run dev`, dann `/dashboard/produkt/` und `/dashboard/positionierung/`).
 
 Ohne KI-Tool ändern Sie die Dateien direkt: Ersetzen Sie nur den Text zwischen den Anführungszeichen. Achten Sie darauf, Kommas und Klammern nicht zu löschen. Wenn die Vorschau danach einen Fehler zeigt, fehlt meist ein Komma oder ein Anführungszeichen.
+
+### Projekte und Aufgaben im Reiter Prozess
+
+Im Reiter **Prozess** legen Sie Projekte und Aufgaben direkt im Browser an:
+
+- **+ Projekt** und **+ Aufgabe** öffnen ein Formular. Ein Klick auf ein Projekt oder eine Aufgabe öffnet sie zum Bearbeiten oder Löschen.
+- **Board:** Aufgaben in vier Spalten (Offen, In Arbeit, Blockiert, Erledigt). Karten lassen sich mit der Maus in eine andere Spalte ziehen.
+- **Liste:** alle Aufgaben nach Kategorie gruppiert, den Status ändern Sie direkt in der Tabelle.
+- **Zeitplan:** jede Aufgabe als Balken von Start bis Fälligkeit, mit Markierung für heute.
+
+**Wichtig:** Ihre Einträge speichert nur der Browser auf diesem Gerät. Andere Personen sehen sie nicht, und beim Löschen der Browserdaten sind sie weg. Sichern Sie deshalb regelmäßig über **Als Datei sichern** und laden Sie die Datei bei Bedarf über **Datei laden** wieder. Für gemeinsames Arbeiten im Team braucht es eine Datenbank, zum Beispiel Neon. Die Startdaten (Beispielprojekte) stehen in `src/inhalte/projekte.json`.
 
 Ein weiteres Tool für den Reiter Plattform ergänzen Sie so:
 

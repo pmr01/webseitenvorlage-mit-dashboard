@@ -1,0 +1,20 @@
+{
+  "beispiel": true,
+  "hinweis": "Beispielprojekte einer fiktiven Firma. Datumsangaben sind Tage relativ zu heute (negativ = in der Vergangenheit) und werden beim ersten Laden in echte Daten umgerechnet.",
+  "projekte": [
+    { "id": "p1", "name": "Website-Relaunch", "kunde": "Musterfirma", "status": "active", "start": -21, "faellig": 14, "fortschritt": 55, "wert": 4800, "notizen": "Neue Website nach dem Storytelling Framework." },
+    { "id": "p2", "name": "Newsletter-Start", "kunde": "Musterfirma", "status": "planned", "start": 7, "faellig": 35, "fortschritt": 0, "wert": 1200, "notizen": "Monatlicher Newsletter mit Tipps für Kunden." },
+    { "id": "p3", "name": "Google-Unternehmensprofil", "kunde": "Musterfirma", "status": "completed", "start": -40, "faellig": -25, "fortschritt": 100, "wert": 400, "notizen": "" }
+  ],
+  "aufgaben": [
+    { "id": "a1", "projekt": "p1", "titel": "Persona mit dem 6P-Skill erstellen", "kategorie": "Konzept", "zustaendig": "Petar", "status": "done", "start": -21, "faellig": -17, "fortschritt": 100, "beschreibung": "" },
+    { "id": "a2", "projekt": "p1", "titel": "Texte für die 12 Storytelling-Elemente schreiben", "kategorie": "Konzept", "zustaendig": "Jakub", "status": "done", "start": -16, "faellig": -8, "fortschritt": 100, "beschreibung": "" },
+    { "id": "a3", "projekt": "p1", "titel": "Hauptbild auswählen", "kategorie": "Gestaltung", "zustaendig": "Fabian", "status": "in_progress", "start": -6, "faellig": 2, "fortschritt": 60, "beschreibung": "Etwas Emotionales, Verbindendes aus einer Bilddatenbank." },
+    { "id": "a4", "projekt": "p1", "titel": "Impressum und Datenschutz ausfüllen", "kategorie": "Recht", "zustaendig": "Petar", "status": "blocked", "start": -4, "faellig": 3, "fortschritt": 20, "beschreibung": "Wartet auf Angaben zur Steuernummer." },
+    { "id": "a5", "projekt": "p1", "titel": "Google Analytics verbinden", "kategorie": "Technik", "zustaendig": "Fabian", "status": "todo", "start": 3, "faellig": 8, "fortschritt": 0, "beschreibung": "Nach der Anleitung im Dashboard." },
+    { "id": "a6", "projekt": "p1", "titel": "Website bei Netlify veröffentlichen", "kategorie": "Technik", "zustaendig": "Jakub", "status": "todo", "start": 9, "faellig": 14, "fortschritt": 0, "beschreibung": "" },
+    { "id": "a7", "projekt": "p2", "titel": "Themenplan für 3 Monate", "kategorie": "Konzept", "zustaendig": "Jakub", "status": "todo", "start": 7, "faellig": 15, "fortschritt": 0, "beschreibung": "" },
+    { "id": "a8", "projekt": "p2", "titel": "Anmeldeformular einbauen", "kategorie": "Technik", "zustaendig": "Fabian", "status": "todo", "start": 16, "faellig": 28, "fortschritt": 0, "beschreibung": "" },
+    { "id": "a9", "projekt": "p3", "titel": "Profil anlegen und Fotos hochladen", "kategorie": "Marketing", "zustaendig": "Petar", "status": "done", "start": -40, "faellig": -30, "fortschritt": 100, "beschreibung": "" }
+  ]
+}
