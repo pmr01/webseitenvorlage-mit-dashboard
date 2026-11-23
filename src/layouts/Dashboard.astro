@@ -44,7 +44,7 @@ const aktuell = Astro.url.pathname.replace(/\/?$/, '/');
         <ol>
           {reiter.map((r, i) => (
             <li>
-              <a href={r.pfad} aria-current={aktuell === r.pfad ? 'page' : undefined}>
+              <a href={r.pfad} aria-current={(i === 0 ? aktuell === r.pfad : aktuell.startsWith(r.pfad)) ? 'page' : undefined}>
                 <span class="d-nr" aria-hidden="true">{i === 0 ? '★' : i}</span>{r.name}
               </a>
             </li>

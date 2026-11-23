@@ -14,13 +14,22 @@ export const konfiguration = {
     beschreibung: 'Vorlage für eine Website nach dem Storytelling Framework.',
   },
 
-  // --- Farben (als CSS-Variablen auf allen Seiten verfügbar) ------------
+  // --- Design-System -----------------------------------------------------
+  // Ausprobieren und fertigen Code erzeugen: Dashboard → Promotion → Design-System.
+  // Farben (als CSS-Variablen auf allen Seiten verfügbar)
   farben: {
     haupt: '#1f4e5f', // Hauptfarbe: Buttons, Überschriften-Akzente
     akzent: '#e0a458', // Akzentfarbe: Hervorhebungen
     text: '#1c2126',
     hintergrund: '#ffffff',
     flaeche: '#f3f5f6', // helle Fläche für abgesetzte Abschnitte
+  },
+  // Schriften: 'system', 'modern', 'freundlich' oder 'klassisch' (siehe src/design.mjs)
+  // Ecken: Rundung von Buttons und Kästen in Pixeln (0 = eckig, 24 = sehr rund)
+  design: {
+    schriftText: 'system',
+    schriftUeberschrift: 'system',
+    ecken: 10,
   },
 
   // --- Analytics --------------------------------------------------------

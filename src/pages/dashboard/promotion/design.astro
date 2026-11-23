@@ -1,0 +1,264 @@
+---
+// Reiter Promotion → Design-System.
+// Zeigt das Design der Website (Farben, Schriften, Ecken) und lässt es mit Live-Vorschau ausprobieren.
+// Festgelegt wird es in src/konfiguration.mjs: Die Seite erzeugt den passenden Code zum Einfügen.
+import Dashboard from '../../../layouts/Dashboard.astro';
+import Unterseiten from '../../../components/Unterseiten.astro';
+import { PROMOTION_SEITEN } from '../../../components/promotion-seiten.mjs';
+import { konfiguration } from '../../../konfiguration.mjs';
+import { SCHRIFTEN } from '../../../design.mjs';
+
+const start = {
+  farben: konfiguration.farben,
+  design: { schriftText: 'system', schriftUeberschrift: 'system', ecken: 10, ...(konfiguration.design ?? {}) },
+};
+const farbFelder = [
+  { schluessel: 'haupt', name: 'Hauptfarbe', zweck: 'Buttons, Hero, Akzente' },
+  { schluessel: 'akzent', name: 'Akzentfarbe', zweck: 'Hervorhebungen, Linien' },
+  { schluessel: 'text', name: 'Textfarbe', zweck: 'Fließtext und Überschriften' },
+  { schluessel: 'hintergrund', name: 'Hintergrund', zweck: 'Grundfläche der Seite' },
+  { schluessel: 'flaeche', name: 'Fläche', zweck: 'abgesetzte Abschnitte' },
+];
+---
+<Dashboard titel="Promotion" untertitel="Das Design-System legt fest, wie die Website aussieht: Farben, Schriften und Formen. Einheitlich eingesetzt, wirkt die Marke professionell und wiedererkennbar.">
+  <Unterseiten seiten={PROMOTION_SEITEN} />
+
+  <div class="ds">
+    <section class="karte ds-einstellungen" aria-labelledby="ds-einst-titel">
+      <h2 id="ds-einst-titel">Design festlegen</h2>
+      <p class="ds-klein">Änderungen hier sind eine Vorschau. Übernommen werden sie, wenn Sie den erzeugten Code unten in <code>src/konfiguration.mjs</code> einfügen.</p>
+
+      <fieldset>
+        <legend>Farben</legend>
+        {farbFelder.map((f) => (
+          <div class="ds-farbe">
+            <input type="color" id={`ds-${f.schluessel}`} data-farbe={f.schluessel} value={start.farben[f.schluessel]} aria-describedby={`ds-${f.schluessel}-zweck`} />
+            <label for={`ds-${f.schluessel}`}><strong>{f.name}</strong><span id={`ds-${f.schluessel}-zweck`}>{f.zweck}</span></label>
+            <input type="text" class="ds-hex" data-hex={f.schluessel} value={start.farben[f.schluessel]} maxlength="7" spellcheck="false" aria-label={`${f.name} als Farbcode`} />
+          </div>
+        ))}
+      </fieldset>
+
+      <fieldset>
+        <legend>Schriften</legend>
+        <label class="ds-zeile">Überschriften
+          <select id="ds-schrift-titel">{Object.entries(SCHRIFTEN).map(([k, s]) => <option value={k} selected={k === start.design.schriftUeberschrift}>{s.name}</option>)}</select>
+        </label>
+        <label class="ds-zeile">Fließtext
+          <select id="ds-schrift-text">{Object.entries(SCHRIFTEN).map(([k, s]) => <option value={k} selected={k === start.design.schriftText}>{s.name}</option>)}</select>
+        </label>
+        <p class="ds-klein">Nur Schriften, die auf den Geräten schon vorhanden sind. Es wird nichts nachgeladen; das ist datenschutzfreundlich und schnell.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Form</legend>
+        <label class="ds-zeile">Ecken: <output id="ds-ecken-wert">{start.design.ecken} px</output>
+          <input type="range" id="ds-ecken" min="0" max="24" step="1" value={start.design.ecken} />
+        </label>
+      </fieldset>
+
+      <div class="ds-knoepfe">
+        <button type="button" class="pm-btn" id="ds-zuruecksetzen">Auf aktuelle Konfiguration zurücksetzen</button>
+      </div>
+    </section>
+
+    <section class="ds-rechts" aria-labelledby="ds-vorschau-titel">
+      <h2 id="ds-vorschau-titel" class="ds-h2">Vorschau</h2>
+      <div class="ds-vorschau" id="ds-vorschau">
+        <div class="v-kopf">
+          <span class="v-logo"><span class="v-zeichen"></span>{konfiguration.firma.name}</span>
+          <span class="v-nav">Angebot · Über uns · Kontakt</span>
+          <span class="v-btn">{konfiguration.cta.text}</span>
+        </div>
+        <div class="v-hero">
+          <h3 class="v-h1">Was bieten Sie wem an?</h3>
+          <p>Eine Einleitung in ein bis drei Sätzen erklärt das Angebot.</p>
+          <span class="v-btn hell">{konfiguration.cta.text}</span>
+        </div>
+        <div class="v-abschnitt">
+          <h4 class="v-h2">Kennen Sie das?</h4>
+          <div class="v-karten">
+            <div class="v-karte"><strong>Painpoint</strong><span>Ein Problem Ihrer Zielgruppe.</span></div>
+            <div class="v-karte"><strong>Painpoint</strong><span>Was es Ihre Kunden kostet.</span></div>
+          </div>
+        </div>
+        <div class="v-abschnitt v-flaeche">
+          <h4 class="v-h2">So einfach geht es</h4>
+          <div class="v-schritte">
+            <div><span class="v-nr">1</span>Termin buchen</div>
+            <div><span class="v-nr">2</span>Gespräch</div>
+            <div><span class="v-nr">3</span>Ergebnis</div>
+          </div>
+          <p class="v-text">Fließtext mit einem <a href="#" onclick="return false">Link in der Hauptfarbe</a>.</p>
+        </div>
+      </div>
+
+      <div class="karte ds-kontrast">
+        <h2>Lesbarkeit (Kontrast)</h2>
+        <p class="ds-klein">Empfohlen ist mindestens 4,5 : 1 für Text, 3 : 1 für große Schrift (Richtlinie WCAG).</p>
+        <ul id="ds-kontrast-liste"></ul>
+      </div>
+    </section>
+  </div>
+
+  <section class="karte ds-code" aria-labelledby="ds-code-titel">
+    <div class="ds-code-kopf">
+      <h2 id="ds-code-titel">Übernehmen</h2>
+      <button type="button" class="pm-btn primaer" id="ds-kopieren">Code kopieren</button>
+    </div>
+    <p>Ersetzen Sie in <code>src/konfiguration.mjs</code> die Abschnitte <code>farben</code> und <code>design</code> durch diesen Code. Danach die Website neu veröffentlichen. Oder geben Sie Ihrem KI-Tool die Anweisung: <em>„Übernimm dieses Design in src/konfiguration.mjs“</em> und fügen den Code an.</p>
+    <pre><code id="ds-code"></code></pre>
+    <p class="ds-klein" id="ds-kopiert" aria-live="polite"></p>
+  </section>
+
+  <script type="application/json" id="ds-start" set:html={JSON.stringify({ ...start, schriften: Object.fromEntries(Object.entries(SCHRIFTEN).map(([k, s]) => [k, s.stapel])) })}></script>
+</Dashboard>
+
+<script>
+  type Stand = { farben: Record<string, string>; design: { schriftText: string; schriftUeberschrift: string; ecken: number } };
+  const START = JSON.parse(document.getElementById('ds-start')!.textContent!);
+  const SCHRIFTEN: Record<string, string> = START.schriften;
+  const SPEICHER = 'design-system-entwurf';
+  const vorschau = document.getElementById('ds-vorschau')!;
+  const hexMuster = /^#[0-9a-f]{6}$/i;
+
+  const kopie = (s: Stand): Stand => JSON.parse(JSON.stringify({ farben: s.farben, design: s.design }));
+  let stand: Stand = kopie(START);
+  try {
+    const e = JSON.parse(localStorage.getItem(SPEICHER) || 'null');
+    if (e && e.farben && e.design) stand = { farben: { ...stand.farben, ...e.farben }, design: { ...stand.design, ...e.design } };
+  } catch { /* kein Speicher */ }
+
+  // ---- Kontrast nach WCAG ----
+  function leuchtdichte(hex: string) {
+    const k = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * k[0] + 0.7152 * k[1] + 0.0722 * k[2];
+  }
+  function kontrast(a: string, b: string) {
+    const [x, y] = [leuchtdichte(a), leuchtdichte(b)].sort((m, n) => n - m);
+    return (x + 0.05) / (y + 0.05);
+  }
+
+  function anwenden() {
+    const f = stand.farben, d = stand.design;
+    const v = vorschau.style;
+    v.setProperty('--haupt', f.haupt); v.setProperty('--akzent', f.akzent); v.setProperty('--text', f.text);
+    v.setProperty('--hintergrund', f.hintergrund); v.setProperty('--flaeche', f.flaeche);
+    v.setProperty('--v-schrift-text', SCHRIFTEN[d.schriftText] ?? SCHRIFTEN.system);
+    v.setProperty('--v-schrift-titel', SCHRIFTEN[d.schriftUeberschrift] ?? SCHRIFTEN.system);
+    v.setProperty('--v-ecken', `${d.ecken}px`);
+
+    document.querySelectorAll<HTMLInputElement>('[data-farbe]').forEach((i) => { i.value = f[i.dataset.farbe!]; });
+    document.querySelectorAll<HTMLInputElement>('[data-hex]').forEach((i) => { if (document.activeElement !== i) i.value = f[i.dataset.hex!]; i.classList.remove('falsch'); });
+    (document.getElementById('ds-schrift-titel') as HTMLSelectElement).value = d.schriftUeberschrift;
+    (document.getElementById('ds-schrift-text') as HTMLSelectElement).value = d.schriftText;
+    (document.getElementById('ds-ecken') as HTMLInputElement).value = String(d.ecken);
+    document.getElementById('ds-ecken-wert')!.textContent = `${d.ecken} px`;
+
+    const paare: [string, string, string][] = [
+      ['Text auf Hintergrund', f.text, f.hintergrund],
+      ['Text auf Fläche', f.text, f.flaeche],
+      ['Weiße Schrift auf Hauptfarbe (Buttons, Hero)', '#ffffff', f.haupt],
+      ['Hauptfarbe auf Hintergrund (Links)', f.haupt, f.hintergrund],
+    ];
+    document.getElementById('ds-kontrast-liste')!.replaceChildren(...paare.map(([name, a, b]) => {
+      const k = kontrast(a, b);
+      const [klasse, urteil] = k >= 4.5 ? ['gut', 'gut lesbar'] : k >= 3 ? ['mittel', 'nur für große Schrift'] : ['schlecht', 'zu schwach'];
+      const li = document.createElement('li');
+      const muster = document.createElement('span'); muster.className = 'ds-muster'; muster.style.background = b; muster.style.color = a; muster.textContent = 'Aa';
+      const text = document.createElement('span'); text.textContent = name;
+      const wert = document.createElement('span'); wert.className = `ds-urteil ${klasse}`; wert.textContent = `${k.toFixed(1).replace('.', ',')} : 1 · ${urteil}`;
+      li.append(muster, text, wert);
+      return li;
+    }));
+
+    document.getElementById('ds-code')!.textContent =
+`  farben: {
+    haupt: '${f.haupt}', // Hauptfarbe: Buttons, Überschriften-Akzente
+    akzent: '${f.akzent}', // Akzentfarbe: Hervorhebungen
+    text: '${f.text}',
+    hintergrund: '${f.hintergrund}',
+    flaeche: '${f.flaeche}', // helle Fläche für abgesetzte Abschnitte
+  },
+  design: {
+    schriftText: '${d.schriftText}',
+    schriftUeberschrift: '${d.schriftUeberschrift}',
+    ecken: ${d.ecken},
+  },`;
+    try { localStorage.setItem(SPEICHER, JSON.stringify(stand)); } catch { /* ohne Speicher */ }
+  }
+
+  document.querySelectorAll<HTMLInputElement>('[data-farbe]').forEach((i) => i.addEventListener('input', () => { stand.farben[i.dataset.farbe!] = i.value; anwenden(); }));
+  document.querySelectorAll<HTMLInputElement>('[data-hex]').forEach((i) => i.addEventListener('input', () => {
+    const w = i.value.trim().startsWith('#') ? i.value.trim() : '#' + i.value.trim();
+    if (hexMuster.test(w)) { stand.farben[i.dataset.hex!] = w.toLowerCase(); anwenden(); } else i.classList.add('falsch');
+  }));
+  document.getElementById('ds-schrift-titel')!.addEventListener('change', (e) => { stand.design.schriftUeberschrift = (e.target as HTMLSelectElement).value; anwenden(); });
+  document.getElementById('ds-schrift-text')!.addEventListener('change', (e) => { stand.design.schriftText = (e.target as HTMLSelectElement).value; anwenden(); });
+  document.getElementById('ds-ecken')!.addEventListener('input', (e) => { stand.design.ecken = Number((e.target as HTMLInputElement).value); anwenden(); });
+  document.getElementById('ds-zuruecksetzen')!.addEventListener('click', () => { stand = kopie(START); anwenden(); });
+  document.getElementById('ds-kopieren')!.addEventListener('click', async () => {
+    const meldung = document.getElementById('ds-kopiert')!;
+    try { await navigator.clipboard.writeText(document.getElementById('ds-code')!.textContent || ''); meldung.textContent = 'Code kopiert.'; }
+    catch { meldung.textContent = 'Kopieren nicht möglich. Markieren Sie den Code und kopieren Sie ihn von Hand.'; }
+  });
+
+  anwenden();
+</script>
+
+<style>
+  .ds { display: grid; gap: 16px; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); align-items: start; }
+  @media (max-width: 900px) { .ds { grid-template-columns: minmax(0, 1fr); } }
+  .ds h2, .ds-h2 { font-size: 1.15rem; margin-bottom: .5em; }
+  .ds-klein { font-size: .85rem; color: #5a676d; }
+  fieldset { border: 0; padding: 0; margin: 0 0 18px; }
+  legend { font-weight: 700; margin-bottom: 8px; color: #3f4a4f; }
+  .ds-farbe { display: grid; grid-template-columns: 44px 1fr 92px; gap: 10px; align-items: center; margin-bottom: 8px; }
+  .ds-farbe input[type="color"] { width: 44px; height: 36px; padding: 0; border: 1px solid #cfd8dc; border-radius: 8px; background: none; cursor: pointer; }
+  .ds-farbe label { display: flex; flex-direction: column; line-height: 1.25; font-size: .9rem; }
+  .ds-farbe label span { font-size: .8rem; color: #67747a; }
+  .ds-hex { font: inherit; font-family: ui-monospace, Menlo, monospace; font-size: .85rem; padding: 6px 8px; border: 1px solid #cfd8dc; border-radius: 6px; width: 100%; }
+  .ds-hex.falsch { border-color: #b04646; background: #fdecec; }
+  .ds-zeile { display: flex; flex-direction: column; gap: 4px; font-size: .9rem; font-weight: 600; color: #3f4a4f; margin-bottom: 10px; }
+  .ds-zeile select { font: inherit; font-weight: 400; padding: 6px 8px; border: 1px solid #cfd8dc; border-radius: 6px; background: #fff; }
+  .ds-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ds-rechts { display: grid; gap: 16px; min-width: 0; }
+
+  /* Vorschau: nutzt die Werte aus dem Editor, nicht die der Dashboard-Seite */
+  .ds-vorschau { border: 1px solid #dde3e6; border-radius: 12px; overflow: hidden; background: var(--hintergrund); color: var(--text); font-family: var(--v-schrift-text); font-size: .95rem; }
+  .ds-vorschau .v-h1, .ds-vorschau .v-h2 { font-family: var(--v-schrift-titel); margin: 0 0 .4em; line-height: 1.2; }
+  .v-kopf { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent); }
+  .v-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+  .v-zeichen { width: 22px; height: 22px; border-radius: calc(var(--v-ecken) * .6); background: var(--haupt); box-shadow: inset 0 -5px 0 var(--akzent); }
+  .v-nav { font-size: .85rem; }
+  .v-btn { display: inline-block; background: var(--haupt); color: #fff; padding: 7px 12px; border-radius: var(--v-ecken); font-weight: 600; font-size: .82rem; }
+  .v-btn.hell { background: #fff; color: var(--haupt); }
+  .v-hero { padding: 28px 20px; color: #fff; background: linear-gradient(110deg, color-mix(in srgb, var(--haupt) 92%, black), color-mix(in srgb, var(--haupt) 60%, var(--akzent))); }
+  .v-hero .v-h1 { font-size: 1.6rem; color: #fff; }
+  .v-abschnitt { padding: 20px; }
+  .v-abschnitt .v-h2 { font-size: 1.15rem; }
+  .v-flaeche { background: var(--flaeche); }
+  .v-karten { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+  .v-karte { display: flex; flex-direction: column; gap: 2px; padding: 12px; border: 1px solid color-mix(in srgb, var(--text) 12%, transparent); border-left: 4px solid var(--akzent); border-radius: var(--v-ecken); background: var(--hintergrund); font-size: .88rem; }
+  .v-schritte { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; font-size: .85rem; }
+  .v-schritte div { background: var(--hintergrund); border-radius: var(--v-ecken); padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .v-nr { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--haupt); color: #fff; font-weight: 700; font-size: .8rem; }
+  .v-text { margin: 0; }
+  .v-text a { color: var(--haupt); }
+
+  .ds-kontrast ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .ds-kontrast :global(li) { display: grid; grid-template-columns: 44px 1fr auto; gap: 10px; align-items: center; font-size: .9rem; }
+  .ds-kontrast :global(.ds-muster) { display: grid; place-items: center; height: 32px; border-radius: 6px; font-weight: 700; border: 1px solid #dde3e6; }
+  .ds-kontrast :global(.ds-urteil) { font-size: .8rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .ds-kontrast :global(.gut) { background: #e3f4e8; color: #22663a; }
+  .ds-kontrast :global(.mittel) { background: #fff4dd; color: #6b4e12; }
+  .ds-kontrast :global(.schlecht) { background: #fdecec; color: #8e2f2f; }
+  @media (max-width: 480px) { .ds-kontrast :global(li) { grid-template-columns: 44px 1fr; } .ds-kontrast :global(.ds-urteil) { grid-column: 2; justify-self: start; } }
+
+  .ds-code { margin-top: 16px; }
+  .ds-code-kopf { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .ds-code h2 { font-size: 1.15rem; margin: 0; }
+  .ds-code pre { background: #1c2126; color: #f1f4f5; padding: 14px 16px; border-radius: 8px; overflow-x: auto; font-size: .85rem; }
+  :global(.pm-btn) { font: inherit; font-weight: 600; font-size: .92rem; padding: 7px 14px; border-radius: 8px; border: 1px solid #cfd8dc; background: #fff; color: var(--text); cursor: pointer; }
+  :global(.pm-btn.primaer) { background: var(--haupt); border-color: var(--haupt); color: #fff; }
+</style>

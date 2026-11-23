@@ -33,7 +33,7 @@ Gut zu wissen:
 | **Performance** (Startansicht) | Besucher, Seitenaufrufe, Verlauf pro Tag, meistbesuchte Seiten, Herkunft der Besucher; Zeitraum 7, 30 oder 90 Tage | Sehen, ob die Website wirkt |
 | **Produkt** | Business Model Canvas mit neun Feldern | Wie Ihr Unternehmen Werte schafft und Geld verdient |
 | **Positionierung** | Strategie-Pyramide, Porter's 5 Kräfte, SWOT-Analyse, Persona / Empathy Map | Wofür Sie stehen, wie Ihr Markt aussieht, für wen Sie da sind |
-| **Promotion** | Checkliste und Aufbauplan des Storytelling Frameworks | Die Startseite Schritt für Schritt aufbauen und abhaken |
+| **Promotion** | Zwei Unterseiten: Checkliste und Aufbauplan des Storytelling Frameworks; Design-System mit Farben, Schriften und Ecken samt Live-Vorschau | Die Startseite Schritt für Schritt aufbauen und ihr Aussehen festlegen |
 | **Prozess** | Projektmanagement: Projekte mit Status, Kunde, Termin und Fortschritt; Aufgaben als Board, Liste oder Zeitplan | Wer macht was bis wann, und wo hakt es? |
 | **Plattform** | Liste der Tools: Astro, Netlify, Google Analytics, Google Search Console, bei Bedarf Google Ads, Meta Ads und Neon als Datenbank | Überblick, womit Sie arbeiten |
 

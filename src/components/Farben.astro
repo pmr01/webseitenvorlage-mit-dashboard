@@ -1,7 +1,12 @@
 ---
-// Schreibt die Farben aus der Konfigurationsdatei als CSS-Variablen.
+// Schreibt das Design-System aus der Konfigurationsdatei als CSS-Variablen:
+// Farben, Schriften und Ecken-Rundung.
 import { konfiguration } from '../konfiguration.mjs';
+import { schriftStapel } from '../design.mjs';
 const f = konfiguration.farben;
-const css = `:root{--haupt:${f.haupt};--akzent:${f.akzent};--text:${f.text};--hintergrund:${f.hintergrund};--flaeche:${f.flaeche};}`;
+const d = konfiguration.design ?? {};
+const ecken = Math.max(0, Math.min(32, Number(d.ecken ?? 10)));
+const css = `:root{--haupt:${f.haupt};--akzent:${f.akzent};--text:${f.text};--hintergrund:${f.hintergrund};--flaeche:${f.flaeche};`
+  + `--schrift-text:${schriftStapel(d.schriftText)};--schrift-titel:${schriftStapel(d.schriftUeberschrift)};--ecken:${ecken}px;}`;
 ---
 <style is:global set:html={css}></style>

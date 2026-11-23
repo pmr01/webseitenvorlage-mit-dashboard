@@ -3,10 +3,13 @@
 // Checkliste mit den zwölf Elementen und Aufbauplan der Startseite.
 // Inhalte ändern in src/inhalte/storytelling-checkliste.json.
 // Der Haken "erledigt" wird nur im eigenen Browser gespeichert.
-import Dashboard from '../../layouts/Dashboard.astro';
-import liste from '../../inhalte/storytelling-checkliste.json';
+import Dashboard from '../../../layouts/Dashboard.astro';
+import liste from '../../../inhalte/storytelling-checkliste.json';
+import Unterseiten from '../../../components/Unterseiten.astro';
+import { PROMOTION_SEITEN } from '../../../components/promotion-seiten.mjs';
 ---
 <Dashboard titel="Promotion" untertitel="Das Storytelling Framework: zwölf Elemente in fester Reihenfolge führen Besucher vom Problem zur Lösung. Der Kunde ist der Held, Sie sind sein Wegweiser.">
+  <Unterseiten seiten={PROMOTION_SEITEN} />
   <div class="promotion">
     <section class="karte checkliste" aria-labelledby="checkliste-titel">
       <div class="kopf">

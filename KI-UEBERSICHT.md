@@ -17,6 +17,7 @@ Alle Texte sind auf Deutsch. Bitte Änderungen ebenfalls auf Deutsch formulieren
 | Was | Datei |
 |---|---|
 | Firmenname, Logo, Farben, alle Texte der Startseite, Call-to-Action, Navigation, Kontakt, Analytics-Mess-ID | `src/konfiguration.mjs` |
+| Design-System: Farben (`farben`), Schriften und Ecken (`design`) | `src/konfiguration.mjs`; verfügbare Schriften in `src/design.mjs`; Editor mit Vorschau unter `/dashboard/promotion/design/` |
 | Bilder (Hauptbild, Foto, Logo) | `public/bilder/` und Pfad in `src/konfiguration.mjs` |
 | Business Model Canvas (Reiter Produkt) | `src/inhalte/business-model-canvas.json` |
 | Strategie-Pyramide (Reiter Positionierung) | `src/inhalte/strategie-pyramide.json` |
@@ -39,7 +40,7 @@ In den JSON-Dateien zeigt `"beispiel": true` einen gelben Hinweis „Beispiel“
 5. **Keine Zugangsdaten in Dateien.** Schlüssel für Google Analytics und das Dashboard-Passwort gehören nur in die Umgebungsvariablen bei Netlify (`DASHBOARD_PASSWORT`, `GA_PROPERTY_ID`, `GA_CLIENT_EMAIL`, `GA_PRIVATE_KEY`).
 8. **Passwortschutz nicht umgehen.** Alles unter `/dashboard/` (Seiten und die Kennzahlen-Schnittstelle `/dashboard/api/kennzahlen`) schützt die Edge Function `netlify/edge-functions/dashboard-schutz.js`. Neue Dashboard-Seiten und Schnittstellen gehören deshalb unter `/dashboard/`.
 6. **Keine externen Schriften oder Skripte** ohne Einwilligung einbinden (Datenschutz). Die Vorlage nutzt Systemschriften.
-7. Farben nur über `konfiguration.farben` ändern; sie stehen überall als CSS-Variablen bereit (`--haupt`, `--akzent`, `--text`, `--hintergrund`, `--flaeche`).
+7. Design nur über `konfiguration.farben` und `konfiguration.design` ändern; es steht überall als CSS-Variablen bereit (`--haupt`, `--akzent`, `--text`, `--hintergrund`, `--flaeche`, `--schrift-text`, `--schrift-titel`, `--ecken`). Neue Bausteine nutzen diese Variablen statt fester Werte. Nur Systemschriften verwenden, keine Schriften aus dem Internet nachladen.
 
 ## Aufbau der Dateien
 
@@ -50,7 +51,8 @@ src/
   pages/index.astro          Startseite (Storytelling Framework)
   pages/impressum.astro, datenschutz.astro
   pages/dashboard/           index (Performance), produkt, positionierung,
-                             promotion, prozess, plattform
+                             promotion/ (index = Storytelling, design = Design-System),
+                             prozess, plattform
   pages/dashboard/anleitungen/   zeigt die beiden Anleitungen aus anleitungen/
                              im Dashboard an (Text nur in den .md-Dateien ändern)
   layouts/Website.astro      Kopfzeile, Fußbereich, Einwilligungsbanner

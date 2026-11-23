@@ -68,7 +68,7 @@ Jede Änderung an einer Datei erscheint nach dem Speichern sofort in der Vorscha
 
 **Firmenname:** `firma.name`
 
-**Farben:** `farben.haupt` (Buttons, Akzente) und `farben.akzent` (Hervorhebungen) als Farbcode, zum Beispiel `'#2a6f97'`. Farbcodes finden Sie mit jedem Farbwähler, etwa in Canva.
+**Design (Farben, Schriften, Ecken):** Am einfachsten im Dashboard unter **Promotion → Design-System**. Dort wählen Sie Farben, eine Schrift für Überschriften und Fließtext und die Rundung der Ecken, sehen sofort eine Vorschau und prüfen, ob alles gut lesbar ist. Mit **Code kopieren** erhalten Sie die fertigen Abschnitte `farben` und `design`; ersetzen Sie damit die gleichnamigen Abschnitte in `src/konfiguration.mjs`. Von Hand geht es auch: `farben.haupt` (Buttons, Akzente) und `farben.akzent` (Hervorhebungen) als Farbcode, zum Beispiel `'#2a6f97'`; Schriften `'system'`, `'modern'`, `'freundlich'` oder `'klassisch'`; `ecken` als Zahl von 0 bis 24.
 
 **Logo:** Legen Sie Ihr Logo als SVG oder PNG in den Ordner `public/bilder/` und tragen Sie den Pfad ein, zum Beispiel `logo: '/bilder/mein-logo.png'`.
 
