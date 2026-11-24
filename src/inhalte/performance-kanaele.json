@@ -1,6 +1,6 @@
 {
   "beispiel": true,
-  "hinweis": "Beispielzahlen. Tragen Sie je Kanal und Monat Impressionen, Klicks, Kosten und Abschlüsse ein; CTR, CVR, CPM, CPC und CPA rechnet die Seite aus. Der Kanal mit \"quelle\": \"google-ads\" wird automatisch aus Google Analytics gefüllt, sobald Analytics verbunden und Google Ads dort verknüpft ist.",
+  "hinweis": "Beispielzahlen. Tragen Sie je Kanal und Monat Impressionen, Klicks, Kosten und Abschlüsse ein; CTR, CVR, CPM, CPC und CPA rechnet die Seite aus. Der Kanal mit \"quelle\": \"google-ads\" wird automatisch aus Google Analytics gefüllt, sobald Analytics verbunden und Google Ads dort verknüpft ist. Kampagnen je Kanal stehen unter \"kampagnen\" mit denselben vier Werten; ein Klick auf den Kanal klappt sie auf.",
   "monate": [
     "2026|06",
     "2026|07",
@@ -46,6 +46,113 @@
         3,
         3,
         4
+      ],
+      "kampagnen": [
+        {
+          "name": "Suche – Leistungen",
+          "impressionen": [
+            18540,
+            20160,
+            21375,
+            23535,
+            25155,
+            27630
+          ],
+          "klicks": [
+            336,
+            360,
+            386,
+            418,
+            448,
+            498
+          ],
+          "kosten": [
+            298,
+            310,
+            322,
+            341,
+            347,
+            372
+          ],
+          "abschluesse": [
+            1,
+            1,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Suche – Markenname",
+          "impressionen": [
+            4120,
+            4480,
+            4750,
+            5230,
+            5590,
+            6140
+          ],
+          "klicks": [
+            152,
+            164,
+            176,
+            190,
+            204,
+            226
+          ],
+          "kosten": [
+            58,
+            60,
+            62,
+            66,
+            67,
+            72
+          ],
+          "abschluesse": [
+            0,
+            0,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "name": "Performance Max",
+          "impressionen": [
+            18540,
+            20160,
+            21375,
+            23535,
+            25155,
+            27630
+          ],
+          "klicks": [
+            122,
+            131,
+            140,
+            152,
+            163,
+            181
+          ],
+          "kosten": [
+            124,
+            130,
+            136,
+            143,
+            146,
+            156
+          ],
+          "abschluesse": [
+            1,
+            1,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
       ]
     },
     {
@@ -83,6 +190,113 @@
         2,
         3,
         3
+      ],
+      "kampagnen": [
+        {
+          "name": "Reichweite – Region",
+          "impressionen": [
+            41100,
+            43440,
+            48060,
+            51780,
+            54720,
+            59220
+          ],
+          "klicks": [
+            216,
+            224,
+            244,
+            266,
+            280,
+            304
+          ],
+          "kosten": [
+            90,
+            96,
+            102,
+            108,
+            114,
+            120
+          ],
+          "abschluesse": [
+            0,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "name": "Leadformular",
+          "impressionen": [
+            17125,
+            18100,
+            20025,
+            21575,
+            22800,
+            24675
+          ],
+          "klicks": [
+            216,
+            224,
+            244,
+            266,
+            280,
+            304
+          ],
+          "kosten": [
+            150,
+            160,
+            170,
+            180,
+            190,
+            200
+          ],
+          "abschluesse": [
+            0,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "name": "Retargeting – Website-Besucher",
+          "impressionen": [
+            10275,
+            10860,
+            12015,
+            12945,
+            13680,
+            14805
+          ],
+          "klicks": [
+            108,
+            112,
+            122,
+            133,
+            140,
+            152
+          ],
+          "kosten": [
+            60,
+            64,
+            68,
+            72,
+            76,
+            80
+          ],
+          "abschluesse": [
+            1,
+            0,
+            0,
+            0,
+            1,
+            1
+          ]
+        }
       ]
     }
   ]

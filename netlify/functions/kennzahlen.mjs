@@ -102,19 +102,44 @@ async function kanalBericht(token, propertyId, monate) {
           dateRanges: zeitraum, dimensions: [{ name: 'yearMonth' }], metrics: [{ name: 'keyEvents' }],
           dimensionFilter: { filter: { fieldName: 'sessionSourceMedium', stringFilter: { matchType: 'EXACT', value: 'google / cpc' } } },
         },
+        // Kampagnen: dieselben Werte je Google-Ads-Kampagne und Monat
+        { dateRanges: zeitraum, dimensions: [{ name: 'yearMonth' }, { name: 'sessionGoogleAdsCampaignName' }], metrics: [{ name: 'advertiserAdImpressions' }, { name: 'advertiserAdClicks' }, { name: 'advertiserAdCost' }], limit: 1000 },
+        {
+          dateRanges: zeitraum, dimensions: [{ name: 'yearMonth' }, { name: 'sessionCampaignName' }], metrics: [{ name: 'keyEvents' }], limit: 1000,
+          dimensionFilter: { filter: { fieldName: 'sessionSourceMedium', stringFilter: { matchType: 'EXACT', value: 'google / cpc' } } },
+        },
       ],
     }),
   });
   const json = await r.json();
   if (!r.ok) throw new Error(json.error?.message || `Google Analytics antwortet mit Status ${r.status}`);
-  const [anzeigen, ereignisse] = json.reports || [];
+  const [anzeigen, ereignisse, kampagnenAnzeigen, kampagnenEreignisse] = json.reports || [];
   const je = (bericht, i) => { const m = Object.fromEntries((bericht?.rows || []).map((z) => [text(z), zahl(z, i)])); return liste.map((ym) => m[ym] ?? 0); };
   const impressionen = je(anzeigen, 0);
+  // Kampagnen: Name → Werte je Monat (Abschlüsse über den Kampagnennamen zugeordnet)
+  const kampagnen = new Map();
+  const kampagne = (name) => {
+    if (!kampagnen.has(name)) kampagnen.set(name, { name, impressionen: liste.map(() => 0), klicks: liste.map(() => 0), kosten: liste.map(() => 0), abschluesse: liste.map(() => 0) });
+    return kampagnen.get(name);
+  };
+  for (const z of kampagnenAnzeigen?.rows || []) {
+    const i = liste.indexOf(text(z, 0)), name = text(z, 1);
+    if (i === -1 || !name || name === '(not set)') continue;
+    const k = kampagne(name);
+    k.impressionen[i] += zahl(z, 0); k.klicks[i] += zahl(z, 1); k.kosten[i] = Math.round((k.kosten[i] + zahl(z, 2)) * 100) / 100;
+  }
+  for (const z of kampagnenEreignisse?.rows || []) {
+    const i = liste.indexOf(text(z, 0)), name = text(z, 1);
+    if (i !== -1 && kampagnen.has(name)) kampagnen.get(name).abschluesse[i] += Math.round(zahl(z, 0));
+  }
   return {
     quelle: 'analytics',
     monate: liste.map((ym) => `${ym.slice(0, 4)}|${ym.slice(4)}`),
     waehrung: anzeigen?.metadata?.currencyCode || 'EUR',
-    googleAds: { impressionen, klicks: je(anzeigen, 1), kosten: je(anzeigen, 2).map((x) => Math.round(x * 100) / 100), abschluesse: je(ereignisse, 0).map(Math.round) },
+    googleAds: {
+      impressionen, klicks: je(anzeigen, 1), kosten: je(anzeigen, 2).map((x) => Math.round(x * 100) / 100), abschluesse: je(ereignisse, 0).map(Math.round),
+      kampagnen: [...kampagnen.values()].sort((a, b) => b.kosten.reduce((s, x) => s + x, 0) - a.kosten.reduce((s, x) => s + x, 0)),
+    },
     // Keine einzige Impression: Google Ads ist vermutlich nicht mit Analytics verknüpft
     leer: impressionen.every((x) => !x),
   };

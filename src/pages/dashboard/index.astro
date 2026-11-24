@@ -232,7 +232,7 @@ const spalten = [
         if (!d.dimensionenFehlen) gruppen.unshift(gruppe('Nach Weg', d.weg), gruppe('Nach letztem Button vor der Anfrage', d.cta));
         feld.querySelector('.bk-gruppen')!.replaceChildren(...gruppen);
         feld.querySelector('[data-marke]')!.textContent = `Live · ${zahl.format(d.gesamt)} Anfragen · letzte ${d.tage} Tage`;
-        if (d.dimensionenFehlen) feld.querySelector('.aw-kopf')!.append(h('p', 'aw-hinweis', 'Weg und Button fehlen noch: Legen Sie in Google Analytics die benutzerdefinierten Dimensionen lead_weg, letzte_cta und lead_position an (Anleitung „Dashboard und Google Analytics“, Abschnitt „Anfragen messen“).'));
+        if (d.dimensionenFehlen) feld.querySelector('.aw-kopf')!.append(h('p', 'aw-hinweis', 'Weg und Button fehlen noch: Legen Sie in Google Analytics die benutzerdefinierten Dimensionen lead_weg, letzte_cta und lead_position an (Anleitung „Google Analytics“, Teil 4).'));
       })
       .catch(() => { /* keine Serverfunktion erreichbar: Beispiel bleibt */ });
   }

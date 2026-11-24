@@ -25,4 +25,4 @@ Schauen Sie einmal pro Woche auf die Übersicht. Steigt die Kosten pro Anfrage, 
 
 **Anweisung für Ihr KI-Tool:** *„Trage diese Zahlen für die letzten 30 Tage in src/inhalte/dashboard-kennzahlen.json ein: [Zahlen]. Setze beispiel auf false.“*
 
-**Anfragen live:** Ist Google Analytics verbunden, zeigt die Kennzahl Anfragen die echten Anfragen der letzten 30 Tage nach Weg, letztem Button, Kanal und Quelle. Einrichtung: Anleitung „Dashboard und Google Analytics“, Abschnitt „Anfragen messen“.
+**Anfragen live:** Ist Google Analytics verbunden, zeigt die Kennzahl Anfragen die echten Anfragen der letzten 30 Tage nach Weg, letztem Button, Kanal und Quelle. Einrichtung: Anleitung „Google Analytics“, Teil 4.

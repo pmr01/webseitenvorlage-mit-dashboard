@@ -4,8 +4,33 @@
 // Ist sie nicht eingerichtet, zeigt die Seite Beispieldaten aus public/daten/beispieldaten.json.
 import Dashboard from '../../layouts/Dashboard.astro';
 import kanaele from '../../inhalte/performance-kanaele.json';
+import { konfiguration } from '../../konfiguration.mjs';
+const messId = konfiguration.analytics.messId.trim();
+const ANL = '/dashboard/anleitungen/google-analytics/';
+const schritte = [
+  { id: 'messid', titel: 'Besuche erfassen', text: 'Mess-ID (G-…) in src/konfiguration.mjs eintragen', anker: '#1-besuche-erfassen-mess-id' },
+  { id: 'verbindung', titel: 'Zahlen ins Dashboard holen', text: 'Dienstkonto anlegen und GA_PROPERTY_ID, GA_CLIENT_EMAIL, GA_PRIVATE_KEY bei Netlify eintragen', anker: '#2-kennzahlen-ins-dashboard-holen-dienstkonto' },
+  { id: 'ads', titel: 'Google Ads verknüpfen', text: 'Optional: Google-Ads-Konto in Analytics verknüpfen', anker: '#3-google-ads-verknüpfen-optional' },
+  { id: 'leads', titel: 'Anfragen messen', text: 'generate_lead als Schlüsselereignis, vier eigene Dimensionen anlegen', anker: '#4-anfragen-messen-weg-kanal-button' },
+  { id: 'formular', titel: 'Kontaktformular einschalten', text: 'Bei Netlify „Form detection“ einschalten und Benachrichtigung einrichten', anker: '#5-kontaktformular-einschalten' },
+];
 ---
-<Dashboard titel="Performance" untertitel="Die echten Kennzahlen der Website aus Google Analytics: Wie viele Menschen kommen, was sehen sie sich an, und woher kommen sie? Die Einrichtung steht in den Anleitungen unter „Dashboard und Google Analytics“.">
+<Dashboard titel="Performance" untertitel="Die echten Kennzahlen der Website aus Google Analytics: Wie viele Menschen kommen, was sehen sie sich an, und woher kommen sie? ">
+  <details class="karte ga-einrichtung" id="ga-einrichtung" open>
+    <summary><span class="ga-titel">Einrichtung Google Analytics</span> <span class="ga-stand" id="ga-stand">wird geprüft …</span></summary>
+    <ol class="ga-schritte">
+      {schritte.map((s, i) => (
+        <li data-schritt={s.id} data-status={s.id === 'messid' ? (messId ? 'ok' : 'offen') : 'pruefen'}>
+          <span class="ga-zeichen" aria-hidden="true">{i + 1}</span>
+          <span class="ga-text"><strong>{s.titel}</strong><small>{s.text}</small></span>
+          <span class="ga-status" data-status-text>{s.id === 'messid' ? (messId ? `erledigt (${messId})` : 'offen') : 'wird geprüft …'}</span>
+          <a href={`${ANL}${s.anker}`}>Anleitung →</a>
+        </li>
+      ))}
+    </ol>
+    <p class="ga-fuss">Die Box prüft automatisch, was schon eingerichtet ist. <a href={ANL}>Ganze Anleitung „Google Analytics“ öffnen</a></p>
+  </details>
+
   <div class="steuerung">
     <p id="quelle" class="quelle" aria-live="polite">Lade Kennzahlen …</p>
     <fieldset class="zeitraum">
@@ -40,7 +65,7 @@ import kanaele from '../../inhalte/performance-kanaele.json';
 
   <section class="kanal-auswertung" aria-labelledby="ka-titel">
     <h2 id="ka-titel">Kanal-Auswertung nach Monaten</h2>
-    <p class="ka-text">Was die bezahlten Kanäle kosten und bringen: gesamt und je Kanal, Monat für Monat. Die drei farbigen Zeilen zeigen die Kosten je 1.000 Impressionen (CPM), je Klick (CPC) und je Abschluss (CPA).</p>
+    <p class="ka-text">Was die bezahlten Kanäle kosten und bringen: gesamt und je Kanal, Monat für Monat. Die drei farbigen Zeilen zeigen die Kosten je 1.000 Impressionen (CPM), je Klick (CPC) und je Abschluss (CPA). <strong>Klick auf einen Kanal</strong> zeigt dieselben Kennzahlen je Kampagne.</p>
     <p id="ka-quelle" class="quelle ka-quelle" aria-live="polite">Lade Kanal-Zahlen …</p>
     <p id="ka-fehler" class="fehler" hidden></p>
     <div class="karte ka-rahmen"><table class="ka-tabelle" id="ka-tabelle"></table></div>
@@ -194,10 +219,48 @@ import kanaele from '../../inhalte/performance-kanaele.json';
 </script>
 
 <script>
+  // ---------- Einrichtung Google Analytics: Status je Schritt prüfen ----------
+  const box = document.getElementById('ga-einrichtung') as HTMLDetailsElement;
+  const setze = (id: string, status: 'ok' | 'offen' | 'unbekannt' | 'fehler', text: string) => {
+    const li = box.querySelector<HTMLElement>(`[data-schritt="${id}"]`)!;
+    li.dataset.status = status; li.querySelector('[data-status-text]')!.textContent = text;
+  };
+  const json = async (url: string) => {
+    try { const r = await fetch(url, { credentials: 'same-origin', headers: { accept: 'application/json' } }); return (r.headers.get('content-type') || '').includes('json') ? { ok: r.ok, d: await r.json() } : null; }
+    catch { return null; }
+  };
+  (async () => {
+    const basis = await json('/dashboard/api/kennzahlen?tage=7');
+    if (basis?.ok && basis.d.quelle === 'analytics') {
+      setze('verbindung', 'ok', 'erledigt, verbunden');
+      const [ads, leads] = await Promise.all([json('/dashboard/api/kennzahlen?bericht=kanaele&monate=6'), json('/dashboard/api/kennzahlen?bericht=leads&tage=30')]);
+      if (ads?.ok) setze('ads', ads.d.leer ? 'offen' : 'ok', ads.d.leer ? 'offen: keine Google-Ads-Daten' : 'erledigt, Daten kommen an');
+      else setze('ads', 'fehler', 'Fehler beim Abruf');
+      if (leads?.ok) setze('leads', leads.d.dimensionenFehlen ? 'offen' : leads.d.gesamt ? 'ok' : 'unbekannt', leads.d.dimensionenFehlen ? 'offen: Dimensionen fehlen' : leads.d.gesamt ? `erledigt, ${leads.d.gesamt} Anfragen in 30 Tagen` : 'eingerichtet, noch keine Anfragen');
+      else setze('leads', 'fehler', 'Fehler beim Abruf');
+    } else {
+      const grund = !basis ? 'offen (in der lokalen Vorschau nicht prüfbar)' : basis.d.fehler === 'nicht-eingerichtet' ? 'offen: Variablen fehlen bei Netlify' : `Fehler: ${basis.d.meldung || basis.d.fehler}`;
+      setze('verbindung', basis && basis.d.fehler !== 'nicht-eingerichtet' ? 'fehler' : 'offen', grund);
+      setze('ads', 'unbekannt', 'erst nach Schritt 2 prüfbar');
+      setze('leads', 'unbekannt', 'erst nach Schritt 2 prüfbar');
+    }
+    setze('formular', 'unbekannt', 'bitte bei Netlify prüfen');
+    const alle = Array.from(box.querySelectorAll<HTMLElement>('[data-schritt]'));
+    const fertig = alle.filter((li) => li.dataset.status === 'ok').length;
+    document.getElementById('ga-stand')!.textContent = `${fertig} von ${alle.length} erledigt`;
+    // Ist die Verbindung da und nichts mehr offen, die Box zuklappen
+    if (!alle.some((li) => li.dataset.status === 'offen' || li.dataset.status === 'fehler')) box.open = false;
+  })();
+</script>
+
+<script>
   // ---------- Kanal-Auswertung nach Monaten ----------
   // Grundlage ist src/inhalte/performance-kanaele.json. Ist Google Analytics verbunden und
   // Google Ads dort verknüpft, ersetzt der Live-Bericht die Zahlen des Kanals "google-ads".
-  type Kanal = { name: string; quelle?: string; logo?: string; farbe?: string; live?: boolean; impressionen: number[]; klicks: number[]; kosten: number[]; abschluesse: number[] };
+  type Reihen = { impressionen: number[]; klicks: number[]; kosten: number[]; abschluesse: number[] };
+  type Kampagne = Reihen & { name: string };
+  type Kanal = Reihen & { name: string; quelle?: string; logo?: string; farbe?: string; live?: boolean; kampagnen?: Kampagne[] };
+  const offen = new Set<string>(); // aufgeklappte Kanäle
   const DATEI = JSON.parse(document.getElementById('ka-daten')!.textContent || '{}') as { beispiel: boolean; hinweis: string; monate: string[]; kanaele: Kanal[] };
   const FELDER = ['impressionen', 'klicks', 'kosten', 'abschluesse'] as const;
   const ganz = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 });
@@ -219,33 +282,60 @@ import kanaele from '../../inhalte/performance-kanaele.json';
   const h = (tag: string, attr: Record<string, string> = {}, ...kinder: (Node | string)[]) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v); e.append(...kinder); return e; };
   const summe = (a: number[]) => a.reduce((s, x) => s + (x || 0), 0);
 
+  // Zeilen mit den neun Kennzahlen für einen Block (Kanal, Gesamt oder Kampagne)
+  function kennzahlZeilen(tbody: HTMLElement, monate: string[], b: Reihen) {
+    for (const z of ZEILEN) {
+      tbody.append(h('tr', z.abgeleitet ? { class: 'ka-abgeleitet' } : {},
+        h('th', { scope: 'row', title: z.hilfe }, z.name),
+        ...monate.map((_, i) => h('td', {}, z.wert({ i: b.impressionen[i] || 0, k: b.klicks[i] || 0, e: b.kosten[i] || 0, a: b.abschluesse[i] || 0 }))),
+        h('td', { class: 'ka-summe' }, z.wert({ i: summe(b.impressionen), k: summe(b.klicks), e: summe(b.kosten), a: summe(b.abschluesse) }))));
+    }
+  }
+
+  let letzteDaten: [string[], Kanal[]] | null = null;
   function zeichneKanaele(monate: string[], kanaele: Kanal[]) {
+    letzteDaten = [monate, kanaele];
     const gesamt: Kanal = { name: 'Gesamt', impressionen: [], klicks: [], kosten: [], abschluesse: [] };
     for (const f of FELDER) gesamt[f] = monate.map((_, i) => kanaele.reduce((s, k) => s + (k[f][i] || 0), 0));
     const tabelle = document.getElementById('ka-tabelle')!;
-    tabelle.replaceChildren(...[gesamt, ...kanaele].map((b, nr) => {
+    const bloecke: HTMLElement[] = [];
+    [gesamt, ...kanaele].forEach((b, nr) => {
+      const kampagnen = nr > 0 ? (b.kampagnen || []) : [];
+      const auf = offen.has(b.name);
       const name = h('span', { class: 'ka-name' });
       if (nr > 0 && b.logo) name.append(h('img', { src: b.logo, alt: '', width: '20', height: '20' }));
       name.append(b.name);
       if (b.live) name.append(h('span', { class: 'ka-live' }, 'live'));
-      const kopf = h('tr', { class: 'ka-kopf' }, h('th', { scope: 'col' }, name), ...monate.map((m) => h('th', { scope: 'col' }, m)), h('th', { scope: 'col' }, 'Summe'));
-      const tbody = h('tbody', nr === 0 ? { class: 'ka-gesamt' } : b.farbe ? { style: `--ka-farbe:${b.farbe}` } : {}, kopf);
-      for (const z of ZEILEN) {
-        tbody.append(h('tr', z.abgeleitet ? { class: 'ka-abgeleitet' } : {},
-          h('th', { scope: 'row', title: z.hilfe }, z.name),
-          ...monate.map((_, i) => h('td', {}, z.wert({ i: b.impressionen[i] || 0, k: b.klicks[i] || 0, e: b.kosten[i] || 0, a: b.abschluesse[i] || 0 }))),
-          h('td', { class: 'ka-summe' }, z.wert({ i: summe(b.impressionen), k: summe(b.klicks), e: summe(b.kosten), a: summe(b.abschluesse) }))));
+      let erste: HTMLElement = name;
+      if (kampagnen.length) {
+        // Klick auf den Kanal klappt die Kampagnen darunter auf
+        const knopf = h('button', { type: 'button', class: 'ka-klapp', 'aria-expanded': String(auf), title: auf ? 'Kampagnen zuklappen' : 'Kampagnen aufklappen' },
+          h('span', { class: 'ka-pfeil', 'aria-hidden': 'true' }, '▸'), name, h('span', { class: 'ka-anzahl' }, `${kampagnen.length} Kampagnen`));
+        knopf.addEventListener('click', () => { if (offen.has(b.name)) offen.delete(b.name); else offen.add(b.name); zeichneKanaele(...letzteDaten!); (document.querySelector(`.ka-klapp[data-kanal="${CSS.escape(b.name)}"]`) as HTMLElement | null)?.focus(); });
+        knopf.dataset.kanal = b.name;
+        erste = knopf;
       }
-      return tbody;
-    }));
+      const kopf = h('tr', { class: 'ka-kopf' }, h('th', { scope: 'col' }, erste), ...monate.map((m) => h('th', { scope: 'col' }, m)), h('th', { scope: 'col' }, 'Summe'));
+      const tbody = h('tbody', nr === 0 ? { class: 'ka-gesamt' } : b.farbe ? { style: `--ka-farbe:${b.farbe}` } : {}, kopf);
+      kennzahlZeilen(tbody, monate, b);
+      bloecke.push(tbody);
+      if (auf) for (const c of kampagnen) {
+        const kk = h('tbody', { class: 'ka-kampagne', style: b.farbe ? `--ka-farbe:${b.farbe}` : '' },
+          h('tr', { class: 'ka-kopf ka-kopf-kampagne' }, h('th', { scope: 'col' }, h('span', { class: 'ka-name' }, h('span', { class: 'ka-einzug', 'aria-hidden': 'true' }, '↳'), c.name)), ...monate.map((m) => h('th', { scope: 'col' }, m)), h('th', { scope: 'col' }, 'Summe')));
+        kennzahlZeilen(kk, monate, c);
+        bloecke.push(kk);
+      }
+    });
+    tabelle.replaceChildren(...bloecke);
   }
 
   // Zahlen eines Kanals aus der Datei auf andere Monatsspalten umlegen (fehlende Monate = 0)
-  const umlegen = (k: Kanal, monate: string[]): Kanal => {
+  function umlegen(k: Kanal, monate: string[]): Kanal {
     const neu = { ...k };
     for (const f of FELDER) neu[f] = monate.map((m) => { const i = DATEI.monate.indexOf(m); return i === -1 ? 0 : k[f][i] || 0; });
+    if (k.kampagnen) neu.kampagnen = k.kampagnen.map((c) => umlegen(c as Kanal, monate) as Kampagne);
     return neu;
-  };
+  }
   const marke = (text: string, live = false) => h('span', { class: live ? 'marke live' : 'marke' }, text);
 
   (async () => {
@@ -273,6 +363,25 @@ import kanaele from '../../inhalte/performance-kanaele.json';
 </script>
 
 <style>
+  .ga-einrichtung { margin-bottom: 18px; border-left: 4px solid var(--akzent); }
+  .ga-einrichtung summary { cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+  .ga-titel { font-weight: 700; font-size: 1.05rem; }
+  .ga-stand { font-size: .85rem; color: #5a676d; font-weight: 600; }
+  .ga-schritte { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
+  .ga-schritte li { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto auto; gap: 4px 14px; align-items: center; padding: 8px 0; border-top: 1px solid #eef1f2; }
+  .ga-zeichen { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; font-weight: 700; font-size: .85rem; background: #eef1f2; color: #47545a; }
+  .ga-schritte li[data-status="ok"] .ga-zeichen { background: #22663a; color: #fff; font-size: 0; }
+  .ga-schritte li[data-status="ok"] .ga-zeichen::after { content: '✓'; font-size: .95rem; }
+  .ga-schritte li[data-status="fehler"] .ga-zeichen { background: #8e2f2f; color: #fff; }
+  .ga-text { display: grid; gap: 1px; min-width: 0; }
+  .ga-text small { color: #5a676d; font-size: .82rem; }
+  .ga-status { font-size: .82rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: #eef1f2; color: #47545a; white-space: nowrap; }
+  .ga-schritte li[data-status="ok"] .ga-status { background: #e3f4e8; color: #22663a; }
+  .ga-schritte li[data-status="offen"] .ga-status { background: #fff4dd; color: #7a5410; }
+  .ga-schritte li[data-status="fehler"] .ga-status { background: #fdecec; color: #8e2f2f; white-space: normal; }
+  .ga-schritte a { font-size: .85rem; font-weight: 600; white-space: nowrap; }
+  .ga-fuss { margin: 10px 0 0; font-size: .85rem; color: #5a676d; }
+  @media (max-width: 700px) { .ga-schritte li { grid-template-columns: 30px minmax(0, 1fr); } .ga-status, .ga-schritte a { grid-column: 2; justify-self: start; } .ga-status { white-space: normal; max-width: 100%; } }
   .kanal-auswertung { margin-top: 28px; }
   .kanal-auswertung > h2 { font-size: 1.3rem; margin-bottom: .3em; }
   .ka-text { color: #4c595f; max-width: 85ch; }
@@ -291,6 +400,16 @@ import kanaele from '../../inhalte/performance-kanaele.json';
   .ka-quelle { margin: 0 0 12px; }
   .ka-tabelle :global(.ka-live) { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; background: #fff; color: #22663a; border-radius: 999px; padding: 1px 7px; margin-left: 4px; }
   .ka-tabelle :global(img) { background: #fff; border-radius: 4px; padding: 2px; }
+  :global(.ka-klapp) { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-align: left; }
+  :global(.ka-klapp:focus-visible) { outline: 2px solid #fff; outline-offset: 3px; border-radius: 4px; }
+  :global(.ka-pfeil) { display: inline-block; transition: transform .15s; font-size: .9em; }
+  :global(.ka-klapp[aria-expanded="true"] .ka-pfeil) { transform: rotate(90deg); }
+  :global(.ka-anzahl) { font-size: .72rem; font-weight: 700; background: rgba(255,255,255,.22); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+  :global(.ka-kampagne .ka-kopf-kampagne th) { background: color-mix(in srgb, var(--ka-farbe, #9aa6ab) 16%, white); color: #1c2126; font-weight: 700; font-size: .88rem; }
+  :global(.ka-kampagne .ka-kopf-kampagne th:first-child) { background: color-mix(in srgb, var(--ka-farbe, #9aa6ab) 16%, white); box-shadow: inset 4px 0 0 var(--ka-farbe, #9aa6ab); }
+  :global(.ka-kampagne td), :global(.ka-kampagne th[scope="row"]) { font-size: .88rem; }
+  :global(.ka-kampagne th[scope="row"]) { padding-left: 30px; font-weight: 600; }
+  :global(.ka-einzug) { color: color-mix(in srgb, var(--ka-farbe, #9aa6ab) 80%, black); }
   .ka-legende { font-size: .8rem; color: #67747a; margin: 10px 0 0; }
   @media (max-width: 640px) { :global(.ka-tabelle th), :global(.ka-tabelle td) { padding: 6px 10px; font-size: .85rem; } :global(.ka-tabelle th:first-child) { min-width: 104px; white-space: normal; } }
   .steuerung { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
