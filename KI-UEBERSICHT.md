@@ -91,6 +91,10 @@ anleitungen/                 Anleitungen für Menschen
 - `npm run dev` – Vorschau unter http://localhost:4321
 - `npm run build` – erzeugt die fertige Website im Ordner `dist/`
 
+## Anfragen messen
+
+`src/components/Messung.astro` (im Layout `Website.astro`) sendet `cta_klick` und `generate_lead` an Google Analytics, wenn `gtag` geladen ist. Jeder CTA trägt `data-cta="position"` (Prop `ort` in `CTA.astro`). Das Kontaktformular (`kontakt.formular` in der Konfiguration) läuft über Netlify Forms. Die Serverfunktion `kennzahlen.mjs` liefert mit `?bericht=leads` die Anfragen nach Weg, Button, Kanal und Quelle; das Dashboard zeigt sie unter der Kennzahl Anfragen.
+
 ## Website-Editor
 
 `src/components/Bearbeiten.astro` steckt auf der Startseite und ist nur mit Parameter aktiv: `/?bearbeiten` macht alle Elemente mit `data-k="pfad.in.konfiguration"` bearbeitbar und erzeugt eine neue `konfiguration.mjs`, indem es nur die Text-Literale im Quelltext ersetzt. `/?markieren` zeigt die Nummern 1–12 und markiert Texte, die noch den Werten in `vorlage-platzhalter.json` entsprechen (genutzt in Promotion → Webseite). Neue Texte auf der Startseite bekommen deshalb ein `data-k`-Attribut mit ihrem Pfad. **Veröffentlichen** schickt die neue Datei an `netlify/functions/veroeffentlichen.mjs` (`/dashboard/api/veroeffentlichen`, nur POST, Dashboard-Passwort): Die Funktion prüft Syntax und Basisstand und schreibt per GitHub-API nur `src/konfiguration.mjs` (Variablen `GITHUB_TOKEN`, `GITHUB_REPO`, `GITHUB_BRANCH` bei Netlify).

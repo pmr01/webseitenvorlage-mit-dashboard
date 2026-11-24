@@ -4,6 +4,7 @@
 import '../styles/global.css';
 import Farben from '../components/Farben.astro';
 import Einwilligung from '../components/Einwilligung.astro';
+import Messung from '../components/Messung.astro';
 import { konfiguration } from '../konfiguration.mjs';
 
 interface Props { titel?: string; beschreibung?: string }
@@ -37,7 +38,7 @@ const jahr = new Date().getFullYear();
             {konfiguration.navigation.map((n, i) => <li><a href={link(n.ziel)} data-k={`navigation.${i}.text`}>{n.text}</a></li>)}
           </ul>
         </nav>
-        <a class="button kopf-cta" href={link(konfiguration.cta.ziel)} data-k="cta.text">{konfiguration.cta.text}</a>
+        <a class="button kopf-cta" href={link(konfiguration.cta.ziel)} data-k="cta.text" data-cta="kopf">{konfiguration.cta.text}</a>
       </div>
     </header>
 
@@ -57,6 +58,7 @@ const jahr = new Date().getFullYear();
     </footer>
 
     <Einwilligung />
+    <Messung />
   </body>
 </html>
 

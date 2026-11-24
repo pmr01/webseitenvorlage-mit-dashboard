@@ -16,7 +16,7 @@ import Bearbeiten from '../components/Bearbeiten.astro';
     <div class="hero-text inhalt">
       <h1 id="hero-titel" data-k="hero.ueberschrift">{k.hero.ueberschrift}</h1>
       <p class="einleitung" data-k="hero.einleitung">{k.hero.einleitung}</p>
-      <CTA hell zentriert={false} />
+      <CTA hell zentriert={false} ort="hero" />
     </div>
   </section>
 
@@ -29,7 +29,7 @@ import Bearbeiten from '../components/Bearbeiten.astro';
           <li><h3 data-k={`painpoints.punkte.${i}.titel`}>{p.titel}</h3><p data-k={`painpoints.punkte.${i}.text`}>{p.text}</p></li>
         ))}
       </ul>
-      <CTA />
+      <CTA ort="painpoints" />
     </div>
   </section>
 
@@ -39,7 +39,7 @@ import Bearbeiten from '../components/Bearbeiten.astro';
       <div>
         <h2 id="vorstellung-titel" data-k="vorstellung.ueberschrift">{k.vorstellung.ueberschrift}</h2>
         {k.vorstellung.text.map((absatz, i) => <p data-k={`vorstellung.text.${i}`}>{absatz}</p>)}
-        <CTA zentriert={false} />
+        <CTA zentriert={false} ort="vorstellung" />
       </div>
       <img src={k.vorstellung.bild} alt={k.vorstellung.bildAlt} width="600" height="600" loading="lazy" />
     </div>
@@ -54,7 +54,7 @@ import Bearbeiten from '../components/Bearbeiten.astro';
           <li><span class="nummer" aria-hidden="true">{i + 1}</span><h3 data-k={`plan.schritte.${i}.titel`}>{s.titel}</h3><p data-k={`plan.schritte.${i}.text`}>{s.text}</p></li>
         ))}
       </ol>
-      <CTA />
+      <CTA ort="plan" />
     </div>
   </section>
 
@@ -82,13 +82,14 @@ import Bearbeiten from '../components/Bearbeiten.astro';
           </li>
         ))}
       </ul>
-      <CTA />
+      <CTA ort="testimonials" />
     </div>
   </section>
 
   <!-- (12) Weitere Elemente: Kontakt (der Footer steht im Layout) -->
   <section id="kontakt" class="abschnitt flaeche" aria-labelledby="kontakt-titel">
-    <div class="inhalt kontakt">
+    <div class:list={['inhalt kontakt', { 'mit-formular': k.kontakt.formular }]}>
+      <div>
       <h2 id="kontakt-titel" data-k="kontakt.ueberschrift">{k.kontakt.ueberschrift}</h2>
       <p data-k="kontakt.text">{k.kontakt.text}</p>
       <ul>
@@ -96,6 +97,21 @@ import Bearbeiten from '../components/Bearbeiten.astro';
         <li><span>Telefon</span><a href={`tel:${k.kontakt.telefon.replace(/\s/g, '')}`} data-k="kontakt.telefon">{k.kontakt.telefon}</a></li>
         <li><span>Adresse</span><span data-k="kontakt.adresse">{k.kontakt.adresse}</span></li>
       </ul>
+      </div>
+      <!-- Kontaktformular über Netlify Forms (kein eigener Server nötig). Gesendete Formulare zählen als Anfrage. -->
+      {k.kontakt.formular && (
+        <form class="k-form" id="kontakt-formular" name="kontakt" method="POST" data-netlify="true" netlify-honeypot="firma-web" data-erfolg="Danke, Ihre Nachricht ist angekommen. Wir melden uns.">
+          <input type="hidden" name="form-name" value="kontakt" />
+          <input type="hidden" name="gekommen_ueber" value="" />
+          <p class="k-falle"><label>Bitte leer lassen <input name="firma-web" tabindex="-1" autocomplete="off" /></label></p>
+          <label>Name<input name="name" required maxlength="120" autocomplete="name" /></label>
+          <label>E-Mail<input name="email" type="email" required maxlength="200" autocomplete="email" /></label>
+          <label>Nachricht<textarea name="nachricht" rows="4" required maxlength="3000"></textarea></label>
+          <p class="k-hinweis">Mit dem Senden verarbeiten wir Ihre Angaben, um Ihre Anfrage zu beantworten. Mehr dazu in der <a href="/datenschutz/">Datenschutzerklärung</a>.</p>
+          <button type="submit" class="button">Nachricht senden</button>
+          <p class="k-status" data-status aria-live="polite"></p>
+        </form>
+      )}
     </div>
   </section>
   <Bearbeiten />
@@ -142,5 +158,18 @@ import Bearbeiten from '../components/Bearbeiten.astro';
   .kontakt ul { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; gap: 10px; }
   .kontakt li { display: grid; grid-template-columns: 7rem 1fr; gap: 12px; }
   .kontakt span { font-weight: 600; }
+  .kontakt.mit-formular { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+  @media (max-width: 760px) { .kontakt.mit-formular { grid-template-columns: 1fr; gap: 28px; } }
+  .k-form { display: grid; gap: 14px; background: #fff; border: 1px solid color-mix(in srgb, var(--text) 12%, transparent); border-radius: var(--ecken); padding: 24px; }
+  .k-form label { display: grid; gap: 5px; font-weight: 600; font-size: .95rem; }
+  .k-form input, .k-form textarea { font: inherit; padding: .6em .7em; border: 1px solid color-mix(in srgb, var(--text) 30%, transparent); border-radius: calc(var(--ecken) * .6); background: #fff; color: var(--text); width: 100%; box-sizing: border-box; }
+  .k-form input:focus-visible, .k-form textarea:focus-visible { outline: 3px solid var(--akzent); outline-offset: 1px; }
+  .k-form .button { justify-self: start; cursor: pointer; font: inherit; font-weight: 700; }
+  .k-form .button:disabled { opacity: .6; cursor: wait; }
+  .k-falle { position: absolute; left: -9999px; }
+  .k-hinweis { font-size: .85rem; margin: 0; color: color-mix(in srgb, var(--text) 75%, transparent); }
+  .k-status { margin: 0; font-weight: 600; min-height: 1.4em; }
+  .k-status.ok { color: #22663a; }
+  .k-status.fehler { color: #8e2f2f; }
   @media (max-width: 480px) { .kontakt li { grid-template-columns: 1fr; gap: 0; } }
 </style>

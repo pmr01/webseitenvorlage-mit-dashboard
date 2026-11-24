@@ -300,7 +300,7 @@
     "Anfragen": {
       "typ": "balken",
       "titel": "Anfragen im Detail",
-      "beschreibung": "Auf welchem Weg Anfragen ankommen und über welchen Kanal die Menschen zu Ihnen gefunden haben.",
+      "beschreibung": "Auf welchem Weg Anfragen ankommen, über welchen Kanal die Menschen zu Ihnen gefunden haben und welcher Button auf der Website sie zur Anfrage geführt hat.",
       "gruppen": [
         {
           "titel": "Nach Weg",
@@ -353,8 +353,35 @@
               "wert": 1
             }
           ]
+        },
+        {
+          "titel": "Nach letztem Button vor der Anfrage",
+          "einheit": "",
+          "reihen": [
+            {
+              "name": "Hero (ganz oben)",
+              "wert": 9
+            },
+            {
+              "name": "Plan",
+              "wert": 7
+            },
+            {
+              "name": "Testimonials",
+              "wert": 5
+            },
+            {
+              "name": "Kopfzeile",
+              "wert": 4
+            },
+            {
+              "name": "Ohne Button (direkt zum Kontakt)",
+              "wert": 2
+            }
+          ]
         }
-      ]
+      ],
+      "live": "leads"
     },
     "Neue Kunden": {
       "typ": "balken",

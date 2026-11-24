@@ -1,15 +1,16 @@
 ---
 // (9) Call-to-Action: überall derselbe Text und dasselbe Ziel aus der Konfiguration.
 import { konfiguration } from '../konfiguration.mjs';
-interface Props { hell?: boolean; zentriert?: boolean }
-const { hell = false, zentriert = true } = Astro.props;
+// ort = wo der Button steht (für die Messung: Welcher Button führt zu Anfragen?)
+interface Props { hell?: boolean; zentriert?: boolean; ort?: string }
+const { hell = false, zentriert = true, ort = 'seite' } = Astro.props;
 // Auf Unterseiten (Impressum, Datenschutz) führt der Anker zur Startseite.
 const ziel = konfiguration.cta.ziel.startsWith('#') && Astro.url.pathname !== '/'
   ? '/' + konfiguration.cta.ziel
   : konfiguration.cta.ziel;
 ---
 <div class:list={['cta', { zentriert }]}>
-  <a class:list={['button', { hell }]} href={ziel} data-k="cta.text">{konfiguration.cta.text}</a>
+  <a class:list={['button', { hell }]} href={ziel} data-k="cta.text" data-cta={ort}>{konfiguration.cta.text}</a>
 </div>
 
 <style>

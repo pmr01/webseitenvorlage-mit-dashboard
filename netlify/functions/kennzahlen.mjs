@@ -2,6 +2,7 @@
 //  SERVERFUNKTION: Kennzahlen aus Google Analytics (GA4)
 //  Erreichbar unter /dashboard/api/kennzahlen?tage=30
 //  und /dashboard/api/kennzahlen?bericht=kanaele&monate=6 (Google Ads je Monat)
+//  und /dashboard/api/kennzahlen?bericht=leads&tage=30 (Anfragen nach Weg, Kanal, Button)
 //  Sie verlangt dasselbe Passwort wie das Dashboard (DASHBOARD_PASSWORT).
 //
 //  Die Zugangsdaten stehen NICHT im Code, sondern als Umgebungsvariablen
@@ -119,6 +120,43 @@ async function kanalBericht(token, propertyId, monate) {
   };
 }
 
+// ---------- Bericht "leads": Anfragen (Ereignis generate_lead) ----------
+// Kanal und Quelle kennt Analytics von selbst. Weg, Button und Abschnitt sind eigene Parameter
+// der Website (src/components/Messung.astro); dafür müssen in Analytics die benutzerdefinierten
+// Dimensionen lead_weg, letzte_cta und lead_position angelegt sein. Fehlen sie, kommt der erste
+// Teil trotzdem und "dimensionenFehlen" ist true.
+async function leadBericht(token, propertyId, tage) {
+  const zeitraum = [{ startDate: `${tage}daysAgo`, endDate: 'today' }];
+  const nurLeads = { filter: { fieldName: 'eventName', stringFilter: { matchType: 'EXACT', value: 'generate_lead' } } };
+  const nach = (dimension) => ({
+    dateRanges: zeitraum, dimensions: [{ name: dimension }], metrics: [{ name: 'eventCount' }], dimensionFilter: nurLeads,
+    orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }], limit: 10,
+  });
+  const abruf = async (requests) => {
+    const r = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${encodeURIComponent(propertyId)}:batchRunReports`, {
+      method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify({ requests }),
+    });
+    const json = await r.json();
+    if (!r.ok) throw new Error(json.error?.message || `Google Analytics antwortet mit Status ${r.status}`);
+    return json.reports || [];
+  };
+  const liste = (bericht) => (bericht?.rows || []).map((z) => ({ name: text(z) || '(nicht gesetzt)', wert: zahl(z) }));
+
+  const [summe, kanal, quelle] = await abruf([
+    { dateRanges: zeitraum, metrics: [{ name: 'eventCount' }], dimensionFilter: nurLeads },
+    nach('sessionDefaultChannelGroup'),
+    nach('sessionSource'),
+  ]);
+  const ergebnis = { quelle: 'analytics', tage, gesamt: zahl(summe?.rows?.[0]), kanal: liste(kanal), herkunft: liste(quelle), weg: [], cta: [], position: [], dimensionenFehlen: false };
+  try {
+    const [weg, cta, position] = await abruf([nach('customEvent:lead_weg'), nach('customEvent:letzte_cta'), nach('customEvent:lead_position')]);
+    Object.assign(ergebnis, { weg: liste(weg), cta: liste(cta), position: liste(position) });
+  } catch {
+    ergebnis.dimensionenFehlen = true;
+  }
+  return ergebnis;
+}
+
 export default async (request) => {
   if (!passwortStimmt(request)) {
     return antwort(401, { fehler: 'nicht-angemeldet', meldung: 'Für die Kennzahlen ist das Dashboard-Passwort nötig.' });
@@ -138,6 +176,15 @@ export default async (request) => {
     const m = Number(parameter.get('monate'));
     try {
       return antwort(200, await kanalBericht(await zugriffstoken(email, schluessel), propertyId, ERLAUBTE_MONATE.includes(m) ? m : 6));
+    } catch (fehler) {
+      return antwort(502, { fehler: 'abruf-fehlgeschlagen', meldung: String(fehler.message || fehler) });
+    }
+  }
+
+  if (parameter.get('bericht') === 'leads') {
+    const t = Number(parameter.get('tage'));
+    try {
+      return antwort(200, await leadBericht(await zugriffstoken(email, schluessel), propertyId, ERLAUBTE_TAGE.includes(t) ? t : 30));
     } catch (fehler) {
       return antwort(502, { fehler: 'abruf-fehlgeschlagen', meldung: String(fehler.message || fehler) });
     }

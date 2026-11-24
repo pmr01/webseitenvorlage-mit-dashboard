@@ -179,3 +179,30 @@ Zeigt das Dashboard weiter „Beispieldaten“ mit einer roten Meldung, steht do
 Zeigt das Dashboard „Beispieldaten“ **ohne** rote Meldung, fehlen die Variablen bei Netlify oder die Seite wurde danach nicht neu veröffentlicht (Schritte 7 und 8).
 
 In der lokalen Vorschau (`npm run dev`) zeigt Performance immer Beispieldaten, weil die Serverfunktion nur bei Netlify läuft.
+
+---
+
+## Anfragen messen: über welchen Weg, Kanal und Button kommen Leads?
+
+Die Website meldet jede Anfrage an Google Analytics, sobald eine Mess-ID eingetragen ist und der Besucher zugestimmt hat. Sie müssen in Analytics nur einmal drei Dinge einstellen.
+
+**Was die Website sendet** (Datei `src/components/Messung.astro`):
+
+| Ereignis | Wann | Parameter |
+|---|---|---|
+| `generate_lead` | Formular gesendet, Klick auf E-Mail-Adresse oder Telefonnummer | `lead_weg` (formular, email, telefon), `lead_position` (Abschnitt, z. B. kontakt), `letzte_cta` (zuletzt geklickter Button: kopf, hero, painpoints, vorstellung, plan, testimonials oder ohne) |
+| `cta_klick` | Klick auf einen Call-to-Action-Button | `cta_position` (wo der Button steht) |
+
+Von welchem Kanal jemand kam (Google, Facebook, direkt …), ergänzt Analytics selbst.
+
+**Einrichten in Google Analytics** (Bezeichnungen können sich ändern):
+
+1. **Schlüsselereignis:** Verwaltung → Datenanzeige → Ereignisse (bzw. Schlüsselereignisse) → `generate_lead` als Schlüsselereignis markieren. Das Ereignis erscheint in der Liste, nachdem es einmal ausgelöst wurde; Sie können es auch vorab über „Neues Schlüsselereignis“ mit genau diesem Namen anlegen.
+2. **Benutzerdefinierte Dimensionen:** Verwaltung → Datenanzeige → Benutzerdefinierte Definitionen → „Benutzerdefinierte Dimension erstellen“, jeweils Umfang **Ereignis**. Legen Sie vier an; Name und Ereignisparameter sind jeweils gleich: `lead_weg`, `lead_position`, `letzte_cta`, `cta_position`.
+3. **Prüfen:** Website öffnen, im Banner zustimmen, einen Button klicken und das Formular senden. In Analytics unter Berichte → Echtzeit erscheint `generate_lead` nach wenigen Sekunden. In den normalen Berichten sind neue Dimensionen erst nach etwa einem Tag gefüllt.
+
+**Kontaktformular:** Es läuft über Netlify Forms. Schalten Sie bei Netlify unter Forms einmal „Form detection“ ein und veröffentlichen Sie neu; danach landen Nachrichten bei Netlify (dort auch E-Mail-Benachrichtigung einrichten). Jede Nachricht enthält das Feld `gekommen_ueber` mit dem zuletzt geklickten Button, auch ohne Analytics. Ohne Formular: in `src/konfiguration.mjs` bei `kontakt` `formular: false` setzen.
+
+**Im Dashboard:** Die Kennzahl **Anfragen** zeigt dann live die Anfragen der letzten 30 Tage nach Weg, letztem Button, Kanal und Quelle. Fehlen die Dimensionen aus Schritt 2 noch, erscheinen nur Kanal und Quelle und ein Hinweis.
+
+**Grenzen:** Gezählt wird nur, wer dem Banner zugestimmt hat. Ein Klick auf E-Mail oder Telefon ist eine Absicht, noch keine Nachricht. Kampagnen-Links sollten UTM-Parameter tragen (z. B. `?utm_source=newsletter&utm_medium=email`), damit Analytics den Kanal richtig zuordnet.

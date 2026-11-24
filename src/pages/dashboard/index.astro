@@ -49,11 +49,11 @@ const spalten = [
   {kacheln.map((x, i) => {
     const a = auswertungen[x.name];
     return (
-      <section class="karte db-auswertung" id={`aw-${kennung(x.name)}`} role="tabpanel" aria-labelledby={`kachel-${kennung(x.name)}`} hidden={i !== 0}>
+      <section class="karte db-auswertung" id={`aw-${kennung(x.name)}`} data-live={a?.live} role="tabpanel" aria-labelledby={`kachel-${kennung(x.name)}`} hidden={i !== 0}>
         {!a && <p class="db-leer">Für „{x.name}“ ist noch keine Auswertung hinterlegt. Ergänzen Sie sie in <code>src/inhalte/dashboard-kennzahlen.json</code> unter <code>auswertungen</code>.</p>}
         {a && (
           <header class="aw-kopf">
-            <h2>{a.titel} <small>{kennzahlen.beispiel ? 'Beispiel · ' : ''}{kennzahlen.zeitraum}</small></h2>
+            <h2>{a.titel} <small data-marke>{kennzahlen.beispiel ? 'Beispiel · ' : ''}{kennzahlen.zeitraum}</small></h2>
             <p>{a.beschreibung}</p>
             {a.link && <a class="aw-link" href={a.link.ziel}>{a.link.text} →</a>}
           </header>
@@ -204,6 +204,39 @@ const spalten = [
     });
   });
 
+  // ---------- Anfragen live aus Google Analytics (Ereignis generate_lead) ----------
+  // Ohne Verbindung bleiben die Beispielzahlen stehen.
+  const NAMEN: Record<string, string> = {
+    formular: 'Kontaktformular', email: 'E-Mail', telefon: 'Anruf',
+    kopf: 'Kopfzeile', hero: 'Hero (ganz oben)', painpoints: 'Painpoints', vorstellung: 'Vorstellung', plan: 'Plan', testimonials: 'Testimonials',
+    ohne: 'Ohne Button (direkt zum Kontakt)', kontakt: 'Abschnitt Kontakt', fuss: 'Fußbereich', '(not set)': 'Nicht erfasst',
+  };
+  const feld = document.querySelector<HTMLElement>('[data-live="leads"]');
+  if (feld) {
+    fetch('/dashboard/api/kennzahlen?bericht=leads&tage=30', { credentials: 'same-origin', headers: { accept: 'application/json' } })
+      .then((r) => (r.ok && (r.headers.get('content-type') || '').includes('json') ? r.json() : null))
+      .then((d) => {
+        if (d?.quelle !== 'analytics') return;
+        const h = (tag: string, klasse = '', text = '') => { const e = document.createElement(tag); if (klasse) e.className = klasse; e.textContent = text; return e; };
+        const gruppe = (titel: string, reihen: { name: string; wert: number }[]) => {
+          const g = h('div', 'bk-gruppe'); g.append(h('h3', '', titel));
+          const ul = h('ul'); const max = Math.max(...reihen.map((r) => r.wert), 1);
+          for (const r of reihen) {
+            const li = h('li'); const balken = h('span', 'bk-balken'); const fuell = h('span'); fuell.style.width = `${Math.max(2, r.wert / max * 100)}%`; balken.append(fuell);
+            li.append(h('span', 'bk-name', NAMEN[r.name] || r.name), balken, h('span', 'bk-wert', zahl.format(r.wert))); ul.append(li);
+          }
+          if (!reihen.length) ul.append(h('li', 'bk-leer', 'Noch keine Anfragen in diesem Zeitraum.'));
+          g.append(ul); return g;
+        };
+        const gruppen = [gruppe('Nach Kanal', d.kanal), gruppe('Nach Quelle', d.herkunft)];
+        if (!d.dimensionenFehlen) gruppen.unshift(gruppe('Nach Weg', d.weg), gruppe('Nach letztem Button vor der Anfrage', d.cta));
+        feld.querySelector('.bk-gruppen')!.replaceChildren(...gruppen);
+        feld.querySelector('[data-marke]')!.textContent = `Live · ${zahl.format(d.gesamt)} Anfragen · letzte ${d.tage} Tage`;
+        if (d.dimensionenFehlen) feld.querySelector('.aw-kopf')!.append(h('p', 'aw-hinweis', 'Weg und Button fehlen noch: Legen Sie in Google Analytics die benutzerdefinierten Dimensionen lead_weg, letzte_cta und lead_position an (Anleitung „Dashboard und Google Analytics“, Abschnitt „Anfragen messen“).'));
+      })
+      .catch(() => { /* keine Serverfunktion erreichbar: Beispiel bleibt */ });
+  }
+
   const ausAdresse = () => { const k = kacheln.find((x) => x.dataset.ziel === `aw-${location.hash.slice(1)}`); if (k) zeigen(k, false); else zeichneAlle(); };
   window.addEventListener('hashchange', ausAdresse);
   ausAdresse();
@@ -243,6 +276,8 @@ const spalten = [
   .aw-kopf p { color: #4c595f; max-width: 85ch; margin: 0 0 6px; }
   .aw-link { font-weight: 600; font-size: .92rem; }
   .db-leer { color: #5a676d; margin: 0; }
+  :global(.aw-hinweis) { background: #fff4dd; border: 1px solid #f0d199; border-radius: 8px; padding: 8px 12px; font-size: .9rem; }
+  :global(.bk-leer) { display: block !important; color: #67747a; font-size: .9rem; }
 
   /* Funnel */
   .fn { position: relative; margin-top: 16px; }
@@ -278,14 +313,14 @@ const spalten = [
   }
 
   /* Balken */
-  .bk-gruppen { display: grid; gap: 20px 40px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); margin-top: 16px; }
-  .bk-gruppe h3 { font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: #5a676d; margin: 0 0 8px; }
-  .bk-gruppe ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-  .bk-gruppe li { display: grid; grid-template-columns: minmax(110px, 190px) 1fr auto; gap: 2px 12px; align-items: center; font-size: .93rem; }
-  .bk-name { display: flex; align-items: center; gap: 8px; font-weight: 600; min-width: 0; }
-  .bk-balken { height: 12px; border-radius: 999px; background: #eef1f2; overflow: hidden; }
-  .bk-balken span { display: block; height: 100%; border-radius: 999px; background: var(--haupt); }
-  .bk-wert { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; min-width: 64px; }
-  .bk-gruppe small { grid-column: 2 / -1; font-size: .78rem; color: #67747a; }
-  @media (max-width: 480px) { .bk-gruppe li { grid-template-columns: 1fr auto; } .bk-balken { grid-column: 1 / -1; grid-row: 2; } .bk-gruppe small { grid-column: 1 / -1; } }
+  :global(.bk-gruppen) { display: grid; gap: 20px 40px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); margin-top: 16px; }
+  :global(.bk-gruppe h3) { font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: #5a676d; margin: 0 0 8px; }
+  :global(.bk-gruppe ul) { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  :global(.bk-gruppe li) { display: grid; grid-template-columns: minmax(110px, 190px) 1fr auto; gap: 2px 12px; align-items: center; font-size: .93rem; }
+  :global(.bk-name) { display: flex; align-items: center; gap: 8px; font-weight: 600; min-width: 0; }
+  :global(.bk-balken) { height: 12px; border-radius: 999px; background: #eef1f2; overflow: hidden; }
+  :global(.bk-balken span) { display: block; height: 100%; border-radius: 999px; background: var(--haupt); }
+  :global(.bk-wert) { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; min-width: 64px; }
+  :global(.bk-gruppe small) { grid-column: 2 / -1; font-size: .78rem; color: #67747a; }
+  @media (max-width: 480px) { :global(.bk-gruppe li) { grid-template-columns: 1fr auto; } :global(.bk-balken) { grid-column: 1 / -1; grid-row: 2; } :global(.bk-gruppe small) { grid-column: 1 / -1; } }
 </style>

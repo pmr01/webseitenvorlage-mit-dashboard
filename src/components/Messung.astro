@@ -1,0 +1,64 @@
+---
+// Messung der Anfragen (Leads) für Google Analytics.
+// Sendet nur, wenn Analytics geladen ist, also nach Zustimmung im Einwilligungsbanner.
+//
+// Ereignisse:
+//   cta_klick      Klick auf einen Call-to-Action-Button
+//                  Parameter: cta_position (kopf, hero, painpoints, vorstellung, plan, testimonials)
+//   generate_lead  eine Anfrage (in Analytics als Schlüsselereignis markieren)
+//                  Parameter: lead_weg       formular | email | telefon
+//                             lead_position  Abschnitt, in dem die Anfrage ausgelöst wurde (z. B. kontakt)
+//                             letzte_cta     der zuletzt geklickte Button vor der Anfrage, sonst "ohne"
+//
+// Von welchem Kanal die Anfrage kam (Google, Facebook, direkt …), ergänzt Analytics selbst.
+// Einrichtung in Analytics: anleitungen/anleitung-dashboard.md, Abschnitt „Anfragen messen“.
+---
+<script>
+  const MERKER = 'letzte-cta';
+  const merken = (wert: string) => { try { sessionStorage.setItem(MERKER, wert); } catch { /* ohne Speicher */ } };
+  const letzteCta = () => { try { return sessionStorage.getItem(MERKER) || 'ohne'; } catch { return 'ohne'; } };
+
+  function senden(name: string, parameter: Record<string, string>) {
+    const gtag = (window as any).gtag;
+    if (typeof gtag === 'function') gtag('event', name, parameter);
+    // Für Tests und eigene Erweiterungen: Das Ereignis ist auch auf der Seite abhörbar
+    document.dispatchEvent(new CustomEvent('messung', { detail: { name, parameter } }));
+  }
+  (window as any).anfrageMelden = (weg: string, position: string) => senden('generate_lead', { lead_weg: weg, lead_position: position, letzte_cta: letzteCta() });
+
+  const imEditor = /[?&](bearbeiten|markieren)\b/.test(location.search);
+  const abschnitt = (el: Element) => el.closest('section[id]')?.id || (el.closest('footer') ? 'fuss' : el.closest('header') ? 'kopf' : 'seite');
+
+  if (!imEditor) {
+    document.addEventListener('click', (e) => {
+      const link = (e.target as Element | null)?.closest?.('a');
+      if (!link) return;
+      const cta = link.getAttribute('data-cta');
+      if (cta) { merken(cta); senden('cta_klick', { cta_position: cta }); return; }
+      const ziel = link.getAttribute('href') || '';
+      if (ziel.startsWith('mailto:')) (window as any).anfrageMelden('email', abschnitt(link));
+      else if (ziel.startsWith('tel:')) (window as any).anfrageMelden('telefon', abschnitt(link));
+    });
+
+    // Kontaktformular: ohne Neuladen an Netlify Forms senden, bei Erfolg als Anfrage zählen
+    const formular = document.getElementById('kontakt-formular') as HTMLFormElement | null;
+    if (formular) {
+      const status = formular.querySelector<HTMLElement>('[data-status]')!;
+      const knopf = formular.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+      formular.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        (formular.elements.namedItem('gekommen_ueber') as HTMLInputElement).value = letzteCta();
+        knopf.disabled = true; status.className = 'k-status'; status.textContent = 'Wird gesendet …';
+        try {
+          const r = await fetch('/', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(new FormData(formular) as any).toString() });
+          if (!r.ok) throw new Error(String(r.status));
+          formular.reset();
+          status.className = 'k-status ok'; status.textContent = formular.dataset.erfolg || 'Danke, Ihre Nachricht ist angekommen.';
+          (window as any).anfrageMelden('formular', abschnitt(formular));
+        } catch {
+          status.className = 'k-status fehler'; status.textContent = 'Das Senden hat nicht geklappt. Bitte schreiben Sie uns per E-Mail oder rufen Sie an.';
+        } finally { knopf.disabled = false; }
+      });
+    }
+  }
+</script>

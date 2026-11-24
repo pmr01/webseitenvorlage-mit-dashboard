@@ -123,5 +123,8 @@ export const konfiguration = {
     email: 'kontakt@example.com',
     telefon: '+49 000 0000000',
     adresse: 'Musterstraße 1, 00000 Musterstadt',
+    // Kontaktformular anzeigen (true) oder nur E-Mail und Telefon (false).
+    // Das Formular läuft über Netlify Forms: dort einmal „Form detection“ einschalten.
+    formular: true,
   },
 };
