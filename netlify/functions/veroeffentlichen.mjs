@@ -25,6 +25,41 @@ const MAX_BILD = 2_500_000;      // Bytes je Bild
 const MAX_BILDER_GESAMT = 4_000_000;
 const BILD_PFAD = /^public\/bilder\/[a-z0-9][a-z0-9-]{0,60}\.(png|jpg|jpeg|webp|gif|svg)$/;
 
+// SVG-Prüfung mit Allowlist: nur bekannte Zeichen-Elemente und harmlose Attribute.
+// Die Datei wird vollständig in Tags zerlegt; bleibt danach Markup übrig, das nicht
+// erkannt wurde, wird sie abgelehnt. Zusätzlich verbietet netlify.toml für /bilder/*
+// per Content-Security-Policy jede Skriptausführung.
+const SVG_ELEMENTE = new Set(['svg', 'g', 'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'text', 'tspan', 'defs', 'lineargradient', 'radialgradient', 'stop', 'clippath', 'mask', 'title', 'desc', 'symbol', 'use', 'pattern', 'filter', 'fegaussianblur', 'feoffset', 'feblend', 'feflood', 'fecomposite', 'femerge', 'femergenode', 'fecolormatrix', 'fedropshadow']);
+const TAG = /<(\/?)([a-zA-Z][\w:.-]*)((?:\s+[^\s=/>"']+(?:\s*=\s*(?:"[^"<]*"|'[^'<]*'))?)*)\s*(\/?)>/g;
+const ATTRIBUT = /([^\s=/>"']+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'))?/g;
+
+function svgFehler(text) {
+  if (text.length > 300_000) return 'SVG zu groß';
+  // Nur die fünf XML-Grundzeichen als Entitäten (keine &#…; und keine eigenen Entitäten)
+  if (/&(?!(amp|lt|gt|quot|apos);)/.test(text)) return 'SVG enthält nicht erlaubte Zeichenreferenzen';
+  let rest = text.replace(/^﻿?\s*<\?xml[^?<>]*\?>/, '').replace(/<!--[\s\S]*?-->/g, '');
+  if (/<!|<\?/.test(rest)) return 'SVG enthält DOCTYPE, Entitäten oder Verarbeitungsanweisungen';
+  let svgGefunden = false, fehler = null;
+  rest = rest.replace(TAG, (_, schluss, name, attribute) => {
+    const n = name.toLowerCase();
+    if (!SVG_ELEMENTE.has(n)) { fehler ??= `Element <${name}> ist nicht erlaubt`; return ''; }
+    if (n === 'svg') svgGefunden = true;
+    if (schluss) return '';
+    for (const [, a, w1, w2] of attribute.matchAll(ATTRIBUT)) {
+      const attr = a.toLowerCase(), wert = (w1 ?? w2 ?? '').trim().toLowerCase();
+      if (attr.startsWith('on')) { fehler ??= `Attribut ${a} ist nicht erlaubt`; continue; }
+      if ((attr === 'href' || attr === 'xlink:href') && !wert.startsWith('#')) { fehler ??= 'Links auf andere Dateien sind nicht erlaubt'; continue; }
+      if (/javascript:|data:|vbscript:/.test(wert)) { fehler ??= `Attribut ${a} enthält nicht erlaubte Inhalte`; continue; }
+      if (/url\(\s*(?!["']?#)/.test(wert)) { fehler ??= 'Nur interne url(#…)-Verweise sind erlaubt'; continue; }
+    }
+    return '';
+  });
+  if (fehler) return fehler;
+  if (!svgGefunden) return 'keine SVG-Datei';
+  if (/[<>]/.test(rest)) return 'SVG enthält nicht erkanntes Markup';
+  return null;
+}
+
 // Prüft, ob der Inhalt wirklich zum Dateityp passt (erste Bytes) und SVGs nichts Ausführbares enthalten
 function bildFehler(pfad, bytes) {
   const endung = pfad.split('.').pop();
@@ -34,12 +69,7 @@ function bildFehler(pfad, bytes) {
   if (endung === 'jpg' || endung === 'jpeg') return beginnt(0xff, 0xd8, 0xff) ? null : 'keine JPG-Datei';
   if (endung === 'gif') return beginnt(0x47, 0x49, 0x46, 0x38) ? null : 'keine GIF-Datei';
   if (endung === 'webp') return beginnt(0x52, 0x49, 0x46, 0x46) && String.fromCharCode(...bytes.subarray(8, 12)) === 'WEBP' ? null : 'keine WebP-Datei';
-  if (endung === 'svg') {
-    const text = bytes.toString('utf8');
-    if (!/<svg[\s>]/i.test(text)) return 'keine SVG-Datei';
-    if (/<script|<foreignobject|<iframe|<embed|<object|javascript:|\son[a-z]+\s*=|<!entity|href\s*=\s*["']?\s*data:(?!image\/(png|jpe?g|gif|webp))/i.test(text)) return 'SVG enthält Skripte oder eingebettete Inhalte';
-    return null;
-  }
+  if (endung === 'svg') return svgFehler(bytes.toString('utf8'));
   return 'Dateityp nicht erlaubt';
 }
 

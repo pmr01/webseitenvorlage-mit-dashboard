@@ -25,7 +25,7 @@ Neue Besuche erscheinen erst nach einigen Stunden. Für den Sofort-Test nutzen S
 
 ## Kanal-Auswertung nach Monaten
 
-Unter den Analytics-Zahlen steht eine Tabelle für die bezahlten Kanäle: **Gesamt** und je Kanal (zum Beispiel Google Ads und Meta Ads), eine Spalte je Monat plus Summe. Sie tragen nur vier Werte je Kanal und Monat ein: **Impressionen, Klicks, Kosten, Abschlüsse**. Den Rest rechnet die Seite aus:
+Performance hat zwei Unterseiten: **Website (Google Analytics)** mit Besuchern, Seiten und Herkunft, und **Kanäle & Kampagnen** (`/dashboard/performance/kanaele/`). Dort steht eine Tabelle für die bezahlten Kanäle: **Gesamt** und je Kanal (zum Beispiel Google Ads und Meta Ads), eine Spalte je Monat plus Summe. Sie tragen nur vier Werte je Kanal und Monat ein: **Impressionen, Klicks, Kosten, Abschlüsse**. Den Rest rechnet die Seite aus:
 
 - **CTR** = Klicks ÷ Impressionen, **CVR** = Abschlüsse ÷ Klicks
 - **CPM** = Kosten je 1.000 Impressionen, **CPC** = Kosten je Klick, **CPA** = Kosten je Abschluss
