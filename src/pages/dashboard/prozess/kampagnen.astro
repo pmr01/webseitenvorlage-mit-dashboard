@@ -2,11 +2,13 @@
 // Reiter Prozess → Kampagnenplanung.
 // Kampagnen mit Ziel, Zielgruppe, Botschaft, Kanälen, Zeitraum, Budget und Kennzahl (Ziel und Ist).
 // Ansichten: Zeitplan (Jahresübersicht) und Karten. Startdaten aus src/inhalte/kampagnen.json;
+// Kanäle aus der gemeinsamen Liste (src/components/kanalliste.mjs), verlinkt mit Promotion → Kanäle & Budget.
 // Änderungen speichert der Browser.
 import Dashboard from '../../../layouts/Dashboard.astro';
 import Unterseiten from '../../../components/Unterseiten.astro';
 import { PROZESS_SEITEN } from '../../../components/prozess-seiten.mjs';
 import startdaten from '../../../inhalte/kampagnen.json';
+import { KANALLISTE, KANAL_ALIAS } from '../../../components/kanalliste.mjs';
 import '../../../styles/pm.css';
 ---
 <Dashboard titel="Prozess" untertitel="Kampagnen planen: Was wollen wir erreichen, bei wem, über welche Kanäle, wann und mit welchem Budget?">
@@ -14,7 +16,7 @@ import '../../../styles/pm.css';
 
   <p class="beispiel-hinweis" role="note">
     <strong>Beispiel</strong>
-    <span>Beispielkampagnen einer fiktiven Firma. Änderungen speichert nur dieser Browser; sichern Sie sie über „Als Datei sichern“. Für die gemeinsame Planung im Team braucht es eine Datenbank wie Neon. Budgets je Kanal planen Sie unter Promotion → Kanäle & Budget.</span>
+    <span>Beispielkampagnen einer fiktiven Firma. Änderungen speichert nur dieser Browser; sichern Sie sie über „Als Datei sichern“. Für die gemeinsame Planung im Team braucht es eine Datenbank wie Neon. Die Kanäle sind dieselben wie unter <a href="/dashboard/promotion/">Promotion → Kanäle & Budget</a>; dort sehen Sie je Kanal auch die geplanten Kampagnen und planen das Budget.</span>
   </p>
 
   <div class="km-kennzahlen" id="km-kennzahlen"></div>
@@ -63,14 +65,18 @@ import '../../../styles/pm.css';
     </form>
   </dialog>
 
-  <script type="application/json" id="km-startdaten" set:html={JSON.stringify(startdaten)}></script>
+  <script type="application/json" id="km-startdaten" set:html={JSON.stringify({ ...startdaten, kanalliste: KANALLISTE, alias: KANAL_ALIAS })}></script>
 </Dashboard>
 
 <script>
   type Status = 'idee' | 'geplant' | 'laeuft' | 'abgeschlossen';
   type Kampagne = { id: string; name: string; ziel: string; zielgruppe: string; botschaft: string; kanaele: string[]; start: string; ende: string; budget: number; status: Status; kpi: string; kpiZiel: number; kpiIst: number };
   const ROH = JSON.parse(document.getElementById('km-startdaten')!.textContent || '{}');
-  const KANAELE: string[] = ROH.kanaele || [];
+  type KanalInfo = { name: string; logo: string; kategorie: string; ziel: string };
+  const KANALLISTE: KanalInfo[] = ROH.kanalliste || [];
+  const ALIAS: Record<string, string> = ROH.alias || {};
+  const KANAELE: string[] = KANALLISTE.map((c) => c.name);
+  const INFO = new Map(KANALLISTE.map((c) => [c.name, c]));
   const STATUS: Record<Status, [string, string]> = { idee: ['Idee', ''], geplant: ['Geplant', 'blau'], laeuft: ['Läuft', 'gruen'], abgeschlossen: ['Abgeschlossen', 'lila'] };
   const SPEICHER = 'prozess-kampagnen';
   const TAG = 86400000;
@@ -101,7 +107,7 @@ import '../../../styles/pm.css';
     return {
       id: String(k.id || 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5)), name: String(k.name || 'Ohne Namen').slice(0, 120),
       ziel: String(k.ziel || '').slice(0, 200), zielgruppe: String(k.zielgruppe || '').slice(0, 200), botschaft: String(k.botschaft || '').slice(0, 200),
-      kanaele: Array.isArray(k.kanaele) ? k.kanaele.map(String).filter((x: string) => KANAELE.includes(x)) : [],
+      kanaele: Array.isArray(k.kanaele) ? [...new Set(k.kanaele.map((x: unknown) => ALIAS[String(x)] || String(x)).filter((x: string) => KANAELE.includes(x)))] as string[] : [],
       start: tag(k.start), ende: tag(k.ende), budget: zahlWert(k.budget), status: (k.status in STATUS ? k.status : 'idee') as Status,
       kpi: String(k.kpi || '').slice(0, 60), kpiZiel: zahlWert(k.kpiZiel), kpiIst: zahlWert(k.kpiIst),
     };
@@ -117,8 +123,10 @@ import '../../../styles/pm.css';
   const speichern = () => { try { localStorage.setItem(SPEICHER, JSON.stringify(kampagnen)); } catch { /* ohne Speicher */ } zeichnen(); };
   const sichtbar = () => kampagnen.filter((k) => filter === 'alle' || k.status === filter);
   const marke = (s: Status) => el('span', { class: `pm-marke ${STATUS[s][1]}` }, STATUS[s][0]);
-  const KANAL_LOGOS: Record<string, string> = { 'Google Ads': '/logos/googleads.svg', Facebook: '/logos/facebook.svg', Instagram: '/logos/instagram.svg', TikTok: '/logos/tiktok.svg', YouTube: '/logos/youtube.svg' };
-  const kanalTag = (c: string) => el('span', { class: 'km-tag' }, KANAL_LOGOS[c] ? el('img', { src: KANAL_LOGOS[c], alt: '', width: 14, height: 14 }) : null, c);
+  // Logo oder Kürzel wie in Promotion → Kanäle & Budget
+  const kanalLogo = (c: string) => { const i = INFO.get(c); return i?.logo ? el('img', { src: i.logo, alt: '', width: 14, height: 14 }) : el('span', { class: 'km-kuerzel', 'aria-hidden': 'true' }, c.replace(/[^A-Za-zÄÖÜäöü0-9]/g, '').slice(0, 2).toUpperCase()); };
+  // Kanal-Etikett verlinkt den passenden Reiter unter Promotion → Kanäle & Budget
+  const kanalTag = (c: string) => el('a', { class: 'km-tag', href: `/dashboard/promotion/#${INFO.get(c)?.ziel || 'alle'}`, title: `${c} unter Kanäle & Budget ansehen` }, kanalLogo(c), c);
   const kpiText = (k: Kampagne) => (k.kpi ? `${k.kpi}: ${zahl.format(k.kpiIst)} von ${zahl.format(k.kpiZiel)}` : '');
   const kpiAnteil = (k: Kampagne) => (k.kpiZiel ? Math.min(100, Math.round((k.kpiIst / k.kpiZiel) * 100)) : 0);
 
@@ -186,7 +194,11 @@ import '../../../styles/pm.css';
   const feld = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
   let aktuell: Kampagne | null = null;
   (form.elements.namedItem('status') as HTMLSelectElement).append(...(Object.keys(STATUS) as Status[]).map((s) => el('option', { value: s }, STATUS[s][0])));
-  document.getElementById('km-kanaele')!.append(...KANAELE.map((c) => el('label', { class: 'km-check' }, el('input', { type: 'checkbox', value: c, name: 'kanal' }), c)));
+  // Kanalwahl nach Kategorien gruppiert, wie unter Promotion → Kanäle & Budget
+  const gruppen = [...new Set(KANALLISTE.map((c) => c.kategorie))];
+  document.getElementById('km-kanaele')!.append(...gruppen.map((g) => el('div', { class: 'km-gruppe' },
+    el('span', { class: 'km-gruppe-name' }, g),
+    el('div', { class: 'km-gruppe-liste' }, ...KANALLISTE.filter((c) => c.kategorie === g).map((c) => el('label', { class: 'km-check' }, el('input', { type: 'checkbox', value: c.name, name: 'kanal' }), kanalLogo(c.name), c.name))))));
   const filterFeld = document.getElementById('km-filter') as HTMLSelectElement;
   filterFeld.append(el('option', { value: 'alle' }, 'Alle'), ...(Object.keys(STATUS) as Status[]).map((s) => el('option', { value: s }, STATUS[s][0])));
   filterFeld.addEventListener('change', () => { filter = filterFeld.value; zeichnen(); });
@@ -250,6 +262,12 @@ import '../../../styles/pm.css';
   :global(.km-tags) { display: flex; flex-wrap: wrap; gap: 4px; }
   :global(.km-tag) { display: inline-flex; align-items: center; gap: 4px; font-size: .75rem; background: #eef2f4; border-radius: 999px; padding: 2px 8px; color: #3f4a4f; }
   :global(.km-tag img) { width: 14px; height: 14px; }
+  :global(a.km-tag) { text-decoration: none; }
+  :global(a.km-tag:hover) { background: #dde6ea; color: #1c2126; }
+  :global(.km-kuerzel) { display: inline-grid; place-items: center; width: 14px; height: 14px; border-radius: 3px; background: #c9d3d8; color: #2c373c; font-size: 7px; font-weight: 800; line-height: 1; }
+  :global(.km-gruppe) { display: grid; gap: 4px; margin-bottom: 8px; }
+  :global(.km-gruppe-name) { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #67747a; }
+  :global(.km-gruppe-liste) { display: flex; flex-wrap: wrap; gap: 4px 14px; }
   :global(.km-tags-klein) { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
   :global(.km-kpi) { margin-top: auto; display: grid; gap: 4px; }
   .km-kanalwahl { border: 0; padding: 0; margin: 0; }

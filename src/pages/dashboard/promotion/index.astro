@@ -9,6 +9,8 @@ import { PROMOTION_SEITEN } from '../../../components/promotion-seiten.mjs';
 import daten from '../../../inhalte/kanaele.json';
 import Reiter from '../../../components/Reiter.astro';
 import Logo from '../../../components/Logo.astro';
+import kampagnenStart from '../../../inhalte/kampagnen.json';
+import { KANAL_ALIAS } from '../../../components/kanalliste.mjs';
 const host = (url: string) => { try { return new URL(url).host.replace(/^www\./, ''); } catch { return url; } };
 const kennung = (name: string) => name.toLowerCase().replace(/\s+/g, '-');
 // Übersicht: alle Kanäle aus allen Kategorien plus Affiliate-Netzwerke in einer Liste
@@ -38,7 +40,7 @@ const kategorienAlle = [...new Set(alle.map((k) => k.kategorie))];
 
   <section class="kategorie" id="alle">
     <h2>Alle Kanäle</h2>
-    <p class="beschreibung">Alle {alle.length} Kanäle auf einen Blick. Details und Hinweise stehen in den Reitern der jeweiligen Kategorie.</p>
+    <p class="beschreibung">Alle {alle.length} Kanäle auf einen Blick. Details und Hinweise stehen in den Reitern der jeweiligen Kategorie. Die Spalte <strong>Kampagnen</strong> zeigt, was unter <a href="/dashboard/prozess/kampagnen/">Prozess → Kampagnenplanung</a> auf dem Kanal läuft oder geplant ist.</p>
     <fieldset class="filter" id="alle-filter">
       <legend>Kategorie</legend>
       <label><input type="radio" name="alle-kategorie" value="alle" checked /> Alle ({alle.length})</label>
@@ -46,15 +48,16 @@ const kategorienAlle = [...new Set(alle.map((k) => k.kategorie))];
     </fieldset>
     <div class="karte liste-rahmen">
       <table class="kanal-liste">
-        <thead><tr><th scope="col">Kanal</th><th scope="col">Kategorie</th><th scope="col">Wofür</th><th scope="col">Werkzeuge &amp; Links</th><th scope="col">Ads Library</th></tr></thead>
+        <thead><tr><th scope="col">Kanal</th><th scope="col">Kategorie</th><th scope="col">Wofür</th><th scope="col">Werkzeuge &amp; Links</th><th scope="col">Ads Library</th><th scope="col">Kampagnen</th></tr></thead>
         <tbody>
           {alle.map((k) => (
-            <tr data-kategorie={k.kategorie}>
+            <tr data-kategorie={k.kategorie} data-kanal={k.name}>
               <th scope="row"><span class="mit-logo"><Logo name={k.name} logo={k.logo} groesse={26} />{k.name}</span></th>
               <td data-titel="Kategorie"><a class="kat-marke" href={`#${k.ziel}`}>{k.kategorie}</a></td>
               <td data-titel="Wofür" class="zweck">{k.zweck}</td>
               <td data-titel="Links"><ul class="werkzeuge">{k.links.map((w) => <li><a href={w.link} target="_blank" rel="noopener" class="mit-logo klein"><Logo name={w.name} logo={w.logo} groesse={16} />{w.name} <span aria-hidden="true">↗</span></a></li>)}</ul></td>
               <td data-titel="Ads Library">{k.bibliothek ? <a class="bibliothek" href={k.bibliothek.link} target="_blank" rel="noopener" title={k.bibliothek.name}><span aria-hidden="true">🔍</span> {k.bibliothek.name} <span aria-hidden="true">↗</span></a> : <span class="leer">–</span>}</td>
+              <td data-titel="Kampagnen" class="km-zelle" data-kampagnen-fuer={k.name}><span class="leer">–</span></td>
             </tr>
           ))}
         </tbody>
@@ -63,6 +66,7 @@ const kategorienAlle = [...new Set(alle.map((k) => k.kategorie))];
     <p class="stand"><strong>Ads Library:</strong> {daten.hinweisBibliothek}</p>
     <p class="stand">Stand {daten.stand}. Angebote und Bezeichnungen ändern sich; bitte vor der Nutzung beim Anbieter prüfen.</p>
   </section>
+  <script type="application/json" id="km-verknuepfung" set:html={JSON.stringify({ kampagnen: kampagnenStart.kampagnen, alias: KANAL_ALIAS })}></script>
 
   {daten.kategorien.map((k) => (
     <section class="kategorie" id={k.name.toLowerCase().replace(/\s+/g, '-')}>
@@ -77,6 +81,7 @@ const kategorienAlle = [...new Set(alle.map((k) => k.kategorie))];
             <ul class="werkzeuge">
               {kanal.werkzeuge.map((w) => <li><a href={w.link} target="_blank" rel="noopener" class="mit-logo klein"><Logo name={w.name} logo={w.logo} groesse={18} />{w.name} <span aria-hidden="true">↗</span></a></li>)}
             </ul>
+            <p class="km-karte-zeile" data-kampagnen-fuer={kanal.name} hidden></p>
             {(kanal as any).anzeigenbibliothek && <a class="bibliothek karte-bib" href={(kanal as any).anzeigenbibliothek.link} target="_blank" rel="noopener"><span aria-hidden="true">🔍</span> Ads Library: {(kanal as any).anzeigenbibliothek.name} <span aria-hidden="true">↗</span></a>}
           </li>
         ))}
@@ -150,6 +155,33 @@ const kategorienAlle = [...new Set(alle.map((k) => k.kategorie))];
 </Dashboard>
 
 <script>
+  // ---------- Verknüpfung mit Prozess → Kampagnenplanung ----------
+  // Liest die Kampagnen so, wie die Kampagnenplanung sie in diesem Browser speichert; sonst die Beispiele.
+  {
+    const V = JSON.parse(document.getElementById('km-verknuepfung')!.textContent || '{}');
+    const STATUS: Record<string, [string, string]> = { idee: ['Idee', ''], geplant: ['Geplant', 'blau'], laeuft: ['Läuft', 'gruen'], abgeschlossen: ['Abgeschlossen', 'lila'] };
+    let liste: any[] = V.kampagnen || [];
+    try { const d = JSON.parse(localStorage.getItem('prozess-kampagnen') || 'null'); if (Array.isArray(d)) liste = d; } catch { /* kein Speicher */ }
+    const euro = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+    const je = new Map<string, any[]>();
+    for (const k of liste) for (const roh of (Array.isArray(k.kanaele) ? k.kanaele : [])) {
+      const c = V.alias[roh] || roh; if (!je.has(c)) je.set(c, []); je.get(c)!.push(k);
+    }
+    const rang: Record<string, number> = { laeuft: 0, geplant: 1, idee: 2, abgeschlossen: 3 };
+    document.querySelectorAll<HTMLElement>('[data-kampagnen-fuer]').forEach((ziel) => {
+      const ks = (je.get(ziel.dataset.kampagnenFuer!) || []).slice().sort((a, b) => (rang[a.status] ?? 9) - (rang[b.status] ?? 9));
+      if (!ks.length) return;
+      const eintraege = ks.map((k) => {
+        const a = document.createElement('a'); a.href = '/dashboard/prozess/kampagnen/'; a.className = 'km-link';
+        a.title = `${k.name}: ${STATUS[k.status]?.[0] || k.status}${k.budget ? `, Budget ${euro.format(k.budget)}` : ''}`;
+        const m = document.createElement('span'); m.className = `pm-marke ${STATUS[k.status]?.[1] || ''}`; m.textContent = STATUS[k.status]?.[0] || k.status;
+        a.append(m, ' ', k.name); return a;
+      });
+      if (ziel.tagName === 'P') { ziel.hidden = false; ziel.replaceChildren('Kampagnen: ', ...eintraege.flatMap((e, i) => (i ? [', ', e] : [e]))); }
+      else { const ul = document.createElement('ul'); ul.className = 'km-liste'; ul.append(...eintraege.map((e) => { const li = document.createElement('li'); li.append(e); return li; })); ziel.replaceChildren(ul); }
+    });
+  }
+
   // ---------- Übersicht: Filter nach Kategorie ----------
   const zeilen = Array.from(document.querySelectorAll<HTMLTableRowElement>('.kanal-liste tbody tr'));
   document.querySelectorAll<HTMLInputElement>('input[name="alle-kategorie"]').forEach((r) => r.addEventListener('change', () => {
@@ -354,14 +386,26 @@ const kategorienAlle = [...new Set(alle.map((k) => k.kategorie))];
   .karte-bib { display: block; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #dde3e6; white-space: normal; }
   .beschreibung.klein { font-size: .88rem; margin-top: -.3em; }
   .leer { color: #9aa6ab; }
+  .km-zelle { min-width: 160px; }
+  :global(.km-liste) { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .84rem; }
+  :global(.km-link) { text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 6px; }
+  :global(.km-link:hover) { text-decoration: underline; }
+  /* Status-Marken wie in Prozess → Kampagnenplanung (src/styles/pm.css) */
+  :global(.km-link .pm-marke) { font-size: .68rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; white-space: nowrap; background: #eceff1; color: #4c595f; }
+  :global(.km-link .pm-marke.blau) { background: #e7f1fb; color: #24527a; }
+  :global(.km-link .pm-marke.gruen) { background: #e3f4e8; color: #22663a; }
+  :global(.km-link .pm-marke.lila) { background: #efedff; color: #4b3d8f; }
+  .km-karte-zeile { font-size: .84rem; color: #3f4a4f; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
   .liste-rahmen { margin-top: 12px; padding: 0; overflow-x: auto; position: relative; }
   .kanal-liste { border-collapse: collapse; width: 100%; font-size: .92rem; }
   .kanal-liste th, .kanal-liste td { padding: 10px 14px; border-bottom: 1px solid #eef1f2; text-align: left; vertical-align: top; }
   .kanal-liste thead th { color: #5a676d; font-weight: 600; font-size: .82rem; border-bottom-color: #dde3e6; background: #f7f9fa; }
-  .kanal-liste tbody th { font-weight: 700; white-space: nowrap; }
+  .kanal-liste tbody th { font-weight: 700; min-width: 140px; }
+  .kanal-liste .bibliothek { white-space: normal; }
+  .kanal-liste th, .kanal-liste td { padding-inline: 12px; }
   .kanal-liste tbody tr:last-child > * { border-bottom: 0; }
   .kanal-liste tr[hidden] { display: none; }
-  .kanal-liste .zweck { color: #4c595f; min-width: 220px; }
+  .kanal-liste .zweck { color: #4c595f; min-width: 190px; }
   .kanal-liste .werkzeuge { font-size: .86rem; }
   .kat-marke { display: inline-block; font-size: .78rem; font-weight: 600; background: #eef2f4; color: #3f4a4f; border-radius: 999px; padding: 2px 9px; text-decoration: none; white-space: nowrap; }
   .kat-marke:hover { background: #e0e7ea; }

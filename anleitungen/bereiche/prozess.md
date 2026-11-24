@@ -24,6 +24,8 @@ Ohne geöffnetes Projekt zeigt die Seite alle Aufgaben als Board, Liste oder Gan
 
 Kampagnen mit Ziel, Zielgruppe, Kernbotschaft, Kanälen, Zeitraum, Budget und einer Kennzahl (Ziel und Ist). Als Zeitplan nach Monaten oder als Karten.
 
+**Verknüpft mit den Kanälen:** Zur Auswahl stehen genau die Kanäle aus Promotion → Kanäle & Budget, nach Kategorie gruppiert (Suche, Social Media, Eigene Kanäle, Affiliate). Ein Klick auf ein Kanal-Etikett einer Kampagne öffnet den Kanal dort. Umgekehrt zeigt Kanäle & Budget in der Liste „Alle Kanäle“ und auf jeder Kanal-Karte, welche Kampagnen auf dem Kanal laufen oder geplant sind. Neue Kanäle tragen Sie einmal in `src/inhalte/kanaele.json` ein; sie erscheinen dann an beiden Stellen.
+
 ## Updates
 
 Erinnert an wiederkehrende Aufgaben, etwa das monatliche Astro-Update. Für Astro wird die neueste Version automatisch geprüft. Nach getaner Arbeit **Heute erledigt** klicken; die Erinnerung startet dann neu.

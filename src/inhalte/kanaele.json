@@ -213,6 +213,64 @@
           }
         }
       ]
+    },
+    {
+      "name": "Eigene Kanäle",
+      "beschreibung": "Kanäle, die Ihnen selbst gehören: kein Klickpreis, aber Pflege. Hier landen die Menschen, die über Suche, Social Media oder Empfehlungen kommen, und hier bleiben sie in Kontakt.",
+      "kanaele": [
+        {
+          "name": "Newsletter",
+          "zweck": "Kontakt zu Interessenten und Kunden halten; wichtigster Kanal für wiederkehrende Anfragen.",
+          "werkzeuge": [
+            {
+              "name": "Brevo",
+              "link": "https://www.brevo.com/de/",
+              "logo": ""
+            },
+            {
+              "name": "Kit",
+              "link": "https://kit.com",
+              "logo": ""
+            }
+          ],
+          "logo": ""
+        },
+        {
+          "name": "Website & Blog",
+          "zweck": "Ratgeber-Artikel und Seiten, die über die Suche gefunden werden (SEO); Ziel aller anderen Kanäle.",
+          "werkzeuge": [
+            {
+              "name": "Google Search Console",
+              "link": "https://search.google.com/search-console",
+              "logo": "/logos/googlesearchconsole.svg"
+            },
+            {
+              "name": "Bing Webmaster Tools",
+              "link": "https://www.bing.com/webmasters",
+              "logo": ""
+            }
+          ],
+          "logo": ""
+        },
+        {
+          "name": "Google-Unternehmensprofil",
+          "zweck": "Eintrag in Google Maps und der lokalen Suche, mit Bewertungen; für Betriebe mit Kunden vor Ort.",
+          "werkzeuge": [
+            {
+              "name": "Google Business Profile",
+              "link": "https://www.google.com/business/",
+              "logo": "/logos/google.svg"
+            }
+          ],
+          "logo": "/logos/google.svg"
+        },
+        {
+          "name": "Print & Offline",
+          "zweck": "Flyer, Plakate, Messen, Visitenkarten. Mit QR-Code und UTM-Parametern wird auch Offline messbar.",
+          "werkzeuge": [],
+          "logo": ""
+        }
+      ]
     }
   ],
   "affiliate": {

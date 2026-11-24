@@ -8,7 +8,8 @@ Promotion beantwortet: Wie werden Menschen auf Sie aufmerksam, und was erzählen
 
 ## Kanäle & Budget
 
-- **Alle Kanäle:** die Übersicht als Liste: jeder Kanal mit Logo, Kategorie, Zweck, Links und Ads Library (Werbebibliothek: welche Anzeigen andere gerade schalten), einschließlich der Affiliate-Netzwerke. Oben filtern Sie nach Kategorie; ein Klick auf die Kategorie öffnet den passenden Reiter.
+- **Alle Kanäle:** die Übersicht als Liste: jeder Kanal mit Logo, Kategorie, Zweck, Links und Ads Library (Werbebibliothek: welche Anzeigen andere gerade schalten), einschließlich der Affiliate-Netzwerke. Oben filtern Sie nach Kategorie; ein Klick auf die Kategorie öffnet den passenden Reiter. Die Spalte **Kampagnen** zeigt, was unter Prozess → Kampagnenplanung auf dem Kanal läuft, geplant oder abgeschlossen ist.
+- **Eigene Kanäle:** Newsletter, Website & Blog, Google-Unternehmensprofil, Print & Offline: Kanäle ohne Klickpreis, die Ihnen selbst gehören.
 - **Suche, Social Media, Affiliate-Marketing:** die gängigen Kanäle mit Zweck und Links zu den Werkzeugen. Bei Affiliate-Marketing filtern Sie die Netzwerke nach Ihrer Produktart.
 - **Budgetplanung:** Wählen Sie **Testzeitraum** (1 oder 2 Monate), **Monat** oder **Jahr** und tragen Sie das Budget je Kanal und Monat ein. Summen und Anteile rechnet die Seite aus. Mit **+ Position** ergänzen Sie weitere Kanäle, mit dem CSV-Download übernehmen Sie die Planung in eine Tabellenkalkulation.
 - **Tipp:** Erst 1–2 Monate mit kleinem Budget testen, dann das Geld dorthin verlagern, wo die Kosten pro Anfrage am niedrigsten sind (siehe Dashboard-Übersicht).

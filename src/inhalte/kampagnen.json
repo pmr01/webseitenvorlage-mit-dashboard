@@ -1,11 +1,79 @@
 {
   "beispiel": true,
-  "hinweis": "Beispielkampagnen einer fiktiven Firma. Datumsangaben sind Tage relativ zu heute und werden beim ersten Laden umgerechnet.",
-  "kanaele": ["Google Ads", "Microsoft Advertising", "Facebook", "Instagram", "TikTok", "YouTube", "Newsletter", "Affiliate", "Website / SEO", "Print / Offline"],
+  "hinweis": "Beispielkampagnen einer fiktiven Firma. Datumsangaben sind Tage relativ zu heute und werden beim ersten Laden umgerechnet. Die Kanäle sind die Namen aus src/inhalte/kanaele.json (Promotion → Kanäle & Budget).",
   "kampagnen": [
-    { "id": "k1", "name": "Start der neuen Website", "ziel": "Bekanntheit für die neue Website und erste Anfragen", "zielgruppe": "Bestandskunden und Interessenten aus der Region", "botschaft": "Neu: in drei Schritten zum kostenlosen Erstgespräch", "kanaele": ["Newsletter", "Instagram", "Facebook"], "start": 22, "ende": 50, "budget": 600, "status": "geplant", "kpi": "Anfragen über das Kontaktformular", "kpiZiel": 30, "kpiIst": 0 },
-    { "id": "k2", "name": "Suchanzeigen Erstgespräch", "ziel": "Anfragen von Menschen, die aktiv nach Beratung suchen", "zielgruppe": "Selbstständige und kleine Betriebe (Persona Sabine)", "botschaft": "Ihre Website bringt keine Kunden? Kostenloses Erstgespräch", "kanaele": ["Google Ads", "Microsoft Advertising"], "start": -10, "ende": 50, "budget": 1500, "status": "laeuft", "kpi": "Anfragen", "kpiZiel": 40, "kpiIst": 9 },
-    { "id": "k3", "name": "Reels-Test Storytelling", "ziel": "Testen, welche Inhalte Reichweite bringen", "zielgruppe": "Gründerinnen und Gründer, 25–40 Jahre", "botschaft": "3 Fehler, die Ihre Startseite Kunden kosten", "kanaele": ["Instagram", "TikTok"], "start": -35, "ende": -7, "budget": 300, "status": "abgeschlossen", "kpi": "Aufrufe", "kpiZiel": 10000, "kpiIst": 12400 },
-    { "id": "k4", "name": "Partnerprogramm für Empfehlungen", "ziel": "Mehr Empfehlungen über Partner", "zielgruppe": "Steuerberater und Agenturen", "botschaft": "Provision für jede erfolgreiche Empfehlung", "kanaele": ["Affiliate"], "start": 60, "ende": 150, "budget": 0, "status": "idee", "kpi": "Neue Partner", "kpiZiel": 5, "kpiIst": 0 }
+    {
+      "id": "k1",
+      "name": "Start der neuen Website",
+      "ziel": "Bekanntheit für die neue Website und erste Anfragen",
+      "zielgruppe": "Bestandskunden und Interessenten aus der Region",
+      "botschaft": "Neu: in drei Schritten zum kostenlosen Erstgespräch",
+      "kanaele": [
+        "Newsletter",
+        "Instagram",
+        "Facebook"
+      ],
+      "start": 22,
+      "ende": 50,
+      "budget": 600,
+      "status": "geplant",
+      "kpi": "Anfragen über das Kontaktformular",
+      "kpiZiel": 30,
+      "kpiIst": 0
+    },
+    {
+      "id": "k2",
+      "name": "Suchanzeigen Erstgespräch",
+      "ziel": "Anfragen von Menschen, die aktiv nach Beratung suchen",
+      "zielgruppe": "Selbstständige und kleine Betriebe (Persona Sabine)",
+      "botschaft": "Ihre Website bringt keine Kunden? Kostenloses Erstgespräch",
+      "kanaele": [
+        "Google",
+        "Bing"
+      ],
+      "start": -10,
+      "ende": 50,
+      "budget": 1500,
+      "status": "laeuft",
+      "kpi": "Anfragen",
+      "kpiZiel": 40,
+      "kpiIst": 9
+    },
+    {
+      "id": "k3",
+      "name": "Reels-Test Storytelling",
+      "ziel": "Testen, welche Inhalte Reichweite bringen",
+      "zielgruppe": "Gründerinnen und Gründer, 25–40 Jahre",
+      "botschaft": "3 Fehler, die Ihre Startseite Kunden kosten",
+      "kanaele": [
+        "Instagram",
+        "TikTok"
+      ],
+      "start": -35,
+      "ende": -7,
+      "budget": 300,
+      "status": "abgeschlossen",
+      "kpi": "Aufrufe",
+      "kpiZiel": 10000,
+      "kpiIst": 12400
+    },
+    {
+      "id": "k4",
+      "name": "Partnerprogramm für Empfehlungen",
+      "ziel": "Mehr Empfehlungen über Partner",
+      "zielgruppe": "Steuerberater und Agenturen",
+      "botschaft": "Provision für jede erfolgreiche Empfehlung",
+      "kanaele": [
+        "Awin",
+        "Digistore24"
+      ],
+      "start": 60,
+      "ende": 150,
+      "budget": 0,
+      "status": "idee",
+      "kpi": "Neue Partner",
+      "kpiZiel": 5,
+      "kpiIst": 0
+    }
   ]
 }
