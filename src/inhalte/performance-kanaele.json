@@ -1,0 +1,25 @@
+{
+  "beispiel": true,
+  "hinweis": "Beispielzahlen. Tragen Sie je Kanal und Monat Impressionen, Klicks, Kosten und Abschlüsse ein; CTR, CVR, CPM, CPC und CPA rechnet die Seite aus.",
+  "monate": ["2026|06", "2026|07", "2026|08", "2026|09", "2026|10", "2026|11"],
+  "kanaele": [
+    {
+      "name": "Google Ads",
+      "logo": "/logos/googleads.svg",
+      "farbe": "#2f7d32",
+      "impressionen": [41200, 44800, 47500, 52300, 55900, 61400],
+      "klicks": [610, 655, 702, 760, 815, 905],
+      "kosten": [480, 500, 520, 550, 560, 600],
+      "abschluesse": [2, 2, 3, 3, 3, 4]
+    },
+    {
+      "name": "Meta Ads (Facebook & Instagram)",
+      "logo": "/logos/meta.svg",
+      "farbe": "#3b6fd4",
+      "impressionen": [68500, 72400, 80100, 86300, 91200, 98700],
+      "klicks": [540, 560, 610, 665, 700, 760],
+      "kosten": [300, 320, 340, 360, 380, 400],
+      "abschluesse": [1, 2, 2, 2, 3, 3]
+    }
+  ]
+}
