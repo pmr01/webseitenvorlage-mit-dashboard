@@ -64,7 +64,7 @@ Jede Änderung an einer Datei erscheint nach dem Speichern sofort in der Vorscha
 
 ## 3. Anpassen: Texte, Farben, Logo
 
-**Am einfachsten mit dem Editor:** Öffnen Sie im Dashboard **Promotion → Webseite mit Storytelling Framework** und klicken Sie auf **Website bearbeiten** (oder rufen Sie Ihre Startseite mit `?bearbeiten` am Ende der Adresse auf). Texte anklicken, ändern, dann **Konfiguration herunterladen** und die Datei als `src/konfiguration.mjs` ins Projekt legen. Bilder, Farben und die Navigation-Ziele ändern Sie weiterhin in der Datei.
+**Am einfachsten mit dem Editor:** Öffnen Sie im Dashboard **Promotion → Webseite mit Storytelling Framework** und klicken Sie auf **Website bearbeiten** (oder rufen Sie Ihre Startseite mit `?bearbeiten` am Ende der Adresse auf). Texte anklicken, ändern, dann **Veröffentlichen**: Die Änderung landet als Commit bei GitHub und ist nach 1–2 Minuten online (einmal einrichten, siehe Teil 4). Alternativ **Herunterladen** und die Datei als `src/konfiguration.mjs` ins Projekt legen. Bilder, Farben und die Navigation-Ziele ändern Sie weiterhin in der Datei.
 
 Von Hand: Öffnen Sie `src/konfiguration.mjs`. Die Datei ist in Abschnitte mit Nummern gegliedert, die zu den zwölf Elementen passen. Ändern Sie nur den Text zwischen den Anführungszeichen.
 
@@ -100,6 +100,20 @@ Die Website läuft bei Netlify im kostenlosen Tarif. Prüfen Sie die aktuellen G
 2. **Netlify verbinden:** Melden Sie sich auf https://app.netlify.com an, wählen Sie „Add new project“ beziehungsweise „Import an existing project“ und dann Ihr GitHub-Repository. Die Einstellungen für den Build liest Netlify aus der Datei `netlify.toml`; Sie müssen nichts eintragen.
 3. **Veröffentlichen:** Netlify baut die Seite und zeigt eine Adresse wie `ihr-name.netlify.app`. Jede Änderung, die Sie zu GitHub hochladen, wird automatisch neu veröffentlicht.
 4. **Eigene Domain (optional):** In Netlify unter den Domain-Einstellungen des Projekts.
+
+### Direkt aus dem Editor veröffentlichen (einmal einrichten)
+
+Damit **Veröffentlichen** im Website-Editor funktioniert, braucht Netlify Schreibzugriff auf genau eine Datei Ihres Repositorys:
+
+1. **Netlify mit GitHub verbunden** (Schritt 2 oben). Nur dann baut Netlify nach jeder Änderung automatisch neu.
+2. **Zugangsschlüssel bei GitHub erstellen:** Profilbild → Settings → Developer settings → Personal access tokens → *Fine-grained tokens* → *Generate new token*. Bei „Repository access“ nur **dieses eine Repository** wählen, bei „Permissions“ → *Contents* **Read and write**. Ablaufdatum setzen (z. B. 1 Jahr) und den Schlüssel kopieren.
+3. **Bei Netlify eintragen:** Project configuration → Environment variables:
+   - `GITHUB_TOKEN` = der Schlüssel (als *Secret* markieren)
+   - `GITHUB_REPO` = `benutzername/repository-name`
+   - `GITHUB_BRANCH` = `main` (nur nötig, wenn der Zweig anders heißt)
+4. **Neu veröffentlichen** (Deploys → Trigger deploy), damit die Werte gelten.
+
+Sicherheit: Der Editor schreibt ausschließlich `src/konfiguration.mjs`, nur nach Anmeldung mit dem Dashboard-Passwort, und prüft vorher, ob die Datei gültig ist. Hat jemand die Datei inzwischen anders geändert, bricht er ab statt zu überschreiben. Den Schlüssel tragen Sie nur bei Netlify ein, nie in eine Datei. Läuft er ab, erstellen Sie einen neuen und ersetzen den Wert.
 
 Die Bezeichnungen der Schaltflächen bei GitHub und Netlify können sich ändern. Wenn Sie etwas nicht finden, fragen Sie Ihr KI-Tool nach dem aktuellen Weg.
 

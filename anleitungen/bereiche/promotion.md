@@ -8,6 +8,7 @@ Promotion beantwortet: Wie werden Menschen auf Sie aufmerksam, und was erzählen
 
 ## Kanäle & Budget
 
+- **Alle Kanäle:** die Übersicht als Liste: jeder Kanal mit Logo, Kategorie, Zweck, Links und Ads Library (Werbebibliothek: welche Anzeigen andere gerade schalten), einschließlich der Affiliate-Netzwerke. Oben filtern Sie nach Kategorie; ein Klick auf die Kategorie öffnet den passenden Reiter.
 - **Suche, Social Media, Affiliate-Marketing:** die gängigen Kanäle mit Zweck und Links zu den Werkzeugen. Bei Affiliate-Marketing filtern Sie die Netzwerke nach Ihrer Produktart.
 - **Budgetplanung:** Wählen Sie **Testzeitraum** (1 oder 2 Monate), **Monat** oder **Jahr** und tragen Sie das Budget je Kanal und Monat ein. Summen und Anteile rechnet die Seite aus. Mit **+ Position** ergänzen Sie weitere Kanäle, mit dem CSV-Download übernehmen Sie die Planung in eine Tabellenkalkulation.
 - **Tipp:** Erst 1–2 Monate mit kleinem Budget testen, dann das Geld dorthin verlagern, wo die Kosten pro Anfrage am niedrigsten sind (siehe Dashboard-Übersicht).
@@ -21,7 +22,7 @@ Der Redaktionsplan für Blogartikel, Reels, Posts, Newsletter und Videos. Ansich
 Links das Wireframe der Startseite, rechts die Checkliste mit den zwölf Elementen. Haken Sie ab, was auf Ihrer Website schon steht.
 
 - **Aktuelle Website:** Der Umschalter über dem Wireframe zeigt Ihre echte Startseite verkleinert, mit den Nummern 1–12. Rot gestrichelt ist alles, was noch Platzhalter der Vorlage ist; oben steht, wie viele es noch sind.
-- **Website bearbeiten:** öffnet die Startseite im Bearbeitungsmodus. Texte mit gestricheltem Rahmen anklicken und ändern; der Call-to-Action ändert sich überall gleichzeitig. Der Entwurf bleibt im Browser. Mit **Konfiguration herunterladen** erhalten Sie `konfiguration.mjs` mit Ihren Texten (Kommentare bleiben erhalten). Legen Sie die Datei als `src/konfiguration.mjs` ins Projekt und veröffentlichen Sie neu.
+- **Website bearbeiten:** öffnet die Startseite im Bearbeitungsmodus. Texte mit gestricheltem Rahmen anklicken und ändern; der Call-to-Action ändert sich überall gleichzeitig. Der Entwurf bleibt im Browser. Mit **Veröffentlichen** speichert der Editor die Texte direkt bei GitHub; Netlify baut die Website danach in 1–2 Minuten neu (einmalige Einrichtung: Anleitung Website, Teil 4). Ohne Einrichtung nutzen Sie **Herunterladen**: Sie erhalten `konfiguration.mjs` mit Ihren Texten (Kommentare bleiben erhalten), legen die Datei als `src/konfiguration.mjs` ins Projekt und veröffentlichen neu.
 
 ## Design-System
 

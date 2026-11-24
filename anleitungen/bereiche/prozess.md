@@ -11,7 +11,7 @@ Prozess beantwortet: Wer macht was bis wann? Drei Unterseiten:
 1. **+ Projekt** anlegen und das **Vorgehen** wählen:
    - **Wasserfall** für Projekte mit festem Ziel, Umfang und Termin. Fünf Phasen nacheinander: Projektdefinition, Planung, Umsetzung, Controlling, Abschluss. Wichtige Termine als **Meilenstein** (◆) markieren.
    - **Agil** für Projekte, deren bestes Ergebnis sich erst beim Ausprobieren zeigt. Ideen sammeln sich im **Backlog**, gearbeitet wird in **Sprints** von 1–4 Wochen. Am Sprintende zeigen Sie das Ergebnis und planen den nächsten Sprint.
-2. Auf ein Projekt klicken: Es öffnet sich oben mit seinen Ansichten.
+2. Die Projekte stehen links als Spalte. Auf ein Projekt klicken: Rechts daneben öffnet es sich mit seinen Ansichten. **Alle Projekte** zeigt wieder alle Aufgaben.
    - Wasserfall: **Phasen**, **Board**, **Liste**, **Gantt**, **Eisenhower**
    - Agil: **Board** (mit Sprint-Filter), **Sprints**, **Liste**, **Gantt**, **Eisenhower**
 3. **+ Aufgabe** anlegen; im Board ziehen Sie Aufgaben in eine andere Spalte.

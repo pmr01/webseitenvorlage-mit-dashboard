@@ -93,7 +93,7 @@ anleitungen/                 Anleitungen für Menschen
 
 ## Website-Editor
 
-`src/components/Bearbeiten.astro` steckt auf der Startseite und ist nur mit Parameter aktiv: `/?bearbeiten` macht alle Elemente mit `data-k="pfad.in.konfiguration"` bearbeitbar und erzeugt eine neue `konfiguration.mjs`, indem es nur die Text-Literale im Quelltext ersetzt. `/?markieren` zeigt die Nummern 1–12 und markiert Texte, die noch den Werten in `vorlage-platzhalter.json` entsprechen (genutzt in Promotion → Webseite). Neue Texte auf der Startseite bekommen deshalb ein `data-k`-Attribut mit ihrem Pfad.
+`src/components/Bearbeiten.astro` steckt auf der Startseite und ist nur mit Parameter aktiv: `/?bearbeiten` macht alle Elemente mit `data-k="pfad.in.konfiguration"` bearbeitbar und erzeugt eine neue `konfiguration.mjs`, indem es nur die Text-Literale im Quelltext ersetzt. `/?markieren` zeigt die Nummern 1–12 und markiert Texte, die noch den Werten in `vorlage-platzhalter.json` entsprechen (genutzt in Promotion → Webseite). Neue Texte auf der Startseite bekommen deshalb ein `data-k`-Attribut mit ihrem Pfad. **Veröffentlichen** schickt die neue Datei an `netlify/functions/veroeffentlichen.mjs` (`/dashboard/api/veroeffentlichen`, nur POST, Dashboard-Passwort): Die Funktion prüft Syntax und Basisstand und schreibt per GitHub-API nur `src/konfiguration.mjs` (Variablen `GITHUB_TOKEN`, `GITHUB_REPO`, `GITHUB_BRANCH` bei Netlify).
 
 ## Daten im Browser
 

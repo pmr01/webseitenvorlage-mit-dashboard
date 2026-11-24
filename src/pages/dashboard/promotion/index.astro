@@ -10,20 +10,65 @@ import daten from '../../../inhalte/kanaele.json';
 import Reiter from '../../../components/Reiter.astro';
 import Logo from '../../../components/Logo.astro';
 const host = (url: string) => { try { return new URL(url).host.replace(/^www\./, ''); } catch { return url; } };
+const kennung = (name: string) => name.toLowerCase().replace(/\s+/g, '-');
+// Übersicht: alle Kanäle aus allen Kategorien plus Affiliate-Netzwerke in einer Liste
+const alle = [
+  ...daten.kategorien.flatMap((k) => k.kanaele.map((kanal) => ({
+    name: kanal.name, logo: kanal.logo, kategorie: k.name, ziel: kennung(k.name), zweck: kanal.zweck,
+    links: kanal.werkzeuge.map((w) => ({ name: w.name, link: w.link, logo: w.logo })),
+    bibliothek: (kanal as { anzeigenbibliothek?: { name: string; link: string } }).anzeigenbibliothek,
+  }))),
+  ...daten.affiliate.netzwerke.map((n) => ({
+    name: n.name, logo: n.logo, kategorie: 'Affiliate', ziel: 'affiliate', zweck: `${n.schwerpunkt} Sitz: ${n.sitz}.`,
+    links: [{ name: host(n.link), link: n.link, logo: '' }],
+    bibliothek: undefined as { name: string; link: string } | undefined,
+  })),
+];
+const kategorienAlle = [...new Set(alle.map((k) => k.kategorie))];
 ---
 <Dashboard titel="Promotion" untertitel="Über welche Kanäle finden Kunden zu Ihnen, und wie viel Budget setzen Sie wo ein?">
   <Unterseiten seiten={PROMOTION_SEITEN} />
 
   <Reiter beschriftung="Kanäle" eintraege={[
+    { id: 'alle', name: 'Alle Kanäle' },
     ...daten.kategorien.map((k) => ({ id: k.name.toLowerCase().replace(/\s+/g, '-'), name: k.name })),
     { id: 'affiliate', name: 'Affiliate-Marketing' },
     { id: 'budget', name: 'Budgetplanung' },
   ]} />
 
+  <section class="kategorie" id="alle">
+    <h2>Alle Kanäle</h2>
+    <p class="beschreibung">Alle {alle.length} Kanäle auf einen Blick. Details und Hinweise stehen in den Reitern der jeweiligen Kategorie.</p>
+    <fieldset class="filter" id="alle-filter">
+      <legend>Kategorie</legend>
+      <label><input type="radio" name="alle-kategorie" value="alle" checked /> Alle ({alle.length})</label>
+      {kategorienAlle.map((k) => <label><input type="radio" name="alle-kategorie" value={k} /> {k} ({alle.filter((x) => x.kategorie === k).length})</label>)}
+    </fieldset>
+    <div class="karte liste-rahmen">
+      <table class="kanal-liste">
+        <thead><tr><th scope="col">Kanal</th><th scope="col">Kategorie</th><th scope="col">Wofür</th><th scope="col">Werkzeuge &amp; Links</th><th scope="col">Ads Library</th></tr></thead>
+        <tbody>
+          {alle.map((k) => (
+            <tr data-kategorie={k.kategorie}>
+              <th scope="row"><span class="mit-logo"><Logo name={k.name} logo={k.logo} groesse={26} />{k.name}</span></th>
+              <td data-titel="Kategorie"><a class="kat-marke" href={`#${k.ziel}`}>{k.kategorie}</a></td>
+              <td data-titel="Wofür" class="zweck">{k.zweck}</td>
+              <td data-titel="Links"><ul class="werkzeuge">{k.links.map((w) => <li><a href={w.link} target="_blank" rel="noopener" class="mit-logo klein"><Logo name={w.name} logo={w.logo} groesse={16} />{w.name} <span aria-hidden="true">↗</span></a></li>)}</ul></td>
+              <td data-titel="Ads Library">{k.bibliothek ? <a class="bibliothek" href={k.bibliothek.link} target="_blank" rel="noopener" title={k.bibliothek.name}><span aria-hidden="true">🔍</span> {k.bibliothek.name} <span aria-hidden="true">↗</span></a> : <span class="leer">–</span>}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="stand"><strong>Ads Library:</strong> {daten.hinweisBibliothek}</p>
+    <p class="stand">Stand {daten.stand}. Angebote und Bezeichnungen ändern sich; bitte vor der Nutzung beim Anbieter prüfen.</p>
+  </section>
+
   {daten.kategorien.map((k) => (
     <section class="kategorie" id={k.name.toLowerCase().replace(/\s+/g, '-')}>
       <h2>{k.name}</h2>
       <p class="beschreibung">{k.beschreibung}</p>
+      <p class="beschreibung klein"><span aria-hidden="true">🔍</span> {daten.hinweisBibliothek}</p>
       <ul class="kanaele">
         {k.kanaele.map((kanal) => (
           <li class="karte">
@@ -32,6 +77,7 @@ const host = (url: string) => { try { return new URL(url).host.replace(/^www\./,
             <ul class="werkzeuge">
               {kanal.werkzeuge.map((w) => <li><a href={w.link} target="_blank" rel="noopener" class="mit-logo klein"><Logo name={w.name} logo={w.logo} groesse={18} />{w.name} <span aria-hidden="true">↗</span></a></li>)}
             </ul>
+            {(kanal as any).anzeigenbibliothek && <a class="bibliothek karte-bib" href={(kanal as any).anzeigenbibliothek.link} target="_blank" rel="noopener"><span aria-hidden="true">🔍</span> Ads Library: {(kanal as any).anzeigenbibliothek.name} <span aria-hidden="true">↗</span></a>}
           </li>
         ))}
       </ul>
@@ -104,6 +150,12 @@ const host = (url: string) => { try { return new URL(url).host.replace(/^www\./,
 </Dashboard>
 
 <script>
+  // ---------- Übersicht: Filter nach Kategorie ----------
+  const zeilen = Array.from(document.querySelectorAll<HTMLTableRowElement>('.kanal-liste tbody tr'));
+  document.querySelectorAll<HTMLInputElement>('input[name="alle-kategorie"]').forEach((r) => r.addEventListener('change', () => {
+    zeilen.forEach((z) => { z.hidden = r.value !== 'alle' && z.dataset.kategorie !== r.value; });
+  }));
+
   // ---------- Affiliate-Filter ----------
   const karten = Array.from(document.querySelectorAll<HTMLElement>('.netzwerke > li'));
   function filtern(art: string) {
@@ -297,6 +349,29 @@ const host = (url: string) => { try { return new URL(url).host.replace(/^www\./,
   .filter label:has(input:focus-visible) { outline: 3px solid var(--akzent); outline-offset: 1px; }
   .treffer { font-size: .85rem; color: #5a676d; margin: 10px 0 0; }
   .stand { font-size: .8rem; color: #67747a; margin: 12px 0 0; }
+
+  .bibliothek { font-size: .86rem; font-weight: 600; white-space: nowrap; }
+  .karte-bib { display: block; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #dde3e6; white-space: normal; }
+  .beschreibung.klein { font-size: .88rem; margin-top: -.3em; }
+  .leer { color: #9aa6ab; }
+  .liste-rahmen { margin-top: 12px; padding: 0; overflow-x: auto; position: relative; }
+  .kanal-liste { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  .kanal-liste th, .kanal-liste td { padding: 10px 14px; border-bottom: 1px solid #eef1f2; text-align: left; vertical-align: top; }
+  .kanal-liste thead th { color: #5a676d; font-weight: 600; font-size: .82rem; border-bottom-color: #dde3e6; background: #f7f9fa; }
+  .kanal-liste tbody th { font-weight: 700; white-space: nowrap; }
+  .kanal-liste tbody tr:last-child > * { border-bottom: 0; }
+  .kanal-liste tr[hidden] { display: none; }
+  .kanal-liste .zweck { color: #4c595f; min-width: 220px; }
+  .kanal-liste .werkzeuge { font-size: .86rem; }
+  .kat-marke { display: inline-block; font-size: .78rem; font-weight: 600; background: #eef2f4; color: #3f4a4f; border-radius: 999px; padding: 2px 9px; text-decoration: none; white-space: nowrap; }
+  .kat-marke:hover { background: #e0e7ea; }
+  @media (max-width: 700px) {
+    .kanal-liste thead { display: none; }
+    .kanal-liste, .kanal-liste tbody, .kanal-liste tr, .kanal-liste th, .kanal-liste td { display: block; }
+    .kanal-liste tr { padding: 12px 14px; border-bottom: 1px solid #eef1f2; }
+    .kanal-liste th, .kanal-liste td { padding: 3px 0; border: 0; }
+    .kanal-liste .zweck { min-width: 0; }
+  }
 
   .budget { margin-top: 12px; }
   .b-steuerung { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 14px; }

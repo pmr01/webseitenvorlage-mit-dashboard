@@ -26,7 +26,11 @@
               "logo": "/logos/google.svg"
             }
           ],
-          "logo": "/logos/google.svg"
+          "logo": "/logos/google.svg",
+          "anzeigenbibliothek": {
+            "name": "Google Ads Transparency Center",
+            "link": "https://adstransparency.google.com"
+          }
         },
         {
           "name": "Bing",
@@ -43,7 +47,11 @@
               "logo": ""
             }
           ],
-          "logo": ""
+          "logo": "",
+          "anzeigenbibliothek": {
+            "name": "Microsoft Ad Library",
+            "link": "https://adlibrary.ads.microsoft.com"
+          }
         },
         {
           "name": "Yahoo",
@@ -55,7 +63,11 @@
               "logo": ""
             }
           ],
-          "logo": ""
+          "logo": "",
+          "anzeigenbibliothek": {
+            "name": "Microsoft Ad Library",
+            "link": "https://adlibrary.ads.microsoft.com"
+          }
         }
       ]
     },
@@ -78,7 +90,11 @@
               "logo": "/logos/meta.svg"
             }
           ],
-          "logo": "/logos/facebook.svg"
+          "logo": "/logos/facebook.svg",
+          "anzeigenbibliothek": {
+            "name": "Meta Werbebibliothek",
+            "link": "https://www.facebook.com/ads/library/"
+          }
         },
         {
           "name": "Instagram",
@@ -95,7 +111,11 @@
               "logo": "/logos/meta.svg"
             }
           ],
-          "logo": "/logos/instagram.svg"
+          "logo": "/logos/instagram.svg",
+          "anzeigenbibliothek": {
+            "name": "Meta Werbebibliothek",
+            "link": "https://www.facebook.com/ads/library/"
+          }
         },
         {
           "name": "TikTok",
@@ -107,7 +127,11 @@
               "logo": "/logos/tiktok.svg"
             }
           ],
-          "logo": "/logos/tiktok.svg"
+          "logo": "/logos/tiktok.svg",
+          "anzeigenbibliothek": {
+            "name": "TikTok Ad Library",
+            "link": "https://library.tiktok.com/ads"
+          }
         },
         {
           "name": "YouTube",
@@ -124,7 +148,69 @@
               "logo": "/logos/googleads.svg"
             }
           ],
-          "logo": "/logos/youtube.svg"
+          "logo": "/logos/youtube.svg",
+          "anzeigenbibliothek": {
+            "name": "Google Ads Transparency Center",
+            "link": "https://adstransparency.google.com"
+          }
+        },
+        {
+          "name": "Pinterest",
+          "zweck": "Visuelle Suchmaschine für Ideen und Inspiration; Pins bleiben lange sichtbar. Stark bei Wohnen, Mode, Food, DIY und Hochzeit.",
+          "werkzeuge": [
+            {
+              "name": "Pinterest Business",
+              "link": "https://business.pinterest.com",
+              "logo": "/logos/pinterest.svg"
+            },
+            {
+              "name": "Pinterest Ads",
+              "link": "https://ads.pinterest.com",
+              "logo": "/logos/pinterest.svg"
+            }
+          ],
+          "logo": "/logos/pinterest.svg",
+          "anzeigenbibliothek": {
+            "name": "Pinterest Ads Repository",
+            "link": "https://ads.pinterest.com/ads-repository/"
+          }
+        },
+        {
+          "name": "LinkedIn",
+          "zweck": "Berufliches Netzwerk; gut für B2B, Fachthemen, Personal Branding und Recruiting. Anzeigen eher teuer, dafür genau nach Branche und Position steuerbar.",
+          "werkzeuge": [
+            {
+              "name": "LinkedIn Campaign Manager",
+              "link": "https://www.linkedin.com/campaignmanager",
+              "logo": ""
+            },
+            {
+              "name": "LinkedIn Marketing Solutions",
+              "link": "https://business.linkedin.com/advertise",
+              "logo": ""
+            }
+          ],
+          "logo": "",
+          "anzeigenbibliothek": {
+            "name": "LinkedIn Ad Library",
+            "link": "https://www.linkedin.com/ad-library/"
+          }
+        },
+        {
+          "name": "Snapchat",
+          "zweck": "Kurze Videos und Stories, vor allem bei Menschen unter 25.",
+          "werkzeuge": [
+            {
+              "name": "Snapchat Ads Manager",
+              "link": "https://ads.snapchat.com",
+              "logo": "/logos/snapchat.svg"
+            }
+          ],
+          "logo": "/logos/snapchat.svg",
+          "anzeigenbibliothek": {
+            "name": "Snap Ads Gallery",
+            "link": "https://adsgallery.snap.com/"
+          }
         }
       ]
     }
@@ -260,5 +346,6 @@
         "logo": ""
       }
     ]
-  }
+  },
+  "hinweisBibliothek": "In der Ads Library (Werbebibliothek) sehen Sie, welche Anzeigen andere Unternehmen gerade schalten: ideal, um Mitbewerber und Ideen zu recherchieren. In der EU müssen große Plattformen solche Verzeichnisse anbieten."
 }

@@ -3,6 +3,10 @@
   command = "npm run build"
   publish = "dist"
 
+# Astro braucht Node.js 22.23 oder neuer; 24 ist die aktuelle Langzeitversion
+[build.environment]
+  NODE_VERSION = "24"
+
 [functions]
   directory = "netlify/functions"
 

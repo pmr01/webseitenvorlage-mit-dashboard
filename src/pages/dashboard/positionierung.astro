@@ -28,35 +28,44 @@ const swotFelder = [
   <section id="pyramide" class="abschnitt-modell">
     <h2>Strategie-Pyramide</h2>
     {pyramide.beispiel && <BeispielHinweis datei="src/inhalte/strategie-pyramide.json" />}
+    <!-- Echte Pyramide in drei Stufen: Jede Stufe steht in derselben Zeile wie ihr Text und wächst
+         mit dessen Höhe. Die Pyramide ist bewusst größer als die Spalte und rechts angeschnitten. -->
+    <svg class="pyramide-klein" viewBox="0 0 360 312" role="img" aria-label="Strategie-Pyramide: oben Purpose und Werte, in der Mitte Mission und Vision, unten Strategie">
+      <polygon class="s1" points="180,4 236,102 124,102" />
+      <polygon class="s2" points="120.6,108 239.4,108 295.4,206 64.6,206" />
+      <polygon class="s3" points="61.1,212 298.9,212 356,312 4,312" />
+      <text x="180" y="78" text-anchor="middle">1</text><text x="180" y="166" text-anchor="middle">2</text><text x="180" y="270" text-anchor="middle">3</text>
+    </svg>
     <div class="pyramide">
-      <!-- Echte Pyramide: Dreieck mit drei gleich hohen Stufen, unabhängig von der Textlänge -->
-      <svg class="pyramide-bild" viewBox="0 0 360 312" role="img" aria-label="Strategie-Pyramide: oben Purpose und Werte, in der Mitte Mission und Vision, unten Strategie">
-        <polygon class="s1" points="180,4 236,102 124,102" />
-        <polygon class="s2" points="120.6,108 239.4,108 295.4,206 64.6,206" />
-        <polygon class="s3" points="61.1,212 298.9,212 356,312 4,312" />
-        <text x="180" y="70" text-anchor="middle"><tspan x="180" dy="0">Purpose</tspan><tspan x="180" dy="17">&amp; Werte</tspan></text>
-        <text x="180" y="152" text-anchor="middle"><tspan x="180" dy="0">Mission</tspan><tspan x="180" dy="18">&amp; Vision</tspan></text>
-        <text x="180" y="268" text-anchor="middle">Strategie</text>
-      </svg>
-      <div class="pyramide-texte">
-        <div class="karte text t1">
-          <h3><span class="stufe" aria-hidden="true">1</span>Purpose &amp; Werte</h3>
-          <p><strong>{pyramide.purpose.text}</strong></p>
-          <ul class="punkte">
-            {pyramide.purpose.werte.map((w) => <li><strong>{w.wert}</strong><span>{w.erklaerung}</span></li>)}
-          </ul>
-        </div>
-        <div class="karte text t2">
-          <h3><span class="stufe" aria-hidden="true">2</span>Mission &amp; Vision</h3>
-          <p><strong>Vision:</strong> {pyramide.vision}</p>
-          <p><strong>Mission:</strong> {pyramide.mission}</p>
-        </div>
-        <div class="karte text t3">
-          <h3><span class="stufe" aria-hidden="true">3</span>Strategie</h3>
-          <ul class="punkte">
-            {pyramide.strategien.map((st) => <li><strong>{st.strategie}</strong><span>{st.erklaerung}</span></li>)}
-          </ul>
-        </div>
+      <div class="band b1" aria-hidden="true">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="50,0 66.67,100 33.33,100" /></svg>
+        <span class="band-text"><b>1</b><i>Purpose<br />&amp; Werte</i></span>
+      </div>
+      <div class="karte text t1">
+        <h3><span class="stufe" aria-hidden="true">1</span>Purpose &amp; Werte</h3>
+        <p><strong>{pyramide.purpose.text}</strong></p>
+        <ul class="punkte">
+          {pyramide.purpose.werte.map((w) => <li><strong>{w.wert}</strong><span>{w.erklaerung}</span></li>)}
+        </ul>
+      </div>
+      <div class="band b2" aria-hidden="true">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="33.33,0 66.67,0 83.33,100 16.67,100" /></svg>
+        <span class="band-text"><b>2</b><i>Mission<br />&amp; Vision</i></span>
+      </div>
+      <div class="karte text t2">
+        <h3><span class="stufe" aria-hidden="true">2</span>Mission &amp; Vision</h3>
+        <p><strong>Vision:</strong> {pyramide.vision}</p>
+        <p><strong>Mission:</strong> {pyramide.mission}</p>
+      </div>
+      <div class="band b3" aria-hidden="true">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="16.67,0 83.33,0 100,100 0,100" /></svg>
+        <span class="band-text"><b>3</b><i>Strategie</i></span>
+      </div>
+      <div class="karte text t3">
+        <h3><span class="stufe" aria-hidden="true">3</span>Strategie</h3>
+        <ul class="punkte">
+          {pyramide.strategien.map((st) => <li><strong>{st.strategie}</strong><span>{st.erklaerung}</span></li>)}
+        </ul>
       </div>
     </div>
     {pyramide.zusammenfassung && <p class="fazit">{pyramide.zusammenfassung}</p>}
@@ -128,14 +137,19 @@ const swotFelder = [
   .sprungmarken a { padding: 6px 12px; border-radius: 999px; background: #fff; border: 1px solid #dde3e6; text-decoration: none; font-weight: 600; font-size: .9rem; }
   .abschnitt-modell { scroll-margin-top: 130px; }
 
-  .pyramide { display: grid; grid-template-columns: minmax(240px, 360px) minmax(0, 1fr); gap: 24px; align-items: start; }
-  .pyramide-bild { width: 100%; height: auto; position: sticky; top: 140px; overflow: visible; }
-  .pyramide-bild polygon { stroke: #fff; stroke-width: 3; stroke-linejoin: round; }
-  .pyramide-bild .s1 { fill: color-mix(in srgb, var(--haupt) 100%, black 18%); }
-  .pyramide-bild .s2 { fill: var(--haupt); }
-  .pyramide-bild .s3 { fill: color-mix(in srgb, var(--haupt) 72%, white); }
-  .pyramide-bild text { fill: #fff; font-weight: 700; font-size: 15px; }
-  .pyramide-texte { display: grid; gap: 12px; }
+  /* Pyramide: linke Spalte mit drei Stufen, jede so hoch wie ihre Textkarte. Die Pyramide ist 130 %
+     so breit wie die Spalte und wird rechts angeschnitten (Mitte bei 65 % der Spalte). */
+  .pyramide { --pyr-breite: 130%; --pyr-mitte: 65%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); column-gap: 20px; row-gap: 10px; align-items: stretch; }
+  .band { position: relative; overflow: hidden; min-height: 150px; }
+  .band svg { position: absolute; top: 0; left: 0; height: 100%; width: var(--pyr-breite); max-width: none; }
+  .pyramide-klein { display: none; }
+  .b1 polygon { fill: color-mix(in srgb, var(--haupt) 100%, black 18%); }
+  .b2 polygon { fill: var(--haupt); }
+  .b3 polygon { fill: color-mix(in srgb, var(--haupt) 72%, white); }
+  .band-text { position: absolute; left: var(--pyr-mitte); top: 50%; transform: translate(-50%, -50%); color: #fff; font-weight: 700; font-size: clamp(.95rem, 1.6vw, 1.3rem); line-height: 1.2; text-align: center; white-space: nowrap; }
+  .b1 .band-text { top: 76%; font-size: clamp(.8rem, 1.15vw, 1rem); }
+  .band-text b { display: none; }
+  .band-text i { font-style: normal; }
   .text h3 { display: flex; align-items: center; gap: 8px; font-size: 1rem; margin: 0 0 .6em; }
   .stufe { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: #fff; font-size: .78rem; }
   .t1 { border-left: 6px solid color-mix(in srgb, var(--haupt) 100%, black 18%); } .t1 .stufe { background: color-mix(in srgb, var(--haupt) 100%, black 18%); }
@@ -145,7 +159,13 @@ const swotFelder = [
   .text .punkte { margin-top: 10px; }
   @media (max-width: 760px) {
     .pyramide { grid-template-columns: 1fr; }
-    .pyramide-bild { position: static; max-width: 300px; margin-inline: auto; }
+    .band { display: none; }
+    .pyramide-klein { display: block; width: 100%; max-width: 240px; margin: 0 auto 14px; }
+    .pyramide-klein polygon { stroke: #fff; stroke-width: 3; }
+    .pyramide-klein .s1 { fill: color-mix(in srgb, var(--haupt) 100%, black 18%); }
+    .pyramide-klein .s2 { fill: var(--haupt); }
+    .pyramide-klein .s3 { fill: color-mix(in srgb, var(--haupt) 72%, white); }
+    .pyramide-klein text { fill: #fff; font-weight: 700; font-size: 26px; }
   }
 
   .porter { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: ". k2 ." "k4 k1 k3" ". k5 ."; }

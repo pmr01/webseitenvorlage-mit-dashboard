@@ -42,6 +42,7 @@ const daten = { konfiguration, quelltext, platzhalter: platzhalter.werte };
       .ed-leiste .ed-luecke { flex: 1; }
       .ed-leiste button { font: inherit; font-weight: 600; border-radius: 8px; padding: 7px 12px; border: 1px solid #56636a; background: transparent; color: #fff; cursor: pointer; }
       .ed-leiste button.ed-haupt { background: #e0a458; border-color: #e0a458; color: #1c2126; }
+      .ed-leiste button:disabled { opacity: .6; cursor: wait; }
       .ed-leiste small { flex-basis: 100%; color: #b8c2c7; font-size: .8rem; }
       [data-ed] { outline: 2px dashed rgba(224,164,88,.6); outline-offset: 3px; border-radius: 3px; cursor: text; }
       [data-ed]:hover { outline-color: #e0a458; }
@@ -119,9 +120,10 @@ const daten = { konfiguration, quelltext, platzhalter: platzhalter.werte };
       leiste.setAttribute('aria-label', 'Bearbeitungsmodus');
       leiste.innerHTML = `<strong>Bearbeitungsmodus</strong><span id="ed-zahl"></span><span class="ed-luecke"></span>
         <button type="button" id="ed-verwerfen">Verwerfen</button>
-        <button type="button" class="ed-haupt" id="ed-laden">Konfiguration herunterladen</button>
+        <button type="button" id="ed-laden">Herunterladen</button>
+        <button type="button" class="ed-haupt" id="ed-veroeffentlichen">Veröffentlichen</button>
         <button type="button" id="ed-ende">Beenden</button>
-        <small>Texte mit gestricheltem Rahmen anklicken und ändern. Der Entwurf bleibt in diesem Browser. Übernehmen: heruntergeladene Datei als src/konfiguration.mjs ins Projekt legen und neu veröffentlichen.</small>`;
+        <small id="ed-status">Texte mit gestricheltem Rahmen anklicken und ändern. Der Entwurf bleibt in diesem Browser, bis Sie veröffentlichen.</small>`;
       document.body.append(leiste);
       document.body.style.paddingBottom = '140px';
 
@@ -134,6 +136,35 @@ const daten = { konfiguration, quelltext, platzhalter: platzhalter.werte };
         for (const el of felder()) if (original.has(el.dataset.k!)) { el.textContent = original.get(el.dataset.k!)!; el.classList.remove('ed-geaendert'); }
       });
       document.getElementById('ed-ende')!.addEventListener('click', () => { location.href = location.pathname; });
+      const status = (text: string, art = '') => { const s = document.getElementById('ed-status')!; s.textContent = text; s.style.color = art === 'fehler' ? '#ffb4b4' : art === 'ok' ? '#b6f0c4' : ''; };
+      document.getElementById('ed-veroeffentlichen')!.addEventListener('click', async () => {
+        const n = Object.keys(entwurf).length;
+        if (!n) { status('Es gibt keine Änderungen zu veröffentlichen.'); return; }
+        if (!confirm(`${n} ${n === 1 ? 'Änderung' : 'Änderungen'} jetzt veröffentlichen? Die Website wird danach automatisch neu gebaut.`)) return;
+        const knopf = document.getElementById('ed-veroeffentlichen') as HTMLButtonElement;
+        knopf.disabled = true; status('Wird veröffentlicht …');
+        try {
+          const r = await fetch('/dashboard/api/veroeffentlichen', {
+            method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json', accept: 'application/json' },
+            body: JSON.stringify({ inhalt: neueKonfiguration(entwurf), basis: D.quelltext, nachricht: `Website-Texte geändert (${n} ${n === 1 ? 'Änderung' : 'Änderungen'})` }),
+          });
+          const typ = r.headers.get('content-type') || '';
+          const d = typ.includes('json') ? await r.json() : null;
+          if (r.ok && d?.ok) {
+            entwurf = {}; speichern();
+            for (const el of felder()) el.classList.remove('ed-geaendert');
+            status(`${d.meldung}${d.commit ? ` (Commit ${d.commit})` : ''} Danach diese Seite neu laden.`, 'ok');
+          } else if (r.status === 401) {
+            status('Nicht angemeldet: Öffnen Sie zuerst das Dashboard, melden Sie sich an und starten Sie den Editor von dort (Promotion → Webseite → Website bearbeiten).', 'fehler');
+          } else if (r.status === 404 || !d) {
+            status('Veröffentlichen ist hier nicht verfügbar (z. B. in der lokalen Vorschau). Nutzen Sie „Herunterladen“.', 'fehler');
+          } else {
+            status(d.meldung || `Fehler ${r.status}`, 'fehler');
+          }
+        } catch {
+          status('Keine Verbindung. Bitte später erneut versuchen oder „Herunterladen“ nutzen.', 'fehler');
+        } finally { knopf.disabled = false; }
+      });
       document.getElementById('ed-laden')!.addEventListener('click', () => {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([neueKonfiguration(entwurf)], { type: 'text/javascript' }));
