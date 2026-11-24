@@ -1,6 +1,6 @@
 ---
-// Rahmen für das Dashboard: sechs Reiter nach dem 6P-Prinzip.
-// Performance ist die Startansicht. Das Dashboard steht nicht in der Navigation der Website.
+// Rahmen für das Dashboard: Übersicht (Dashboard) und die sechs Reiter nach dem 6P-Prinzip,
+// Performance als sechstes P. Das Dashboard steht nicht in der Navigation der Website.
 import '../styles/global.css';
 import Farben from '../components/Farben.astro';
 import { konfiguration } from '../konfiguration.mjs';
@@ -9,12 +9,13 @@ interface Props { titel: string; untertitel?: string }
 const { titel, untertitel } = Astro.props;
 
 const reiter = [
-  { name: 'Performance', pfad: '/dashboard/' },
+  { name: 'Dashboard', pfad: '/dashboard/' },
   { name: 'Produkt', pfad: '/dashboard/produkt/' },
   { name: 'Positionierung', pfad: '/dashboard/positionierung/' },
   { name: 'Promotion', pfad: '/dashboard/promotion/' },
   { name: 'Prozess', pfad: '/dashboard/prozess/' },
   { name: 'Plattform', pfad: '/dashboard/plattform/' },
+  { name: 'Performance', pfad: '/dashboard/performance/' },
 ];
 const aktuell = Astro.url.pathname.replace(/\/?$/, '/');
 ---

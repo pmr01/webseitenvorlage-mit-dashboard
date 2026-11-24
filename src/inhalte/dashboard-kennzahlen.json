@@ -1,0 +1,12 @@
+{
+  "beispiel": true,
+  "hinweis": "Beispielzahlen für die Übersicht. Ersetzen Sie sie durch Ihre eigenen Werte, sobald Sie sie kennen.",
+  "zeitraum": "letzte 30 Tage",
+  "kennzahlen": [
+    { "name": "Besucher", "wert": 2276, "einheit": "", "vorher": 1980, "quelle": "Performance (Google Analytics)" },
+    { "name": "Anfragen", "wert": 27, "einheit": "", "vorher": 21, "quelle": "Kontaktformular und E-Mail" },
+    { "name": "Neue Kunden", "wert": 6, "einheit": "", "vorher": 4, "quelle": "eigene Zählung" },
+    { "name": "Umsatz", "wert": 8400, "einheit": "€", "vorher": 7100, "quelle": "Buchhaltung" },
+    { "name": "Marketingbudget", "wert": 1350, "einheit": "€", "vorher": 1200, "quelle": "Promotion → Kanäle & Budget" }
+  ]
+}

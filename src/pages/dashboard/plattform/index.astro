@@ -1,0 +1,82 @@
+---
+// Reiter Plattform → Tools.
+// Liste der Tools mit Logo, Zweck, Datenschutzerklärung und Auftragsverarbeitung (AVV/DPA).
+// Liste ändern in src/inhalte/plattform-tools.json ("bedarf": true = nur bei Bedarf).
+// Logos liegen in public/logos/ (Simple Icons, CC0; die Marken gehören den jeweiligen Anbietern).
+import Dashboard from '../../../layouts/Dashboard.astro';
+import Unterseiten from '../../../components/Unterseiten.astro';
+import { PLATTFORM_SEITEN } from '../../../components/plattform-seiten.mjs';
+import daten from '../../../inhalte/plattform-tools.json';
+import '../../../styles/pm.css';
+
+const host = (url: string) => { try { return new URL(url).host.replace(/^www\./, ''); } catch { return url; } };
+const avvText: Record<string, [string, string]> = { ja: ['nötig', 'rot'], nein: ['nicht nötig', 'gruen'], abhaengig: ['je nach Nutzung', 'gelb'] };
+// Fehlende Angaben in der Inhaltsdatei abfangen, damit neue Einträge nicht zu Fehlern führen
+const alle = daten.tools.map((t: any) => ({
+  ...t,
+  avv: t.avv && t.avv.noetig in avvText ? t.avv : { noetig: 'abhaengig', hinweis: 'Noch nicht geprüft: Datenschutz und AVV ergänzen.' },
+}));
+const gruppen = [
+  { titel: 'Im Einsatz', tools: alle.filter((t) => !t.bedarf) },
+  { titel: 'Bei Bedarf', tools: alle.filter((t) => t.bedarf) },
+];
+---
+<Dashboard titel="Plattform" untertitel="Die Tools, mit denen Website, Hosting, Auswertung und Werbung laufen, mit Datenschutzerklärung und Auftragsverarbeitungsvertrag (AVV) auf einen Blick.">
+  <Unterseiten seiten={PLATTFORM_SEITEN} />
+
+  <div class="karte tabelle-rahmen">
+    <table class="tools">
+      <thead>
+        <tr>
+          <th scope="col">Tool</th>
+          <th scope="col">Wofür</th>
+          <th scope="col">Datenschutzerklärung</th>
+          <th scope="col">AVV / DPA</th>
+        </tr>
+      </thead>
+      {gruppen.filter((g) => g.tools.length).map((g) => (
+        <tbody>
+          <tr class="gruppe"><th colspan="4" scope="colgroup">{g.titel}</th></tr>
+          {g.tools.map((t: any) => (
+            <tr>
+              <th scope="row">
+                <span class="tool">
+                  {t.logo ? <img src={t.logo} alt="" width="28" height="28" loading="lazy" /> : <span class="ersatz" aria-hidden="true">{t.name.slice(0, 1)}</span>}
+                  <span><strong>{t.name}</strong><a href={t.link} target="_blank" rel="noopener">{host(t.link)} <span aria-hidden="true">↗</span></a></span>
+                </span>
+              </th>
+              <td>{t.zweck}</td>
+              <td>{t.datenschutz ? <a href={t.datenschutz} target="_blank" rel="noopener">Datenschutzerklärung <span aria-hidden="true">↗</span></a> : <span class="leise">nicht nötig</span>}</td>
+              <td>
+                <span class={`pm-marke ${avvText[t.avv.noetig][1]}`}>{avvText[t.avv.noetig][0]}</span>
+                {t.avv.url && <a class="avv-link" href={t.avv.url} target="_blank" rel="noopener">{t.avv.noetig === 'abhaengig' ? 'Auftragsverarbeitung' : 'AVV / DPA'} <span aria-hidden="true">↗</span></a>}
+                {t.avv.zusatz && <a class="avv-link" href={t.avv.zusatz.url} target="_blank" rel="noopener">{t.avv.zusatz.name} <span aria-hidden="true">↗</span></a>}
+                {t.avv.hinweis && <small>{t.avv.hinweis}</small>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      ))}
+    </table>
+  </div>
+  <p class="hinweis">Stand {daten.stand}. {daten.hinweis} Die Liste steht in <code>src/inhalte/plattform-tools.json</code>. Logos: Simple Icons (CC0); die Marken gehören den jeweiligen Anbietern.</p>
+</Dashboard>
+
+<style>
+  .tabelle-rahmen { overflow-x: auto; position: relative; padding: 6px 14px; }
+  .tools { width: 100%; min-width: 760px; border-collapse: collapse; font-size: .93rem; }
+  .tools th, .tools td { text-align: left; padding: 12px 10px; border-bottom: 1px solid #eef1f2; vertical-align: top; }
+  .tools thead th { color: #5a676d; font-weight: 600; border-bottom-color: #dde3e6; font-size: .85rem; }
+  .tools tbody th { font-weight: 400; width: 230px; }
+  .gruppe th { background: #f4f6f7; font-size: .8rem !important; text-transform: uppercase; letter-spacing: .05em; color: #3f4a4f; font-weight: 700 !important; padding: 8px 10px !important; }
+  .tool { display: flex; gap: 12px; align-items: flex-start; }
+  .tool img, .ersatz { width: 28px; height: 28px; flex: none; }
+  .ersatz { display: grid; place-items: center; border-radius: 6px; background: #eef2f4; font-weight: 700; color: #3f4a4f; }
+  .tool > span { display: flex; flex-direction: column; line-height: 1.35; }
+  .tool a { font-size: .85rem; }
+  td a { font-weight: 600; }
+  .avv-link { display: block; margin-top: 4px; font-size: .9rem; }
+  td small { display: block; color: #67747a; font-size: .8rem; margin-top: 4px; line-height: 1.4; }
+  .leise { color: #67747a; }
+  .hinweis { color: #67747a; font-size: .85rem; margin-top: 12px; }
+</style>

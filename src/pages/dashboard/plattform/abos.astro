@@ -1,0 +1,222 @@
+---
+// Reiter Plattform → Abos & Domains.
+// Laufende Kosten selbst pflegen: Kostenübersicht pro Monat und Jahr, Erinnerung an
+// Verlängerungen in den nächsten 14 Tagen. Startdaten aus src/inhalte/abos.json;
+// Änderungen speichert der Browser.
+import Dashboard from '../../../layouts/Dashboard.astro';
+import Unterseiten from '../../../components/Unterseiten.astro';
+import { PLATTFORM_SEITEN } from '../../../components/plattform-seiten.mjs';
+import startdaten from '../../../inhalte/abos.json';
+import '../../../styles/pm.css';
+---
+<Dashboard titel="Plattform" untertitel="Abos und Domains im Blick: was läuft, was es kostet und wann die nächste Zahlung fällig ist.">
+  <Unterseiten seiten={PLATTFORM_SEITEN} />
+
+  <p class="beispiel-hinweis" role="note"><strong>Beispiel</strong><span>Beispieleinträge mit erfundenen Preisen; tragen Sie Ihre eigenen ein. Änderungen speichert nur dieser Browser. Für die gemeinsame Pflege im Team braucht es eine Datenbank wie Neon.</span></p>
+
+  <div class="ab-oben">
+    <section class="karte ab-kosten" aria-labelledby="ab-kosten-titel">
+      <h2 id="ab-kosten-titel">Kostenübersicht</h2>
+      <div class="ab-summen" id="ab-summen"></div>
+      <p class="pm-klein">Abos und Domains zusammen. Gekündigte Einträge und Testphasen zählen nicht mit.</p>
+    </section>
+    <section class="karte ab-erinnerung" aria-labelledby="ab-erinnerung-titel">
+      <h2 id="ab-erinnerung-titel">Verlängerungen in den nächsten 14 Tagen</h2>
+      <ul id="ab-faellig"></ul>
+    </section>
+  </div>
+
+  <div class="pm-kopf">
+    <div class="pm-ansicht" role="tablist" aria-label="Art">
+      <button type="button" role="tab" data-typ="abo" aria-selected="true">Abos <span class="ab-zahl" id="ab-zahl-abo"></span></button>
+      <button type="button" role="tab" data-typ="domain" aria-selected="false">Domains <span class="ab-zahl" id="ab-zahl-domain"></span></button>
+    </div>
+    <button type="button" class="pm-btn primaer" id="ab-neu">+ Abo hinzufügen</button>
+  </div>
+  <div class="karte pm-tabelle-rahmen"><table class="pm-tabelle" id="ab-tabelle"></table></div>
+
+  <div class="pm-daten">
+    <button type="button" class="pm-link" id="ab-csv">Als Tabelle (CSV) herunterladen</button>
+    <button type="button" class="pm-link" id="ab-export">Als Datei sichern</button>
+    <label class="pm-link">Datei laden<input type="file" accept="application/json,.json" id="ab-import" hidden /></label>
+    <button type="button" class="pm-link" id="ab-reset">Beispieldaten wiederherstellen</button>
+  </div>
+
+  <dialog id="ab-dialog" class="pm-dialog" aria-labelledby="ab-dialog-titel">
+    <form method="dialog" id="ab-form">
+      <h2 id="ab-dialog-titel">Abo</h2>
+      <label>Art<select name="typ"><option value="abo">Abo</option><option value="domain">Domain</option></select></label>
+      <label>Name<input name="name" required maxlength="100" /></label>
+      <label class="breit">Link (optional)<input name="link" type="url" maxlength="300" placeholder="https://" /></label>
+      <label>Preis<input name="preis" type="number" min="0" step="0.01" required /></label>
+      <label>Währung<select name="waehrung"><option>EUR</option><option>USD</option><option>CHF</option><option>GBP</option></select></label>
+      <label>Abrechnung<select name="zyklus"><option value="monatlich">monatlich</option><option value="jaehrlich">jährlich</option></select></label>
+      <label>Nächste Zahlung<input name="naechsteZahlung" type="date" /></label>
+      <label>Status<select name="status"><option value="aktiv">aktiv</option><option value="test">Testphase</option><option value="gekuendigt">gekündigt</option></select></label>
+      <label>Zahlungsart<input name="zahlungsart" maxlength="60" placeholder="z. B. Kreditkarte" /></label>
+      <label class="breit">Notizen<textarea name="notizen" rows="2" maxlength="1000"></textarea></label>
+      <div class="pm-dialog-knoepfe breit">
+        <button type="button" class="pm-btn gefahr" id="ab-loeschen">Löschen</button>
+        <span></span>
+        <button type="button" class="pm-btn" id="ab-abbrechen">Abbrechen</button>
+        <button type="submit" class="pm-btn primaer">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="application/json" id="ab-startdaten" set:html={JSON.stringify(startdaten)}></script>
+</Dashboard>
+
+<script>
+  type Typ = 'abo' | 'domain';
+  type Status = 'aktiv' | 'test' | 'gekuendigt';
+  type Eintrag = { id: string; typ: Typ; name: string; link: string; preis: number; waehrung: string; zyklus: 'monatlich' | 'jaehrlich'; naechsteZahlung: string; status: Status; zahlungsart: string; notizen: string };
+  const SPEICHER = 'plattform-abos';
+  const FENSTER = 14;
+  const ROH = JSON.parse(document.getElementById('ab-startdaten')!.textContent || '{}');
+  const STATUS: Record<Status, [string, string]> = { aktiv: ['aktiv', 'gruen'], test: ['Testphase', 'blau'], gekuendigt: ['gekündigt', ''] };
+  const datum = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const geld = (betrag: number, w: string) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: w || 'EUR' }).format(betrag);
+
+  function el<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, any> = {}, ...kinder: (Node | string | null | false | undefined)[]) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v === undefined || v === null || v === false) continue;
+      if (k.startsWith('on') && typeof v === 'function') e.addEventListener(k.slice(2), v);
+      else if (k === 'class') e.className = v; else e.setAttribute(k, v === true ? '' : String(v));
+    }
+    for (const k of kinder) if (k !== null && k !== undefined && k !== false) e.append(k);
+    return e;
+  }
+  const heute = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const verschoben = (t: number) => { const d = heute(); d.setDate(d.getDate() + t); return iso(d); };
+  const tageBis = (s: string) => Math.round((new Date(s + 'T00:00:00').getTime() - heute().getTime()) / 86400000);
+  const sichererLink = (u: string) => (/^https?:\/\//i.test(u) ? u : '');
+
+  function pruefe(e: any): Eintrag {
+    return {
+      id: String(e.id || 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5)), typ: e.typ === 'domain' ? 'domain' : 'abo',
+      name: String(e.name || 'Ohne Namen').slice(0, 100), link: sichererLink(String(e.link || '')).slice(0, 300),
+      preis: Math.max(0, Number(e.preis) || 0), waehrung: ['EUR', 'USD', 'CHF', 'GBP'].includes(e.waehrung) ? e.waehrung : 'EUR',
+      zyklus: e.zyklus === 'jaehrlich' ? 'jaehrlich' : 'monatlich', naechsteZahlung: /^\d{4}-\d{2}-\d{2}$/.test(e.naechsteZahlung) ? e.naechsteZahlung : '',
+      status: (e.status in STATUS ? e.status : 'aktiv') as Status, zahlungsart: String(e.zahlungsart || '').slice(0, 60), notizen: String(e.notizen || '').slice(0, 1000),
+    };
+  }
+  const startdaten = () => (ROH.eintraege || []).map((e: any) => pruefe({ ...e, naechsteZahlung: typeof e.naechsteZahlung === 'number' ? verschoben(e.naechsteZahlung) : e.naechsteZahlung }));
+  function laden(): Eintrag[] {
+    try { const d = JSON.parse(localStorage.getItem(SPEICHER) || 'null'); if (Array.isArray(d)) return d.map(pruefe); } catch { /* kein Speicher */ }
+    return startdaten();
+  }
+  let eintraege = laden();
+  let typ: Typ = 'abo';
+  const speichern = () => { try { localStorage.setItem(SPEICHER, JSON.stringify(eintraege)); } catch { /* ohne Speicher */ } zeichnen(); };
+
+  function zeichnen() {
+    // Kostenübersicht je Währung
+    const zaehlen = eintraege.filter((e) => e.status === 'aktiv');
+    const proWaehrung: Record<string, { abo: number; domain: number }> = {};
+    for (const e of zaehlen) {
+      const monatlich = e.zyklus === 'jaehrlich' ? e.preis / 12 : e.preis;
+      (proWaehrung[e.waehrung] ??= { abo: 0, domain: 0 })[e.typ] += monatlich;
+    }
+    const waehrungen = Object.keys(proWaehrung);
+    document.getElementById('ab-summen')!.replaceChildren(...(waehrungen.length ? waehrungen : ['EUR']).map((w) => {
+      const k = proWaehrung[w] ?? { abo: 0, domain: 0 };
+      const monat = k.abo + k.domain;
+      return el('div', { class: 'ab-summe' },
+        el('div', {}, el('span', {}, 'pro Monat'), el('strong', {}, geld(monat, w))),
+        el('div', {}, el('span', {}, 'pro Jahr'), el('strong', {}, geld(monat * 12, w))),
+        el('p', { class: 'pm-klein' }, `Abos ${geld(k.abo, w)} · Domains ${geld(k.domain, w)} pro Monat`));
+    }));
+
+    // Erinnerung
+    const faellig = eintraege.filter((e) => e.status !== 'gekuendigt' && e.naechsteZahlung).map((e) => ({ e, tage: tageBis(e.naechsteZahlung) })).filter((x) => x.tage <= FENSTER).sort((a, b) => a.tage - b.tage);
+    document.getElementById('ab-faellig')!.replaceChildren(...(faellig.length ? faellig.map(({ e, tage }) => el('li', {},
+      el('span', {}, el('strong', {}, e.name), el('small', {}, `${datum.format(new Date(e.naechsteZahlung + 'T00:00:00'))} · ${geld(e.preis, e.waehrung)}`)),
+      el('span', { class: `pm-marke ${tage < 0 ? 'rot' : tage <= 3 ? 'gelb' : 'blau'}` }, tage < 0 ? `überfällig (${-tage} T.)` : tage === 0 ? 'heute' : `in ${tage} Tagen`))) : [el('li', { class: 'pm-leer' }, `Keine Verlängerungen in den nächsten ${FENSTER} Tagen.`)]));
+
+    // Liste
+    document.getElementById('ab-zahl-abo')!.textContent = String(eintraege.filter((e) => e.typ === 'abo').length);
+    document.getElementById('ab-zahl-domain')!.textContent = String(eintraege.filter((e) => e.typ === 'domain').length);
+    document.querySelectorAll<HTMLButtonElement>('[data-typ]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.typ === typ)));
+    document.getElementById('ab-neu')!.textContent = typ === 'domain' ? '+ Domain hinzufügen' : '+ Abo hinzufügen';
+    const liste = eintraege.filter((e) => e.typ === typ).sort((a, b) => (a.status === 'gekuendigt' ? 1 : 0) - (b.status === 'gekuendigt' ? 1 : 0) || (a.naechsteZahlung || '9').localeCompare(b.naechsteZahlung || '9'));
+    const tabelle = document.getElementById('ab-tabelle')!;
+    tabelle.replaceChildren(
+      el('thead', {}, el('tr', {}, ...['Name', 'Preis', 'Status', 'Nächste Zahlung', 'Zahlungsart', 'Notizen'].map((t) => el('th', { scope: 'col', class: t === 'Preis' ? 'zahl' : '' }, t)))),
+      el('tbody', {}, ...(liste.length ? liste.map((e) => el('tr', { class: e.status === 'gekuendigt' ? 'ab-aus' : '' },
+        el('td', {}, el('span', { class: 'ab-name' }, el('span', { class: 'ab-initial', 'aria-hidden': 'true' }, e.name.slice(0, 1).toUpperCase()),
+          el('span', {}, el('button', { type: 'button', class: 'pm-link', onclick: () => dialog(e) }, e.name), e.link ? el('a', { href: e.link, target: '_blank', rel: 'noopener', class: 'ab-host' }, new URL(e.link).host.replace(/^www\./, '')) : null))),
+        el('td', { class: 'zahl' }, `${geld(e.preis, e.waehrung)} / ${e.zyklus === 'jaehrlich' ? 'Jahr' : 'Monat'}`),
+        el('td', {}, el('span', { class: `pm-marke ${STATUS[e.status][1]}` }, STATUS[e.status][0])),
+        el('td', {}, e.naechsteZahlung ? datum.format(new Date(e.naechsteZahlung + 'T00:00:00')) : '–'),
+        el('td', {}, e.zahlungsart || '–'),
+        el('td', { class: 'ab-notiz' }, e.notizen || ''))) : [el('tr', {}, el('td', { colspan: 6, class: 'pm-leer' }, typ === 'domain' ? 'Noch keine Domains. Tragen Sie Ihre Domains mit Kosten ein; sie zählen zur Gesamtsumme.' : 'Noch keine Abos.'))])));
+  }
+
+  // Formular
+  const dlg = document.getElementById('ab-dialog') as HTMLDialogElement;
+  const form = document.getElementById('ab-form') as HTMLFormElement;
+  const feld = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
+  let aktuell: Eintrag | null = null;
+  function dialog(e: Eintrag | null) {
+    aktuell = e;
+    const w: any = e ?? { typ, name: '', link: '', preis: '', waehrung: 'EUR', zyklus: typ === 'domain' ? 'jaehrlich' : 'monatlich', naechsteZahlung: '', status: 'aktiv', zahlungsart: '', notizen: '' };
+    for (const n of ['typ', 'name', 'link', 'preis', 'waehrung', 'zyklus', 'naechsteZahlung', 'status', 'zahlungsart', 'notizen']) feld(n).value = String(w[n] ?? '');
+    document.getElementById('ab-dialog-titel')!.textContent = e ? `${e.typ === 'domain' ? 'Domain' : 'Abo'} bearbeiten` : typ === 'domain' ? 'Neue Domain' : 'Neues Abo';
+    document.getElementById('ab-loeschen')!.hidden = !e;
+    dlg.showModal(); feld('name').focus();
+  }
+  form.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const neu = pruefe({ id: aktuell?.id, ...Object.fromEntries(['typ', 'name', 'link', 'preis', 'waehrung', 'zyklus', 'naechsteZahlung', 'status', 'zahlungsart', 'notizen'].map((n) => [n, feld(n).value.trim()])) });
+    if (aktuell) Object.assign(aktuell, neu); else eintraege.push(neu);
+    typ = neu.typ; dlg.close(); speichern();
+  });
+  document.getElementById('ab-abbrechen')!.addEventListener('click', () => dlg.close());
+  document.getElementById('ab-loeschen')!.addEventListener('click', () => { if (aktuell && confirm(`„${aktuell.name}“ löschen?`)) { eintraege = eintraege.filter((x) => x !== aktuell); dlg.close(); speichern(); } });
+  document.getElementById('ab-neu')!.addEventListener('click', () => dialog(null));
+  document.querySelectorAll<HTMLButtonElement>('[data-typ]').forEach((b) => b.addEventListener('click', () => { typ = b.dataset.typ as Typ; zeichnen(); }));
+
+  const herunterladen = (inhalt: string, typMime: string, name: string) => {
+    const a = el('a', { href: URL.createObjectURL(new Blob([inhalt], { type: typMime })), download: name }) as HTMLAnchorElement;
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  document.getElementById('ab-export')!.addEventListener('click', () => herunterladen(JSON.stringify(eintraege, null, 2), 'application/json', `abos-${iso(heute())}.json`));
+  document.getElementById('ab-csv')!.addEventListener('click', () => {
+    const z = (v: unknown) => `"${String(v).replace(/"/g, '""')}"`;
+    const zeilen = [['Art', 'Name', 'Link', 'Preis', 'Währung', 'Abrechnung', 'Nächste Zahlung', 'Status', 'Zahlungsart', 'Notizen'], ...eintraege.map((e) => [e.typ === 'domain' ? 'Domain' : 'Abo', e.name, e.link, String(e.preis).replace('.', ','), e.waehrung, e.zyklus, e.naechsteZahlung, STATUS[e.status][0], e.zahlungsart, e.notizen])];
+    herunterladen('﻿' + zeilen.map((r) => r.map(z).join(';')).join('\r\n'), 'text/csv;charset=utf-8', `abos-${iso(heute())}.csv`);
+  });
+  document.getElementById('ab-import')!.addEventListener('change', async (ev) => {
+    const datei = (ev.target as HTMLInputElement).files?.[0]; if (!datei) return;
+    try { const d = JSON.parse(await datei.text()); if (!Array.isArray(d)) throw new Error(); if (confirm(`${d.length} Einträge laden? Der bisherige Stand wird ersetzt.`)) { eintraege = d.map(pruefe); speichern(); } }
+    catch { alert('Die Datei konnte nicht gelesen werden.'); }
+    (ev.target as HTMLInputElement).value = '';
+  });
+  document.getElementById('ab-reset')!.addEventListener('click', () => { if (confirm('Alle eigenen Einträge in diesem Browser durch die Beispieldaten ersetzen?')) { eintraege = startdaten(); speichern(); } });
+
+  zeichnen();
+</script>
+
+<style>
+  .ab-oben { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); margin-bottom: 24px; }
+  .ab-oben h2 { font-size: 1.05rem; }
+  :global(.ab-summe) { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+  :global(.ab-summe > div) { display: flex; flex-direction: column; }
+  :global(.ab-summe span) { font-size: .8rem; color: #5a676d; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  :global(.ab-summe strong) { font-size: 1.7rem; font-variant-numeric: tabular-nums; }
+  :global(.ab-summe p) { grid-column: 1 / -1; margin: 0; }
+  .ab-erinnerung ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .ab-erinnerung :global(li) { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid #eef1f2; }
+  .ab-erinnerung :global(li > span:first-child) { display: flex; flex-direction: column; }
+  .ab-erinnerung :global(small) { color: #5a676d; font-size: .82rem; }
+  .ab-zahl { font-size: .78rem; opacity: .8; margin-left: 4px; }
+  :global(.ab-name) { display: flex; gap: 10px; align-items: center; }
+  :global(.ab-name > span:last-child) { display: flex; flex-direction: column; }
+  :global(.ab-initial) { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: color-mix(in srgb, var(--haupt) 14%, white); color: var(--haupt); font-weight: 700; flex: none; }
+  :global(.ab-host) { font-size: .8rem; }
+  :global(.ab-notiz) { color: #5a676d; font-size: .88rem; max-width: 260px; }
+  :global(tr.ab-aus) { opacity: .6; }
+</style>

@@ -32,7 +32,12 @@ import '../../../styles/pm.css';
     <div class="pm-projekte" id="pm-projekte"></div>
   </section>
 
-  <details class="karte pm-methode" open>
+  <section id="pm-alle-matrix" class="pm-alle-matrix" aria-labelledby="pm-alle-matrix-titel">
+    <div class="pm-kopf"><h2 id="pm-alle-matrix-titel">Priorisierung aller offenen Aufgaben (Eisenhower)</h2></div>
+    <div id="pm-alle-matrix-inhalt"></div>
+  </section>
+
+  <details class="karte pm-methode">
     <summary><h2>Vorschlag: Wasserfall oder agil?</h2></summary>
     <div class="pm-methode-raster">
       <div>
@@ -70,6 +75,10 @@ import '../../../styles/pm.css';
       <label>Start<input name="start" type="date" /></label>
       <label>Fällig<input name="faellig" type="date" /></label>
       <label class="haken breit" data-nur="wasserfall"><input name="meilenstein" type="checkbox" /> Meilenstein (Ende einer Phase oder wichtiger Termin)</label>
+      <fieldset class="breit pm-prio"><legend>Priorität (Eisenhower)</legend>
+        <label class="haken"><input name="wichtig" type="checkbox" /> wichtig</label>
+        <label class="haken"><input name="dringend" type="checkbox" /> dringend</label>
+      </fieldset>
       <label class="breit">Fortschritt: <output name="fortschritt-anzeige">0 %</output><input name="fortschritt" type="range" min="0" max="100" step="5" value="0" /></label>
       <label class="breit">Beschreibung<textarea name="beschreibung" rows="3" maxlength="2000"></textarea></label>
       <div class="pm-dialog-knoepfe breit">
@@ -110,7 +119,7 @@ import '../../../styles/pm.css';
   type AufgabeStatus = 'todo' | 'in_progress' | 'blocked' | 'done';
   type Vorgehen = 'wasserfall' | 'agil';
   type Projekt = { id: string; name: string; kunde: string; status: ProjektStatus; vorgehen: Vorgehen; sprintWochen: number; start: string; faellig: string; wert: number; notizen: string; ansicht: string };
-  type Aufgabe = { id: string; projekt: string; titel: string; phase: string; sprint: number; meilenstein: boolean; zustaendig: string; status: AufgabeStatus; start: string; faellig: string; fortschritt: number; beschreibung: string };
+  type Aufgabe = { id: string; projekt: string; titel: string; phase: string; sprint: number; meilenstein: boolean; wichtig: boolean; dringend: boolean; zustaendig: string; status: AufgabeStatus; start: string; faellig: string; fortschritt: number; beschreibung: string };
   type Daten = { version: 2; projekte: Projekt[]; aufgaben: Aufgabe[] };
 
   const SPEICHER = 'prozess-projektmanagement-v2';
@@ -119,8 +128,8 @@ import '../../../styles/pm.css';
   const PROJEKT_STATUS: Record<ProjektStatus, [string, string]> = { planned: ['Geplant', 'blau'], active: ['Aktiv', 'gruen'], 'on-hold': ['Pausiert', 'gelb'], completed: ['Abgeschlossen', ''] };
   const AUFGABE_STATUS: Record<AufgabeStatus, string> = { todo: 'Offen', in_progress: 'In Arbeit', blocked: 'Blockiert', done: 'Erledigt' };
   const ANSICHTEN: Record<Vorgehen, [string, string][]> = {
-    wasserfall: [['phasen', 'Phasen'], ['zeitplan', 'Zeitplan'], ['liste', 'Liste']],
-    agil: [['board', 'Board'], ['sprints', 'Sprints'], ['liste', 'Liste']],
+    wasserfall: [['phasen', 'Phasen'], ['zeitplan', 'Zeitplan'], ['eisenhower', 'Eisenhower'], ['liste', 'Liste']],
+    agil: [['board', 'Board'], ['sprints', 'Sprints'], ['eisenhower', 'Eisenhower'], ['liste', 'Liste']],
   };
   const TAG = 86400000;
   const datum = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -173,7 +182,11 @@ import '../../../styles/pm.css';
     return {
       id: text(a.id, 40) || neueId('a'), projekt: String(a.projekt), titel: text(a.titel, 200) || 'Ohne Titel',
       phase: PHASEN.includes(a.phase) ? a.phase : PHASEN.includes(a.kategorie) ? a.kategorie : 'Umsetzung',
-      sprint: begrenzen(a.sprint, 0, 99), meilenstein: !!a.meilenstein, zustaendig: text(a.zustaendig, 60),
+      sprint: begrenzen(a.sprint, 0, 99), meilenstein: !!a.meilenstein,
+      // Ohne eigene Angabe gilt eine Aufgabe als dringend, wenn sie in den nächsten 7 Tagen fällig ist
+      wichtig: a.wichtig === undefined ? true : !!a.wichtig,
+      dringend: a.dringend === undefined ? (!!tag(a.faellig) && (alsDatum(tag(a.faellig))!.getTime() - heute().getTime()) / 86400000 <= 7) : !!a.dringend,
+      zustaendig: text(a.zustaendig, 60),
       status: (a.status in AUFGABE_STATUS ? a.status : 'todo') as AufgabeStatus, start: tag(a.start), faellig: tag(a.faellig),
       fortschritt: begrenzen(a.fortschritt, 0, 100), beschreibung: text(a.beschreibung),
     };
@@ -258,7 +271,7 @@ import '../../../styles/pm.css';
     const [statusText, statusFarbe] = PROJEKT_STATUS[p.status];
     const ansichtKnoepfe = el('div', { class: 'pm-ansicht', role: 'tablist', 'aria-label': 'Ansicht' }, ...ANSICHTEN[p.vorgehen].map(([k, name]) =>
       el('button', { type: 'button', role: 'tab', 'aria-selected': String(p.ansicht === k), onclick: () => { p.ansicht = k; speichern(); } }, name)));
-    const inhalt = p.ansicht === 'phasen' ? phasen(p) : p.ansicht === 'zeitplan' ? zeitplan(p) : p.ansicht === 'board' ? board(p) : p.ansicht === 'sprints' ? sprints(p) : liste(p);
+    const inhalt = p.ansicht === 'phasen' ? phasen(p) : p.ansicht === 'zeitplan' ? zeitplan(p) : p.ansicht === 'board' ? board(p) : p.ansicht === 'sprints' ? sprints(p) : p.ansicht === 'eisenhower' ? eisenhower(aufgabenVon(p), false) : liste(p);
     box.replaceChildren(
       el('button', { type: 'button', class: 'pm-link pm-zurueck', onclick: () => oeffnen(null) }, '← Alle Projekte'),
       el('div', { class: 'karte pm-detail-kopf' },
@@ -405,6 +418,45 @@ import '../../../styles/pm.css';
     }));
   }
 
+  // Eisenhower-Matrix: offene Aufgaben nach Wichtigkeit und Dringlichkeit
+  const QUADRANTEN: { wichtig: boolean; dringend: boolean; titel: string; tun: string; klasse: string }[] = [
+    { wichtig: true, dringend: true, titel: 'Sofort erledigen', tun: 'wichtig und dringend: selbst und jetzt', klasse: 'q1' },
+    { wichtig: true, dringend: false, titel: 'Einplanen', tun: 'wichtig, nicht dringend: Termin festlegen', klasse: 'q2' },
+    { wichtig: false, dringend: true, titel: 'Delegieren', tun: 'dringend, nicht wichtig: abgeben', klasse: 'q3' },
+    { wichtig: false, dringend: false, titel: 'Streichen oder später', tun: 'weder noch: bewusst weglassen', klasse: 'q4' },
+  ];
+  function eisenhower(alle: Aufgabe[], mitProjekt: boolean) {
+    const offen = alle.filter((a) => a.status !== 'done');
+    const feld = (q: (typeof QUADRANTEN)[number]) => {
+      const liste = offen.filter((a) => a.wichtig === q.wichtig && a.dringend === q.dringend).sort((x, y) => (x.faellig || '9').localeCompare(y.faellig || '9'));
+      const box = el('section', { class: `pm-quadrant ${q.klasse}`, 'aria-label': q.titel },
+        el('h3', {}, q.titel, el('span', { class: 'pm-anzahl' }, String(liste.length))),
+        el('p', { class: 'pm-klein' }, q.tun),
+        el('ul', {}, ...liste.map((a) => {
+          const projekt = daten.projekte.find((p) => p.id === a.projekt);
+          const li = el('li', { draggable: 'true' }, titelKnopf(a),
+            el('span', { class: 'pm-phase-fuss' }, mitProjekt && projekt ? el('span', { class: 'pm-klein' }, projekt.name) : null, statusMarke(a), a.zustaendig ? el('span', { class: 'pm-person' }, a.zustaendig) : null,
+              a.faellig ? el('span', { class: ueberfaellig(a) ? 'pm-faellig ueber' : 'pm-faellig' }, datumKurz.format(alsDatum(a.faellig)!)) : null));
+          li.addEventListener('dragstart', (e) => e.dataTransfer?.setData('text/plain', a.id));
+          return li;
+        })),
+        liste.length ? null : el('p', { class: 'pm-leer' }, 'Keine offenen Aufgaben'));
+      box.addEventListener('dragover', (e) => { e.preventDefault(); box.classList.add('ziel'); });
+      box.addEventListener('dragleave', () => box.classList.remove('ziel'));
+      box.addEventListener('drop', (e) => {
+        e.preventDefault(); box.classList.remove('ziel');
+        const a = daten.aufgaben.find((x) => x.id === e.dataTransfer?.getData('text/plain'));
+        if (a) { a.wichtig = q.wichtig; a.dringend = q.dringend; speichern(); }
+      });
+      return box;
+    };
+    return el('div', { class: 'karte pm-eisenhower' },
+      el('div', { class: 'pm-achse-y', 'aria-hidden': 'true' }, el('span', {}, 'wichtig'), el('span', {}, 'nicht wichtig')),
+      el('div', { class: 'pm-achse-x', 'aria-hidden': 'true' }, el('span', {}, 'dringend'), el('span', {}, 'nicht dringend')),
+      el('div', { class: 'pm-matrix' }, feld(QUADRANTEN[0]), feld(QUADRANTEN[1]), feld(QUADRANTEN[2]), feld(QUADRANTEN[3])),
+      el('p', { class: 'pm-klein pm-matrix-hinweis' }, 'Aufgaben per Maus in ein anderes Feld ziehen oder im Aufgabenformular „wichtig“ und „dringend“ setzen. Erledigte Aufgaben werden ausgeblendet.'));
+  }
+
   // Beide: Liste gruppiert nach Phase oder Sprint
   function liste(p: Projekt) {
     const aufgaben = aufgabenVon(p);
@@ -428,6 +480,9 @@ import '../../../styles/pm.css';
     const p = ausgewaehlt();
     const box = document.getElementById('pm-detail')!;
     if (p) detail(p); else { box.hidden = true; box.replaceChildren(); }
+    const alleMatrix = document.getElementById('pm-alle-matrix')!;
+    alleMatrix.hidden = !!p;
+    if (!p) document.getElementById('pm-alle-matrix-inhalt')!.replaceChildren(eisenhower(daten.aufgaben, true));
     document.getElementById('pm-projekte-titel')!.textContent = p ? 'Weitere Projekte' : 'Projekte';
     const andere = daten.projekte.filter((x) => x !== p);
     const raster = document.getElementById('pm-projekte')!;
@@ -472,6 +527,8 @@ import '../../../styles/pm.css';
     const w: any = a ?? { titel: '', projekt: projekt.id, phase: 'Umsetzung', sprint: projekt.vorgehen === 'agil' ? aktuellerSprint(projekt) : 0, meilenstein: false, zustaendig: '', status: 'todo', start: isoTag(heute()), faellig: '', fortschritt: 0, beschreibung: '', ...vorgabe };
     for (const n of ['titel', 'projekt', 'phase', 'sprint', 'zustaendig', 'status', 'start', 'faellig', 'fortschritt', 'beschreibung']) feld(formA, n).value = String(w[n] ?? '');
     feld(formA, 'meilenstein').checked = !!w.meilenstein;
+    feld(formA, 'wichtig').checked = w.wichtig !== false;
+    feld(formA, 'dringend').checked = !!w.dringend;
     (formA.elements.namedItem('fortschritt-anzeige') as HTMLOutputElement).value = `${w.fortschritt} %`;
     vorgehenFelder(formA, projekt.vorgehen);
     document.getElementById('pm-dialog-aufgabe-titel')!.textContent = a ? 'Aufgabe bearbeiten' : 'Neue Aufgabe';
@@ -491,7 +548,7 @@ import '../../../styles/pm.css';
   formA.addEventListener('submit', (e) => {
     e.preventDefault();
     const w = (n: string) => feld(formA, n).value.trim();
-    const neu = pruefeAufgabe({ id: aktA?.id ?? neueId('a'), projekt: w('projekt'), titel: w('titel'), phase: w('phase'), sprint: w('sprint'), meilenstein: feld(formA, 'meilenstein').checked, zustaendig: w('zustaendig'), status: w('status'), start: w('start'), faellig: w('faellig'), fortschritt: w('fortschritt'), beschreibung: w('beschreibung') });
+    const neu = pruefeAufgabe({ id: aktA?.id ?? neueId('a'), projekt: w('projekt'), titel: w('titel'), phase: w('phase'), sprint: w('sprint'), meilenstein: feld(formA, 'meilenstein').checked, wichtig: feld(formA, 'wichtig').checked, dringend: feld(formA, 'dringend').checked, zustaendig: w('zustaendig'), status: w('status'), start: w('start'), faellig: w('faellig'), fortschritt: w('fortschritt'), beschreibung: w('beschreibung') });
     if (neu.status === 'done') neu.fortschritt = 100;
     if (aktA) Object.assign(aktA, neu); else daten.aufgaben.push(neu);
     dlgA.close(); speichern();
@@ -595,6 +652,26 @@ import '../../../styles/pm.css';
   :global(.pm-karte.zieht) { opacity: .5; }
   :global(.pm-karte-fuss) { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: .82rem; }
   :global(.pm-karte-status) { display: flex; align-items: center; gap: 6px; font-size: .8rem; color: #5a676d; }
+
+  .pm-alle-matrix { margin-bottom: 28px; }
+  .pm-prio { border: 0; padding: 0; margin: 0; display: flex; gap: 18px; flex-wrap: wrap; }
+  .pm-prio legend { font-size: .88rem; font-weight: 600; color: #3f4a4f; margin-bottom: 4px; }
+  :global(.pm-eisenhower) { display: grid; grid-template-columns: 28px 1fr; grid-template-rows: auto 1fr auto; gap: 6px 8px; }
+  :global(.pm-achse-x) { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: 1fr 1fr; text-align: center; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #5a676d; }
+  :global(.pm-achse-y) { grid-column: 1; grid-row: 2; display: grid; grid-template-rows: 1fr 1fr; writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #5a676d; }
+  :global(.pm-matrix) { grid-column: 2; grid-row: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  :global(.pm-matrix-hinweis) { grid-column: 2; margin: 4px 0 0; }
+  :global(.pm-quadrant) { border-radius: 12px; padding: 12px 14px; min-height: 150px; border: 1px solid #dde3e6; display: flex; flex-direction: column; gap: 6px; }
+  :global(.pm-quadrant.ziel) { outline: 2px dashed var(--haupt); outline-offset: -2px; }
+  :global(.pm-quadrant h3) { font-size: 1rem; margin: 0; display: flex; justify-content: space-between; align-items: center; }
+  :global(.pm-quadrant p) { margin: 0; }
+  :global(.pm-quadrant ul) { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 6px; }
+  :global(.pm-quadrant li) { background: #fff; border: 1px solid #dde3e6; border-radius: 8px; padding: 7px 10px; display: flex; flex-direction: column; gap: 4px; cursor: grab; font-size: .9rem; }
+  :global(.pm-quadrant.q1) { background: #fdf1f1; border-color: #efc7c7; }
+  :global(.pm-quadrant.q2) { background: #eef6f0; border-color: #c4e2cc; }
+  :global(.pm-quadrant.q3) { background: #fff8ea; border-color: #f0d9a8; }
+  :global(.pm-quadrant.q4) { background: #f4f6f7; border-color: #dde3e6; }
+  @media (max-width: 640px) { :global(.pm-matrix) { grid-template-columns: 1fr; } :global(.pm-achse-x), :global(.pm-achse-y) { display: none; } :global(.pm-eisenhower) { grid-template-columns: 1fr; } :global(.pm-matrix), :global(.pm-matrix-hinweis) { grid-column: 1; } }
 
   :global(.pm-sprints) { display: grid; gap: 12px; }
   :global(.pm-sprint h3) { font-size: 1rem; margin: 0; display: flex; align-items: center; gap: 8px; }

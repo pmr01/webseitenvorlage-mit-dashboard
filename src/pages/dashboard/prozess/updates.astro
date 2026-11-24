@@ -124,7 +124,8 @@ for (const a of updates.aufgaben) {
   .up-liste { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
   .up-eintrag { display: flex; flex-direction: column; gap: 8px; }
   .up-eintrag.faellig { border-color: #f0d199; }
-  .up-kopf { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .up-kopf { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .up-kopf h2 { min-width: 0; overflow-wrap: anywhere; }
   .up-kopf h2 { font-size: 1.05rem; margin: 0; }
   .up-eintrag p { margin: 0; font-size: .93rem; }
   .up-version { display: flex; flex-wrap: wrap; gap: 4px 18px; background: #f4f6f7; border-radius: 8px; padding: 8px 10px; }

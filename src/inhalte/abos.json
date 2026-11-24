@@ -1,0 +1,10 @@
+{
+  "beispiel": true,
+  "hinweis": "Beispiel-Abos. naechsteZahlung = Tage relativ zu heute, wird beim ersten Laden umgerechnet. Kosten, die beim Erstellen der Vorlage nicht bekannt waren, sind erfunden.",
+  "eintraege": [
+    { "id": "s1", "typ": "abo", "name": "Claude Pro", "link": "https://claude.ai", "preis": 18, "waehrung": "EUR", "zyklus": "monatlich", "naechsteZahlung": 6, "status": "aktiv", "zahlungsart": "Kreditkarte", "notizen": "KI-Tool für Texte und Code" },
+    { "id": "s2", "typ": "abo", "name": "Canva Pro", "link": "https://www.canva.com", "preis": 110, "waehrung": "EUR", "zyklus": "jaehrlich", "naechsteZahlung": 120, "status": "aktiv", "zahlungsart": "PayPal", "notizen": "Grafiken und Social-Media-Vorlagen" },
+    { "id": "s3", "typ": "abo", "name": "Newsletter-Tool", "link": "", "preis": 0, "waehrung": "EUR", "zyklus": "monatlich", "naechsteZahlung": 12, "status": "test", "zahlungsart": "", "notizen": "Testphase, danach entscheiden" },
+    { "id": "d1", "typ": "domain", "name": "musterfirma.de", "link": "", "preis": 12, "waehrung": "EUR", "zyklus": "jaehrlich", "naechsteZahlung": 45, "status": "aktiv", "zahlungsart": "Lastschrift", "notizen": "Registrar eintragen" }
+  ]
+}

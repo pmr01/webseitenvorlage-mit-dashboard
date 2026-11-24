@@ -28,16 +28,19 @@ Gut zu wissen:
 
 ## 1. Die sechs Bereiche
 
+Das Dashboard öffnet mit einer **Übersicht** und hat danach sechs Reiter nach dem 6P-Prinzip. Bereiche mit mehreren Teilen haben Unterseiten oder Reiter direkt unter der Überschrift.
+
 | Reiter | Was Sie dort sehen | Wozu |
 |---|---|---|
-| **Performance** (Startansicht) | Besucher, Seitenaufrufe, Verlauf pro Tag, meistbesuchte Seiten, Herkunft der Besucher; Zeitraum 7, 30 oder 90 Tage | Sehen, ob die Website wirkt |
-| **Produkt** | Business Model Canvas mit neun Feldern | Wie Ihr Unternehmen Werte schafft und Geld verdient |
-| **Positionierung** | Strategie-Pyramide, Porter's 5 Kräfte, SWOT-Analyse, Persona / Empathy Map | Wofür Sie stehen, wie Ihr Markt aussieht, für wen Sie da sind |
-| **Promotion** | Zwei Unterseiten: Checkliste und Aufbauplan des Storytelling Frameworks; Design-System mit Farben, Schriften und Ecken samt Live-Vorschau | Die Startseite Schritt für Schritt aufbauen und ihr Aussehen festlegen |
-| **Prozess** | Projektmanagement: Projekte mit Status, Kunde, Termin und Fortschritt; Aufgaben als Board, Liste oder Zeitplan | Wer macht was bis wann, und wo hakt es? |
-| **Plattform** | Liste der Tools: Astro, Netlify, Google Analytics, Google Search Console, bei Bedarf Google Ads, Meta Ads und Neon als Datenbank | Überblick, womit Sie arbeiten |
+| **Dashboard** (Startansicht) | Kennzahlen mit Beispielzahlen (Besucher, Anfragen, Kunden, Umsatz, Budget, Anfragequote, Kosten pro Anfrage) und der Stand aller sechs Bereiche | Auf einen Blick sehen, wo Sie stehen |
+| **1 Produkt** | Business Model Canvas mit neun Feldern | Wie Ihr Unternehmen Werte schafft und Geld verdient |
+| **2 Positionierung** | Reiter: Strategie-Pyramide, Porter's 5 Kräfte, SWOT-Analyse, Persona / Empathy Map | Wofür Sie stehen, wie Ihr Markt aussieht, für wen Sie da sind |
+| **3 Promotion** | Unterseiten: Webseite mit Storytelling Framework (Wireframe und Checkliste), Design-System (Farben, Schriften, Ecken), Kanäle & Budget (Suche, Social Media, Affiliate-Netzwerke, Budgetplanung) | Website aufbauen, Aussehen festlegen, Kanäle und Budget planen |
+| **4 Prozess** | Unterseiten: Projekte (Wasserfall oder agil, Eisenhower-Matrix), Kampagnenplanung, Updates | Wer macht was bis wann, was ist wichtig, und was muss regelmäßig gepflegt werden? |
+| **5 Plattform** | Unterseiten: Tools (mit Logo, Datenschutzerklärung und AVV), Abos & Domains (Kosten und Verlängerungen) | Überblick, womit Sie arbeiten und was es kostet |
+| **6 Performance** | Echte Zahlen aus Google Analytics: Besucher, Seitenaufrufe, Verlauf, meistbesuchte Seiten, Herkunft; Zeitraum 7, 30 oder 90 Tage | Sehen, ob die Website wirkt |
 
-Solange Google Analytics nicht verbunden ist, zeigt Performance **Beispieldaten** mit dem gelben Hinweis „Beispieldaten“. Die Modelle zeigen Beispielinhalte einer fiktiven Firma mit dem Hinweis „Beispiel“.
+Solange Google Analytics nicht verbunden ist, zeigt Performance **Beispieldaten** mit gelbem Hinweis. Die Beispielzahlen der Übersicht stehen in `src/inhalte/dashboard-kennzahlen.json`. Die Modelle zeigen Beispielinhalte einer fiktiven Firma mit dem Hinweis „Beispiel“.
 
 ---
 
@@ -64,26 +67,33 @@ So gehen Sie vor:
 
 Ohne KI-Tool ändern Sie die Dateien direkt: Ersetzen Sie nur den Text zwischen den Anführungszeichen. Achten Sie darauf, Kommas und Klammern nicht zu löschen. Wenn die Vorschau danach einen Fehler zeigt, fehlt meist ein Komma oder ein Anführungszeichen.
 
-### Projekte und Aufgaben im Reiter Prozess
+### Projekte, Kampagnen und Updates im Reiter Prozess
 
-Im Reiter **Prozess** legen Sie Projekte und Aufgaben direkt im Browser an:
+**Projekte:** Ein Klick auf ein Projekt öffnet es oben mit seinen eigenen Ansichten; jedes Projekt merkt sich die zuletzt gewählte Ansicht. Im Projektformular wählen Sie das Vorgehen:
 
-- **+ Projekt** und **+ Aufgabe** öffnen ein Formular. Ein Klick auf ein Projekt oder eine Aufgabe öffnet sie zum Bearbeiten oder Löschen.
-- **Board:** Aufgaben in vier Spalten (Offen, In Arbeit, Blockiert, Erledigt). Karten lassen sich mit der Maus in eine andere Spalte ziehen.
-- **Liste:** alle Aufgaben nach Kategorie gruppiert, den Status ändern Sie direkt in der Tabelle.
-- **Zeitplan:** jede Aufgabe als Balken von Start bis Fälligkeit, mit Markierung für heute.
+- **Wasserfall** für Projekte mit festem Ziel, Umfang und Termin. Fünf Phasen nacheinander: Projektdefinition, Planung, Umsetzung, Controlling, Abschluss. Wichtige Termine markieren Sie als **Meilenstein** (◆). Ansichten: Phasen, Zeitplan, Eisenhower, Liste.
+- **Agil** für Projekte, deren bestes Ergebnis sich erst beim Ausprobieren zeigt. Ideen sammeln sich im **Backlog**, die Arbeit läuft in **Sprints** von 1 bis 4 Wochen. Ansichten: Board (mit Sprint-Filter), Sprints, Eisenhower, Liste.
+- **Eisenhower-Matrix:** ordnet offene Aufgaben nach Wichtigkeit und Dringlichkeit in vier Felder: sofort erledigen, einplanen, delegieren, streichen oder später. Aufgaben ziehen Sie mit der Maus in ein anderes Feld oder setzen „wichtig“ und „dringend“ im Aufgabenformular. Ohne Projektauswahl zeigt die Übersicht die Matrix für alle Projekte.
 
-**Wichtig:** Ihre Einträge speichert nur der Browser auf diesem Gerät. Andere Personen sehen sie nicht, und beim Löschen der Browserdaten sind sie weg. Sichern Sie deshalb regelmäßig über **Als Datei sichern** und laden Sie die Datei bei Bedarf über **Datei laden** wieder. Die Startdaten (Beispielprojekte) stehen in `src/inhalte/projekte.json`.
+**Kampagnenplanung:** Kampagnen mit Ziel, Zielgruppe, Kernbotschaft, Kanälen, Zeitraum, Budget und einer Kennzahl (Ziel und Ist), als Zeitplan oder Karten.
+
+**Updates:** erinnert an wiederkehrende Aufgaben wie das Astro-Update (monatlich), Paket- und Sicherheitsprüfungen, Node.js, Netlify, Rechtstexte und Verträge. Für Astro wird die neueste Version automatisch abgefragt und mit der installierten verglichen. Mit „Heute erledigt“ startet die Erinnerung neu.
+
+**Wichtig:** Projekte, Kampagnen, Abos, Budgetplanung und Haken speichert nur der Browser auf diesem Gerät. Andere Personen sehen sie nicht, und beim Löschen der Browserdaten sind sie weg. Sichern Sie deshalb regelmäßig über **Als Datei sichern** und laden Sie die Datei bei Bedarf über **Datei laden** wieder. Die Startdaten (Beispielprojekte) stehen in `src/inhalte/projekte.json`.
 
 **Für den echten Einsatz im Team: Neon einrichten.** Das Projektmanagement in der Vorlage ist ein Beispiel ohne Datenbank. Damit alle im Team dieselben Projekte und Aufgaben sehen, legen Sie auf https://neon.tech ein kostenloses Konto und eine Datenbank an. Den Verbindungs-Schlüssel hinterlegen Sie wie das Dashboard-Passwort als Umgebungsvariable bei Netlify, nie in einer Datei. Den Umbau übernimmt Ihr KI-Tool, zum Beispiel mit: *„Speichere Projekte und Aufgaben im Reiter Prozess in meiner Neon-Datenbank. Die Schnittstelle soll unter /dashboard/api/ liegen, damit der Passwortschutz greift.“*
 
 Ein weiteres Tool für den Reiter Plattform ergänzen Sie so:
 
 ```json
-{ "name": "Mailchimp", "zweck": "Newsletter versenden", "link": "https://mailchimp.com", "bedarf": true }
+{
+  "name": "Mailchimp", "logo": "", "zweck": "Newsletter versenden", "link": "https://mailchimp.com", "bedarf": true,
+  "datenschutz": "https://…/privacy",
+  "avv": { "noetig": "ja", "url": "https://…/dpa", "hinweis": "Verarbeitet E-Mail-Adressen der Abonnenten." }
+}
 ```
 
-`"bedarf": true` sortiert das Tool unter „Bei Bedarf“ ein.
+`"bedarf": true` sortiert das Tool unter „Bei Bedarf“ ein. Bei `"avv"` ist `"noetig"` entweder `"ja"`, `"nein"` oder `"abhaengig"`. Ohne Logo zeigt die Liste den Anfangsbuchstaben; eigene Logos legen Sie als SVG in `public/logos/`.
 
 ---
 
@@ -150,7 +160,7 @@ Wenn Netlify anbietet, eine Variable als geheim („secret“) zu markieren, tun
 Die Variablen gelten erst nach der nächsten Veröffentlichung: In Netlify unter **Deploys → Trigger deploy → Deploy site**.
 
 **Schritt 9 – Prüfen, ob Daten ankommen.**
-Öffnen Sie `/dashboard/`. Oben steht jetzt **„Live – Daten aus Google Analytics“**. Wechseln Sie den Zeitraum zwischen 7, 30 und 90 Tagen; die Werte ändern sich mit.
+Öffnen Sie im Dashboard den Reiter **Performance** (`/dashboard/performance/`). Oben steht jetzt **„Live – Daten aus Google Analytics“**. Wechseln Sie den Zeitraum zwischen 7, 30 und 90 Tagen; die Werte ändern sich mit.
 Neue Besuche erscheinen dort nicht sofort: Google verarbeitet die Daten mit einigen Stunden Verzögerung, am ersten Tag kann das Dashboard noch leer sein. Für den Sofort-Test nutzen Sie den Echtzeit-Bericht in Google Analytics (Teil A, Schritt 7).
 
 ### Wenn es nicht klappt

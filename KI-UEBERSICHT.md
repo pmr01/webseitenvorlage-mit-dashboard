@@ -7,7 +7,7 @@ Diese Datei erklärt einem KI-Tool (zum Beispiel Claude), wie die Vorlage aufgeb
 Eine Website-Vorlage mit Dashboard, gebaut mit Astro (statische Website) für das Hosting bei Netlify.
 
 - **Website:** eine Startseite nach dem Storytelling Framework (12 Elemente in fester Reihenfolge), dazu Impressum und Datenschutz.
-- **Dashboard** unter `/dashboard/`: sechs Reiter nach dem 6P-Prinzip. Performance ist die Startansicht. Bei Netlify durch ein Passwort geschützt.
+- **Dashboard** unter `/dashboard/`: Übersicht mit Beispielzahlen, dann sechs Reiter nach dem 6P-Prinzip (Produkt, Positionierung, Promotion, Prozess, Plattform, Performance). Bei Netlify durch ein Passwort geschützt.
 - **Analytics:** Google Analytics (GA4) erfasst Besuche erst nach Einwilligung. Eine Serverfunktion liest die Kennzahlen für das Dashboard.
 
 Alle Texte sind auf Deutsch. Bitte Änderungen ebenfalls auf Deutsch formulieren.
@@ -25,7 +25,13 @@ Alle Texte sind auf Deutsch. Bitte Änderungen ebenfalls auf Deutsch formulieren
 | SWOT-Analyse (Reiter Positionierung) | `src/inhalte/swot-analyse.json` |
 | Persona / Empathy Map (Reiter Positionierung) | `src/inhalte/persona-empathy-map.json` |
 | Checkliste des Storytelling Frameworks (Reiter Promotion) | `src/inhalte/storytelling-checkliste.json` |
-| Tool-Liste (Reiter Plattform) | `src/inhalte/plattform-tools.json` |
+| Tool-Liste mit Datenschutz- und AVV-Links (Plattform → Tools) | `src/inhalte/plattform-tools.json`, Logos in `public/logos/` |
+| Beispiel-Abos und -Domains (Plattform → Abos & Domains) | `src/inhalte/abos.json` |
+| Beispielzahlen der Übersicht (Reiter Dashboard) | `src/inhalte/dashboard-kennzahlen.json` |
+| Kanäle und Affiliate-Netzwerke (Promotion → Kanäle & Budget) | `src/inhalte/kanaele.json` |
+| Beispielprojekte und Phasen (Prozess → Projekte) | `src/inhalte/projekte.json` |
+| Beispielkampagnen (Prozess → Kampagnenplanung) | `src/inhalte/kampagnen.json` |
+| Wiederkehrende Updates und Prüfungen (Prozess → Updates) | `src/inhalte/updates.json` |
 | Impressum, Datenschutz | `src/pages/impressum.astro`, `src/pages/datenschutz.astro` |
 | Beispieldaten für Performance | `public/daten/beispieldaten.json` |
 
@@ -50,11 +56,19 @@ src/
   inhalte/*.json             Inhalte der Dashboard-Modelle
   pages/index.astro          Startseite (Storytelling Framework)
   pages/impressum.astro, datenschutz.astro
-  pages/dashboard/           index (Performance), produkt, positionierung,
-                             promotion/ (index = Storytelling, design = Design-System),
-                             prozess, plattform
-  pages/dashboard/anleitungen/   zeigt die beiden Anleitungen aus anleitungen/
-                             im Dashboard an (Text nur in den .md-Dateien ändern)
+  pages/dashboard/index.astro        Übersicht (Startansicht) mit Beispielzahlen
+  pages/dashboard/produkt.astro      Business Model Canvas
+  pages/dashboard/positionierung.astro   vier Modelle als Reiter
+  pages/dashboard/promotion/         index = Webseite mit Storytelling Framework,
+                                     design = Design-System, kanaele = Kanäle & Budget
+  pages/dashboard/prozess/           index = Projekte (Wasserfall, agil, Eisenhower),
+                                     kampagnen, updates
+  pages/dashboard/plattform/         index = Tools, abos = Abos & Domains
+  pages/dashboard/performance.astro  Kennzahlen aus Google Analytics
+  pages/dashboard/anleitungen/       zeigt die beiden Anleitungen aus anleitungen/
+  components/Reiter.astro            Reiter innerhalb einer Seite
+  components/Unterseiten.astro       Navigation zwischen Unterseiten eines Reiters
+  styles/pm.css                      gemeinsame Bausteine für Prozess
   layouts/Website.astro      Kopfzeile, Fußbereich, Einwilligungsbanner
   layouts/Dashboard.astro    Reiter-Navigation des Dashboards
   components/                CTA, Einwilligungsbanner, Hinweise
@@ -73,6 +87,6 @@ anleitungen/                 Anleitungen für Menschen
 - `npm run dev` – Vorschau unter http://localhost:4321
 - `npm run build` – erzeugt die fertige Website im Ordner `dist/`
 
-## Projektmanagement (Reiter Prozess)
+## Daten im Browser
 
-`src/pages/dashboard/prozess.astro` enthält ein Projektmanagement mit Projekten (Status: planned, active, on-hold, completed) und Aufgaben (Status: todo, in_progress, blocked, done; Felder Kategorie, Zuständig, Start, Fällig, Fortschritt). Ansichten: Board, Liste, Zeitplan. Startdaten: `src/inhalte/projekte.json` (Datumsangaben dort sind Tage relativ zu heute). Änderungen speichert der Browser im `localStorage`; Export und Import als JSON-Datei. Für gemeinsames Arbeiten wäre eine Datenbank nötig (z. B. Neon) mit einer Serverfunktion unter `/dashboard/api/`, damit der Passwortschutz greift.
+Projekte, Kampagnen, Abos, Budgetplanung, Haken der Checklisten, Updates und der Design-Entwurf werden im `localStorage` des Browsers gespeichert (Schlüssel z. B. `prozess-projektmanagement-v2`, `prozess-kampagnen`, `plattform-abos`, `kanaele-budget`, `prozess-updates`). Startdaten kommen aus `src/inhalte/`. Export und Import als Datei gibt es jeweils auf der Seite. Für gemeinsames Arbeiten im Team wäre eine Datenbank nötig (z. B. Neon) mit einer Serverfunktion unter `/dashboard/api/`, damit der Passwortschutz greift.
