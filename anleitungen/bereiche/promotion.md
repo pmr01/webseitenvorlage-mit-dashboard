@@ -22,7 +22,7 @@ Der Redaktionsplan für Blogartikel, Reels, Posts, Newsletter und Videos. Ansich
 Links das Wireframe der Startseite, rechts die Checkliste mit den zwölf Elementen. Haken Sie ab, was auf Ihrer Website schon steht.
 
 - **Aktuelle Website:** Der Umschalter über dem Wireframe zeigt Ihre echte Startseite verkleinert, mit den Nummern 1–12. Rot gestrichelt ist alles, was noch Platzhalter der Vorlage ist; oben steht, wie viele es noch sind.
-- **Website bearbeiten:** öffnet die Startseite im Bearbeitungsmodus. Texte mit gestricheltem Rahmen anklicken und ändern; der Call-to-Action ändert sich überall gleichzeitig. Der Entwurf bleibt im Browser. Mit **Veröffentlichen** speichert der Editor die Texte direkt bei GitHub; Netlify baut die Website danach in 1–2 Minuten neu (einmalige Einrichtung: Anleitung Website, Teil 4). Ohne Einrichtung nutzen Sie **Herunterladen**: Sie erhalten `konfiguration.mjs` mit Ihren Texten (Kommentare bleiben erhalten), legen die Datei als `src/konfiguration.mjs` ins Projekt und veröffentlichen neu.
+- **Website bearbeiten:** öffnet die Startseite im Bearbeitungsmodus. Texte mit gestricheltem Rahmen anklicken und ändern; der Call-to-Action ändert sich überall gleichzeitig. Logo (✎), Hauptbild und das Bild bei Vorstellung tauschen Sie über **Bild ändern** aus; große Fotos werden automatisch verkleinert. Der Entwurf bleibt im Browser. Mit **Veröffentlichen** speichert der Editor die Texte direkt bei GitHub; Netlify baut die Website danach in 1–2 Minuten neu (einmalige Einrichtung: Anleitung Website, Teil 4). Ohne Einrichtung nutzen Sie **Herunterladen**: Sie erhalten `konfiguration.mjs` mit Ihren Texten (Kommentare bleiben erhalten), legen die Datei als `src/konfiguration.mjs` ins Projekt und veröffentlichen neu.
 
 ## Design-System
 

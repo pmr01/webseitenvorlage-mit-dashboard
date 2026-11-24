@@ -12,7 +12,7 @@ import Bearbeiten from '../components/Bearbeiten.astro';
   <section class="hero" aria-labelledby="hero-titel">
     {k.hero.video
       ? <video class="hero-medium" src={k.hero.video} autoplay muted loop playsinline aria-hidden="true"></video>
-      : <img class="hero-medium" src={k.hero.bild} alt={k.hero.bildAlt} width="1600" height="900" />}
+      : <img class="hero-medium" src={k.hero.bild} alt={k.hero.bildAlt} width="1600" height="900" data-bild="hero.bild" data-bild-alt="hero.bildAlt" />}
     <div class="hero-text inhalt">
       <h1 id="hero-titel" data-k="hero.ueberschrift">{k.hero.ueberschrift}</h1>
       <p class="einleitung" data-k="hero.einleitung">{k.hero.einleitung}</p>
@@ -41,7 +41,7 @@ import Bearbeiten from '../components/Bearbeiten.astro';
         {k.vorstellung.text.map((absatz, i) => <p data-k={`vorstellung.text.${i}`}>{absatz}</p>)}
         <CTA zentriert={false} ort="vorstellung" />
       </div>
-      <img src={k.vorstellung.bild} alt={k.vorstellung.bildAlt} width="600" height="600" loading="lazy" />
+      <img src={k.vorstellung.bild} alt={k.vorstellung.bildAlt} width="600" height="600" loading="lazy" data-bild="vorstellung.bild" data-bild-alt="vorstellung.bildAlt" />
     </div>
   </section>
 

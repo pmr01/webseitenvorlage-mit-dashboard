@@ -1,9 +1,11 @@
 ---
 // Einfacher Editor und Prüfansicht für die Startseite. Ohne Parameter passiert nichts.
 //
-//   /?bearbeiten  Bearbeitungsmodus: Texte anklicken und ändern. Der Entwurf bleibt im Browser.
-//                 "Konfiguration herunterladen" erzeugt src/konfiguration.mjs mit den neuen
-//                 Texten; Kommentare und alles andere in der Datei bleiben erhalten.
+//   /?bearbeiten  Bearbeitungsmodus: Texte anklicken und ändern, Logo und Bilder über
+//                 „Bild ändern“ austauschen (Elemente mit data-bild="pfad"). Der Entwurf bleibt
+//                 im Browser. „Herunterladen“ erzeugt src/konfiguration.mjs (Kommentare bleiben)
+//                 und die neuen Bilder für public/bilder/; „Veröffentlichen“ schickt alles in
+//                 einem Commit an GitHub (netlify/functions/veroeffentlichen.mjs).
 //   /?markieren   Prüfansicht (im Dashboard eingebettet): zeigt die Nummern 1–12 des
 //                 Storytelling Frameworks und markiert, was noch Platzhalter der Vorlage ist.
 //
@@ -48,6 +50,11 @@ const daten = { konfiguration, quelltext, platzhalter: platzhalter.werte };
       [data-ed]:hover { outline-color: #e0a458; }
       [data-ed]:focus { outline: 2px solid #e0a458; background: rgba(224,164,88,.12); }
       [data-ed].ed-geaendert { outline-color: #3d8b5a; }
+      [data-bild].ed-bild { outline: 3px dashed rgba(224,164,88,.8); outline-offset: -3px; }
+      [data-bild].ed-bild.ed-geaendert { outline-color: #3d8b5a; }
+      .ed-bild-knopf { position: absolute; z-index: 40; font: 600 13px system-ui, sans-serif; background: #1c2126; color: #fff; border: 2px solid #e0a458; border-radius: 999px; padding: 6px 12px; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,.3); white-space: nowrap; }
+      .ed-bild-knopf:hover, .ed-bild-knopf:focus-visible { background: #e0a458; color: #1c2126; }
+      .ed-bild-knopf.klein { padding: 0; width: 24px; height: 24px; display: grid; place-items: center; font-size: 12px; }
       .mk-nr { position: absolute; z-index: 30; display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 6px; border-radius: 999px; background: #1c2126; color: #fff; font: 700 13px system-ui, sans-serif; box-shadow: 0 0 0 2px #fff; pointer-events: none; }
       .mk-offen { outline: 3px dashed #d14343 !important; outline-offset: 3px; position: relative; }
       .mk-offen-bild { outline: 4px dashed #d14343; outline-offset: -4px; }
@@ -114,6 +121,92 @@ const daten = { konfiguration, quelltext, platzhalter: platzhalter.werte };
         });
       }
 
+      // ---------- Bilder austauschen ----------
+      // Neue Bilder liegen bis zum Veröffentlichen im Browser (Data-URL). In der Konfiguration steht
+      // schon der künftige Pfad /bilder/<name>; die Datei kommt beim Veröffentlichen nach public/bilder/.
+      type NeuesBild = { name: string; daten: string };
+      const BILDER = 'website-entwurf-bilder';
+      let bilder: Record<string, NeuesBild> = {};
+      try { bilder = JSON.parse(localStorage.getItem(BILDER) || '{}'); } catch { bilder = {}; }
+      let bilderGemerkt = true;
+      const bilderSpeichern = () => { try { localStorage.setItem(BILDER, JSON.stringify(bilder)); bilderGemerkt = true; } catch { bilderGemerkt = false; } };
+      const KURZ: Record<string, string> = { 'firma.logo': 'logo', 'hero.bild': 'hauptbild', 'vorstellung.bild': 'vorstellung' };
+      const BREITE: Record<string, number> = { 'firma.logo': 400, 'hero.bild': 1920, 'vorstellung.bild': 1200 };
+      const TYPEN: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif', 'image/svg+xml': 'svg' };
+      const bildElemente = () => Array.from(document.querySelectorAll<HTMLImageElement>('img[data-bild]')).filter((b) => original.has(b.dataset.bild!));
+      const originalAlt = new Map(bildElemente().map((b) => [b, b.getAttribute('alt') || '']));
+      // Bild-Entwürfe ohne gespeicherte Datei verwerfen (z. B. Speicher war voll)
+      for (const pfad of Object.keys(KURZ)) if (entwurf[pfad] && !bilder[pfad]) delete entwurf[pfad];
+      for (const pfad of Object.keys(bilder)) if (!entwurf[pfad]) delete bilder[pfad];
+
+      // Große Fotos vor dem Hochladen verkleinern (spart Ladezeit); SVG und GIF bleiben, wie sie sind
+      async function vorbereiten(datei: File, pfad: string): Promise<string> {
+        const roh = await new Promise<string>((ok, fehler) => { const r = new FileReader(); r.onload = () => ok(String(r.result)); r.onerror = fehler; r.readAsDataURL(datei); });
+        if (!/^image\/(png|jpeg|webp)$/.test(datei.type)) return roh;
+        const bild = new Image(); bild.src = roh; await bild.decode();
+        const max = BREITE[pfad] || 1600;
+        if (bild.naturalWidth <= max) return roh;
+        const c = document.createElement('canvas');
+        c.width = max; c.height = Math.round(bild.naturalHeight * max / bild.naturalWidth);
+        c.getContext('2d')!.drawImage(bild, 0, 0, c.width, c.height);
+        return c.toDataURL(datei.type, 0.85);
+      }
+
+      const waehler = document.createElement('input');
+      waehler.type = 'file'; waehler.accept = Object.keys(TYPEN).join(','); waehler.hidden = true;
+      document.body.append(waehler);
+      let ziel: HTMLImageElement | null = null;
+
+      const knoepfe: [HTMLImageElement, HTMLButtonElement][] = [];
+      for (const img of bildElemente()) {
+        const pfad = img.dataset.bild!;
+        img.classList.add('ed-bild');
+        if (bilder[pfad]) { img.src = bilder[pfad].daten; img.classList.add('ed-geaendert'); }
+        const altPfad = img.dataset.bildAlt;
+        if (altPfad && entwurf[altPfad] !== undefined) img.alt = entwurf[altPfad];
+        const knopf = document.createElement('button');
+        knopf.type = 'button'; knopf.className = 'ed-bild-knopf';
+        const klein = img.getBoundingClientRect().width < 120;
+        if (klein) { knopf.classList.add('klein'); knopf.textContent = '✎'; knopf.title = 'Logo ändern'; knopf.setAttribute('aria-label', 'Logo ändern'); }
+        else knopf.textContent = pfad === 'hero.bild' ? '🖼 Hauptbild ändern' : '🖼 Bild ändern';
+        knopf.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); ziel = img; waehler.value = ''; waehler.click(); });
+        const eltern = img.parentElement!;
+        if (getComputedStyle(eltern).position === 'static') eltern.style.position = 'relative';
+        eltern.append(knopf);
+        knoepfe.push([img, knopf]);
+      }
+      const platzieren = () => {
+        for (const [img, knopf] of knoepfe) {
+          if (knopf.classList.contains('klein')) { knopf.style.left = `${img.offsetLeft + img.offsetWidth - 14}px`; knopf.style.top = `${img.offsetTop - 10}px`; }
+          else { knopf.style.left = `${img.offsetLeft + 12}px`; knopf.style.top = `${img.offsetTop + 12}px`; }
+        }
+      };
+      platzieren();
+      addEventListener('resize', platzieren);
+      addEventListener('load', platzieren);
+
+      waehler.addEventListener('change', async () => {
+        const datei = waehler.files?.[0]; const img = ziel;
+        if (!datei || !img) return;
+        const pfad = img.dataset.bild!;
+        const endung = TYPEN[datei.type];
+        if (!endung) { status('Bitte ein Bild als JPG, PNG, WebP, GIF oder SVG wählen.', 'fehler'); return; }
+        if (datei.size > (endung === 'svg' ? 300_000 : 8_000_000)) { status(endung === 'svg' ? 'Die SVG-Datei ist zu groß (höchstens 300 KB).' : 'Das Bild ist zu groß (höchstens 8 MB).', 'fehler'); return; }
+        let daten: string;
+        try { daten = await vorbereiten(datei, pfad); } catch { status('Das Bild ließ sich nicht lesen.', 'fehler'); return; }
+        if (daten.length > 2_800_000) { status('Das Bild ist auch verkleinert noch zu groß (höchstens etwa 2 MB). Bitte vorher komprimieren.', 'fehler'); return; }
+        const name = `${KURZ[pfad] || 'bild'}-${Date.now().toString(36)}.${endung}`;
+        bilder[pfad] = { name, daten }; entwurf[pfad] = `/bilder/${name}`;
+        img.src = daten; img.classList.add('ed-geaendert');
+        const altPfad = img.dataset.bildAlt;
+        if (altPfad) {
+          const alt = prompt('Kurze Bildbeschreibung (für Menschen mit Screenreader und für Suchmaschinen):', entwurf[altPfad] ?? original.get(altPfad) ?? '');
+          if (alt !== null) { const t = alt.replace(/\s+/g, ' ').trim(); if (t && t !== original.get(altPfad)) entwurf[altPfad] = t; else delete entwurf[altPfad]; img.alt = t || original.get(altPfad) || ''; }
+        }
+        bilderSpeichern(); speichern(); platzieren();
+        status(bilderGemerkt ? 'Bild ausgetauscht. Mit „Veröffentlichen“ geht es online.' : 'Bild ausgetauscht. Achtung: Der Browser-Speicher ist voll, das Bild bleibt nur bis zum Neuladen. Bitte jetzt veröffentlichen oder herunterladen.', bilderGemerkt ? 'ok' : 'fehler');
+      });
+
       const leiste = document.createElement('div');
       leiste.className = 'ed-leiste';
       leiste.setAttribute('role', 'region');
@@ -123,7 +216,7 @@ const daten = { konfiguration, quelltext, platzhalter: platzhalter.werte };
         <button type="button" id="ed-laden">Herunterladen</button>
         <button type="button" class="ed-haupt" id="ed-veroeffentlichen">Veröffentlichen</button>
         <button type="button" id="ed-ende">Beenden</button>
-        <small id="ed-status">Texte mit gestricheltem Rahmen anklicken und ändern. Der Entwurf bleibt in diesem Browser, bis Sie veröffentlichen.</small>`;
+        <small id="ed-status">Texte mit gestricheltem Rahmen anklicken und ändern, Logo und Bilder über „Bild ändern“ austauschen. Der Entwurf bleibt in diesem Browser, bis Sie veröffentlichen.</small>`;
       document.body.append(leiste);
       document.body.style.paddingBottom = '140px';
 
@@ -132,11 +225,13 @@ const daten = { konfiguration, quelltext, platzhalter: platzhalter.werte };
 
       document.getElementById('ed-verwerfen')!.addEventListener('click', () => {
         if (!confirm('Alle Änderungen dieses Entwurfs verwerfen?')) return;
-        entwurf = {}; speichern();
+        entwurf = {}; speichern(); bilder = {}; bilderSpeichern();
         for (const el of felder()) if (original.has(el.dataset.k!)) { el.textContent = original.get(el.dataset.k!)!; el.classList.remove('ed-geaendert'); }
+        for (const img of bildElemente()) { img.src = original.get(img.dataset.bild!)!; img.alt = originalAlt.get(img) || ''; img.classList.remove('ed-geaendert'); }
+        platzieren();
       });
       document.getElementById('ed-ende')!.addEventListener('click', () => { location.href = location.pathname; });
-      const status = (text: string, art = '') => { const s = document.getElementById('ed-status')!; s.textContent = text; s.style.color = art === 'fehler' ? '#ffb4b4' : art === 'ok' ? '#b6f0c4' : ''; };
+      function status(text: string, art = '') { const s = document.getElementById('ed-status')!; s.textContent = text; s.style.color = art === 'fehler' ? '#ffb4b4' : art === 'ok' ? '#b6f0c4' : ''; }
       document.getElementById('ed-veroeffentlichen')!.addEventListener('click', async () => {
         const n = Object.keys(entwurf).length;
         if (!n) { status('Es gibt keine Änderungen zu veröffentlichen.'); return; }
@@ -146,13 +241,18 @@ const daten = { konfiguration, quelltext, platzhalter: platzhalter.werte };
         try {
           const r = await fetch('/dashboard/api/veroeffentlichen', {
             method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json', accept: 'application/json' },
-            body: JSON.stringify({ inhalt: neueKonfiguration(entwurf), basis: D.quelltext, nachricht: `Website-Texte geändert (${n} ${n === 1 ? 'Änderung' : 'Änderungen'})` }),
+            body: JSON.stringify({
+              inhalt: neueKonfiguration(entwurf), basis: D.quelltext,
+              nachricht: `Website geändert über den Editor (${n} ${n === 1 ? 'Änderung' : 'Änderungen'})`,
+              bilder: Object.values(bilder).map((b) => ({ pfad: `public/bilder/${b.name}`, inhalt: b.daten.slice(b.daten.indexOf(',') + 1) })),
+            }),
           });
           const typ = r.headers.get('content-type') || '';
           const d = typ.includes('json') ? await r.json() : null;
           if (r.ok && d?.ok) {
-            entwurf = {}; speichern();
+            entwurf = {}; speichern(); bilder = {}; bilderSpeichern();
             for (const el of felder()) el.classList.remove('ed-geaendert');
+            for (const img of bildElemente()) img.classList.remove('ed-geaendert');
             status(`${d.meldung}${d.commit ? ` (Commit ${d.commit})` : ''} Danach diese Seite neu laden.`, 'ok');
           } else if (r.status === 401) {
             status('Nicht angemeldet: Öffnen Sie zuerst das Dashboard, melden Sie sich an und starten Sie den Editor von dort (Promotion → Webseite → Website bearbeiten).', 'fehler');
@@ -170,6 +270,10 @@ const daten = { konfiguration, quelltext, platzhalter: platzhalter.werte };
         a.href = URL.createObjectURL(new Blob([neueKonfiguration(entwurf)], { type: 'text/javascript' }));
         a.download = 'konfiguration.mjs';
         document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        // Neue Bilder zusätzlich als eigene Dateien
+        const liste = Object.values(bilder);
+        liste.forEach((b, i) => setTimeout(() => { const l = document.createElement('a'); l.href = b.daten; l.download = b.name; document.body.append(l); l.click(); l.remove(); }, 400 * (i + 1)));
+        if (liste.length) status(`Heruntergeladen: konfiguration.mjs nach src/ und ${liste.length === 1 ? 'das Bild' : `${liste.length} Bilder`} (${liste.map((b) => b.name).join(', ')}) in den Ordner public/bilder/ legen.`, 'ok');
       });
     }
 

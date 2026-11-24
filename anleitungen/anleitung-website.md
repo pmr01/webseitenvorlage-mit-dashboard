@@ -64,7 +64,9 @@ Jede Änderung an einer Datei erscheint nach dem Speichern sofort in der Vorscha
 
 ## 3. Anpassen: Texte, Farben, Logo
 
-**Am einfachsten mit dem Editor:** Öffnen Sie im Dashboard **Promotion → Webseite mit Storytelling Framework** und klicken Sie auf **Website bearbeiten** (oder rufen Sie Ihre Startseite mit `?bearbeiten` am Ende der Adresse auf). Texte anklicken, ändern, dann **Veröffentlichen**: Die Änderung landet als Commit bei GitHub und ist nach 1–2 Minuten online (einmal einrichten, siehe Teil 4). Alternativ **Herunterladen** und die Datei als `src/konfiguration.mjs` ins Projekt legen. Bilder, Farben und die Navigation-Ziele ändern Sie weiterhin in der Datei.
+**Am einfachsten mit dem Editor:** Öffnen Sie im Dashboard **Promotion → Webseite mit Storytelling Framework** und klicken Sie auf **Website bearbeiten** (oder rufen Sie Ihre Startseite mit `?bearbeiten` am Ende der Adresse auf). Texte anklicken, ändern, dann **Veröffentlichen**: Die Änderung landet als Commit bei GitHub und ist nach 1–2 Minuten online (einmal einrichten, siehe Teil 4). Alternativ **Herunterladen** und die Datei als `src/konfiguration.mjs` ins Projekt legen.
+
+**Logo und Bilder** tauschen Sie im Editor ebenfalls aus: Beim Logo auf das kleine ✎ klicken, beim Hauptbild und beim Bild im Abschnitt Vorstellung auf **Bild ändern**. Erlaubt sind JPG, PNG, WebP, GIF und SVG. Große Fotos verkleinert der Editor automatisch (Hauptbild auf 1920 Pixel Breite, Vorstellung auf 1200, Logo auf 400). Danach fragt er nach einer kurzen Bildbeschreibung für Screenreader und Suchmaschinen. **Veröffentlichen** schickt Bilder und Texte zusammen in einem Schritt online; bei **Herunterladen** erhalten Sie die Bilder als eigene Dateien für den Ordner `public/bilder/`. Farben und Schriften stellen Sie im Design-System ein, die Ziele der Navigation in der Datei.
 
 Von Hand: Öffnen Sie `src/konfiguration.mjs`. Die Datei ist in Abschnitte mit Nummern gegliedert, die zu den zwölf Elementen passen. Ändern Sie nur den Text zwischen den Anführungszeichen.
 
