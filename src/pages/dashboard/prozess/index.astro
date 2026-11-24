@@ -32,9 +32,20 @@ import '../../../styles/pm.css';
     <div class="pm-projekte" id="pm-projekte"></div>
   </section>
 
-  <section id="pm-alle-matrix" class="pm-alle-matrix" aria-labelledby="pm-alle-matrix-titel">
-    <div class="pm-kopf"><h2 id="pm-alle-matrix-titel">Priorisierung aller offenen Aufgaben (Eisenhower)</h2></div>
-    <div id="pm-alle-matrix-inhalt"></div>
+  <section id="pm-alle" class="pm-alle" aria-labelledby="pm-alle-titel">
+    <div class="pm-kopf">
+      <h2 id="pm-alle-titel">Aufgaben</h2>
+      <div class="pm-knoepfe">
+        <label class="pm-filter">Projekt <select class="pm-select" id="pm-alle-filter"></select></label>
+        <div class="pm-ansicht" role="tablist" aria-label="Ansicht" id="pm-alle-ansicht">
+          <button type="button" role="tab" data-ansicht="board">Board</button>
+          <button type="button" role="tab" data-ansicht="liste">Liste</button>
+          <button type="button" role="tab" data-ansicht="zeitplan">Gantt</button>
+        </div>
+        <button type="button" class="pm-btn primaer" data-aktion="neue-aufgabe">+ Aufgabe</button>
+      </div>
+    </div>
+    <div id="pm-alle-inhalt"></div>
   </section>
 
   <details class="karte pm-methode">
@@ -75,7 +86,7 @@ import '../../../styles/pm.css';
       <label>Start<input name="start" type="date" /></label>
       <label>Fällig<input name="faellig" type="date" /></label>
       <label class="haken breit" data-nur="wasserfall"><input name="meilenstein" type="checkbox" /> Meilenstein (Ende einer Phase oder wichtiger Termin)</label>
-      <fieldset class="breit pm-prio"><legend>Priorität (Eisenhower)</legend>
+      <fieldset class="breit pm-prio"><legend>Priorität (optional, für die Eisenhower-Ansicht)</legend>
         <label class="haken"><input name="wichtig" type="checkbox" /> wichtig</label>
         <label class="haken"><input name="dringend" type="checkbox" /> dringend</label>
       </fieldset>
@@ -128,8 +139,8 @@ import '../../../styles/pm.css';
   const PROJEKT_STATUS: Record<ProjektStatus, [string, string]> = { planned: ['Geplant', 'blau'], active: ['Aktiv', 'gruen'], 'on-hold': ['Pausiert', 'gelb'], completed: ['Abgeschlossen', ''] };
   const AUFGABE_STATUS: Record<AufgabeStatus, string> = { todo: 'Offen', in_progress: 'In Arbeit', blocked: 'Blockiert', done: 'Erledigt' };
   const ANSICHTEN: Record<Vorgehen, [string, string][]> = {
-    wasserfall: [['phasen', 'Phasen'], ['zeitplan', 'Zeitplan'], ['eisenhower', 'Eisenhower'], ['liste', 'Liste']],
-    agil: [['board', 'Board'], ['sprints', 'Sprints'], ['eisenhower', 'Eisenhower'], ['liste', 'Liste']],
+    wasserfall: [['phasen', 'Phasen'], ['board', 'Board'], ['liste', 'Liste'], ['zeitplan', 'Gantt'], ['eisenhower', 'Eisenhower']],
+    agil: [['board', 'Board'], ['sprints', 'Sprints'], ['liste', 'Liste'], ['zeitplan', 'Gantt'], ['eisenhower', 'Eisenhower']],
   };
   const TAG = 86400000;
   const datum = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -271,7 +282,7 @@ import '../../../styles/pm.css';
     const [statusText, statusFarbe] = PROJEKT_STATUS[p.status];
     const ansichtKnoepfe = el('div', { class: 'pm-ansicht', role: 'tablist', 'aria-label': 'Ansicht' }, ...ANSICHTEN[p.vorgehen].map(([k, name]) =>
       el('button', { type: 'button', role: 'tab', 'aria-selected': String(p.ansicht === k), onclick: () => { p.ansicht = k; speichern(); } }, name)));
-    const inhalt = p.ansicht === 'phasen' ? phasen(p) : p.ansicht === 'zeitplan' ? zeitplan(p) : p.ansicht === 'board' ? board(p) : p.ansicht === 'sprints' ? sprints(p) : p.ansicht === 'eisenhower' ? eisenhower(aufgabenVon(p), false) : liste(p);
+    const inhalt = p.ansicht === 'phasen' ? phasen(p) : p.ansicht === 'zeitplan' ? zeitplan(aufgabenVon(p), p) : p.ansicht === 'board' ? board(aufgabenVon(p), p) : p.ansicht === 'sprints' ? sprints(p) : p.ansicht === 'eisenhower' ? eisenhower(aufgabenVon(p), false) : liste(aufgabenVon(p), p);
     box.replaceChildren(
       el('button', { type: 'button', class: 'pm-link pm-zurueck', onclick: () => oeffnen(null) }, '← Alle Projekte'),
       el('div', { class: 'karte pm-detail-kopf' },
@@ -315,9 +326,16 @@ import '../../../styles/pm.css';
     }));
   }
 
-  // Wasserfall: Zeitplan mit Phasen-Gruppen und Meilensteinen
-  function zeitplan(p: Projekt) {
-    const aufgaben = aufgabenVon(p).filter((a) => a.start || a.faellig);
+  // Gruppen für Liste und Gantt: Übersicht nach Projekt, Wasserfall nach Phase, agil nach Sprint
+  function gruppieren(alle: Aufgabe[], p: Projekt | null): [string, Aufgabe[]][] {
+    if (!p) return daten.projekte.map((x) => [x.name, alle.filter((a) => a.projekt === x.id)] as [string, Aufgabe[]]);
+    if (p.vorgehen === 'agil') return [0, ...Array.from({ length: maxSprint(p) }, (_, i) => i + 1)].map((n) => [sprintName(p, n), alle.filter((a) => a.sprint === n)] as [string, Aufgabe[]]);
+    return PHASEN.map((ph) => [ph, alle.filter((a) => a.phase === ph)] as [string, Aufgabe[]]);
+  }
+
+  // Gantt: Balken von Start bis Fälligkeit, Meilensteine als Raute
+  function zeitplan(alle: Aufgabe[], p: Projekt | null) {
+    const aufgaben = alle.filter((a) => a.start || a.faellig);
     if (!aufgaben.length) return el('p', { class: 'karte pm-leer' }, 'Noch keine Aufgaben mit Datum.');
     const anfang = (a: Aufgabe) => alsDatum(a.start || a.faellig)!.getTime();
     const ende = (a: Aufgabe) => alsDatum(a.faellig || a.start)!.getTime();
@@ -331,10 +349,10 @@ import '../../../styles/pm.css';
     for (; w.getTime() <= max; w.setDate(w.getDate() + 7)) wochen.push(el('span', { class: 'pm-woche', style: `left:${pz(w.getTime())}%` }, datumKurz.format(w)));
 
     const zeilen: HTMLElement[] = [];
-    for (const phase of PHASEN) {
-      const liste = aufgaben.filter((a) => a.phase === phase).sort((x, y) => anfang(x) - anfang(y));
+    for (const [gruppe, l] of gruppieren(aufgaben, p)) {
+      const liste = l.sort((x, y) => anfang(x) - anfang(y));
       if (!liste.length) continue;
-      zeilen.push(el('div', { class: 'pm-zeile gruppe' }, el('span', { class: 'pm-zeile-name' }, phase), el('div', { class: 'pm-spur' }, heuteLinie())));
+      zeilen.push(el('div', { class: 'pm-zeile gruppe' }, el('span', { class: 'pm-zeile-name' }, gruppe), el('div', { class: 'pm-spur' }, heuteLinie())));
       for (const a of liste) {
         const links = pz(anfang(a));
         const breite = Math.max(1.2, pz(ende(a) + TAG) - links);
@@ -354,18 +372,23 @@ import '../../../styles/pm.css';
         el('span', {}, '◆ Meilenstein')));
   }
 
-  // Agil: Board nach Status mit Sprint-Filter
+  // Board nach Status; bei agilen Projekten mit Sprint-Filter
   let boardSprint: Record<string, string> = {};
-  function board(p: Projekt) {
-    const auswahl = boardSprint[p.id] ?? String(aktuellerSprint(p));
+  function board(alle: Aufgabe[], p: Projekt | null) {
+    const agil = !!p && p.vorgehen === 'agil';
+    if (!agil) return el('div', { class: 'pm-board' }, ...boardSpalten(alle, p));
+    const auswahl = boardSprint[p!.id] ?? String(aktuellerSprint(p!));
     const filter = el('select', { class: 'pm-select', 'aria-label': 'Sprint anzeigen' },
       el('option', { value: 'alle' }, 'Alle Sprints und Backlog'),
       ...Array.from({ length: maxSprint(p) }, (_, i) => el('option', { value: String(i + 1) }, `${sprintName(p, i + 1)}${i + 1 === aktuellerSprint(p) ? ' – aktuell' : ''}`)),
       el('option', { value: '0' }, 'Backlog')) as HTMLSelectElement;
     filter.value = auswahl;
-    filter.addEventListener('change', () => { boardSprint[p.id] = filter.value; zeichnen(); });
-    const sichtbar = aufgabenVon(p).filter((a) => auswahl === 'alle' || a.sprint === Number(auswahl));
-    const spalten = (Object.keys(AUFGABE_STATUS) as AufgabeStatus[]).map((status) => {
+    filter.addEventListener('change', () => { boardSprint[p!.id] = filter.value; zeichnen(); });
+    const sichtbar = alle.filter((a) => auswahl === 'alle' || a.sprint === Number(auswahl));
+    return el('div', {}, el('label', { class: 'pm-filter' }, 'Sprint ', filter), el('div', { class: 'pm-board' }, ...boardSpalten(sichtbar, p)));
+  }
+  function boardSpalten(sichtbar: Aufgabe[], p: Projekt | null) {
+    return (Object.keys(AUFGABE_STATUS) as AufgabeStatus[]).map((status) => {
       const liste = sichtbar.filter((a) => a.status === status);
       const spalte = el('div', { class: `pm-spalte s-${status}` },
         el('h3', {}, AUFGABE_STATUS[status], el('span', { class: 'pm-anzahl' }, String(liste.length))),
@@ -380,12 +403,11 @@ import '../../../styles/pm.css';
       });
       return spalte;
     });
-    return el('div', {}, el('label', { class: 'pm-filter' }, 'Sprint ', filter), el('div', { class: 'pm-board' }, ...spalten));
   }
-  function karte(a: Aufgabe, p: Projekt) {
+  function karte(a: Aufgabe, p: Projekt | null) {
     const k = el('article', { class: 'pm-karte', draggable: 'true' },
       titelKnopf(a),
-      el('span', { class: 'pm-klein' }, p.vorgehen === 'agil' ? sprintName(p, a.sprint).replace(/ \(.*\)/, '') : a.phase),
+      el('span', { class: 'pm-klein' }, !p ? `${daten.projekte.find((x) => x.id === a.projekt)?.name ?? ''}` : p.vorgehen === 'agil' ? sprintName(p, a.sprint).replace(/ \(.*\)/, '') : a.phase),
       el('span', { class: 'pm-karte-fuss' }, a.zustaendig ? el('span', { class: 'pm-person' }, a.zustaendig) : el('span'), a.faellig ? el('span', { class: ueberfaellig(a) ? 'pm-faellig ueber' : 'pm-faellig' }, datumKurz.format(alsDatum(a.faellig)!)) : null),
       a.fortschritt > 0 && a.status !== 'done' ? el('span', { class: 'pm-balken' }, el('span', { style: `width:${a.fortschritt}%` })) : null,
       el('label', { class: 'pm-karte-status' }, 'Status ', statusAuswahl(a)));
@@ -454,16 +476,12 @@ import '../../../styles/pm.css';
       el('div', { class: 'pm-achse-y', 'aria-hidden': 'true' }, el('span', {}, 'wichtig'), el('span', {}, 'nicht wichtig')),
       el('div', { class: 'pm-achse-x', 'aria-hidden': 'true' }, el('span', {}, 'dringend'), el('span', {}, 'nicht dringend')),
       el('div', { class: 'pm-matrix' }, feld(QUADRANTEN[0]), feld(QUADRANTEN[1]), feld(QUADRANTEN[2]), feld(QUADRANTEN[3])),
-      el('p', { class: 'pm-klein pm-matrix-hinweis' }, 'Aufgaben per Maus in ein anderes Feld ziehen oder im Aufgabenformular „wichtig“ und „dringend“ setzen. Erledigte Aufgaben werden ausgeblendet.'));
+      el('p', { class: 'pm-klein pm-matrix-hinweis' }, 'Optional: Aufgaben per Maus in ein anderes Feld ziehen oder im Aufgabenformular „wichtig“ und „dringend“ setzen. Erledigte Aufgaben werden ausgeblendet.'));
   }
 
-  // Beide: Liste gruppiert nach Phase oder Sprint
-  function liste(p: Projekt) {
-    const aufgaben = aufgabenVon(p);
-    const gruppen: [string, Aufgabe[]][] = p.vorgehen === 'agil'
-      ? [0, ...Array.from({ length: maxSprint(p) }, (_, i) => i + 1)].map((n) => [sprintName(p, n), aufgaben.filter((a) => a.sprint === n)] as [string, Aufgabe[]])
-      : PHASEN.map((ph) => [ph, aufgaben.filter((a) => a.phase === ph)] as [string, Aufgabe[]]);
-    const belegt = gruppen.filter(([, l]) => l.length);
+  // Liste gruppiert nach Projekt, Phase oder Sprint
+  function liste(alle: Aufgabe[], p: Projekt | null) {
+    const belegt = gruppieren(alle, p).filter(([, l]) => l.length);
     if (!belegt.length) return el('p', { class: 'karte pm-leer' }, 'Noch keine Aufgaben. Legen Sie mit „+ Aufgabe“ die erste an.');
     return el('div', { class: 'karte pm-tabelle-rahmen' }, el('table', { class: 'pm-tabelle' },
       el('thead', {}, el('tr', {}, ...['Aufgabe', 'Zuständig', 'Status', 'Start', 'Fällig', 'Fortschritt'].map((t) => el('th', { scope: 'col' }, t)))),
@@ -475,14 +493,32 @@ import '../../../styles/pm.css';
           el('td', {}, el('span', { class: 'pm-balken klein' }, el('span', { style: `width:${fortschrittVon(a)}%` })), ` ${fortschrittVon(a)} %`)))))));
   }
 
+  // ---------- Übersicht ohne geöffnetes Projekt ----------
+  let uebersichtFilter = 'alle';
+  let uebersichtAnsicht = 'board';
+  try { uebersichtAnsicht = localStorage.getItem('prozess-uebersicht-ansicht') || 'board'; } catch { /* ohne Speicher */ }
+  document.querySelectorAll<HTMLButtonElement>('#pm-alle-ansicht [data-ansicht]').forEach((b) => b.addEventListener('click', () => {
+    uebersichtAnsicht = b.dataset.ansicht!;
+    try { localStorage.setItem('prozess-uebersicht-ansicht', uebersichtAnsicht); } catch { /* ohne Speicher */ }
+    zeichnen();
+  }));
+  document.getElementById('pm-alle-filter')!.addEventListener('change', (e) => { uebersichtFilter = (e.target as HTMLSelectElement).value; zeichnen(); });
+
   // ---------- Zeichnen ----------
   function zeichnen() {
     const p = ausgewaehlt();
     const box = document.getElementById('pm-detail')!;
     if (p) detail(p); else { box.hidden = true; box.replaceChildren(); }
-    const alleMatrix = document.getElementById('pm-alle-matrix')!;
-    alleMatrix.hidden = !!p;
-    if (!p) document.getElementById('pm-alle-matrix-inhalt')!.replaceChildren(eisenhower(daten.aufgaben, true));
+    document.getElementById('pm-alle')!.hidden = !!p;
+    if (!p) {
+      const filter = document.getElementById('pm-alle-filter') as HTMLSelectElement;
+      filter.replaceChildren(el('option', { value: 'alle' }, 'Alle Projekte'), ...daten.projekte.map((x) => el('option', { value: x.id }, x.name)));
+      if (uebersichtFilter !== 'alle' && !daten.projekte.some((x) => x.id === uebersichtFilter)) uebersichtFilter = 'alle';
+      filter.value = uebersichtFilter;
+      const sichtbar = daten.aufgaben.filter((a) => uebersichtFilter === 'alle' || a.projekt === uebersichtFilter);
+      document.querySelectorAll<HTMLButtonElement>('#pm-alle-ansicht [data-ansicht]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.ansicht === uebersichtAnsicht)));
+      document.getElementById('pm-alle-inhalt')!.replaceChildren(uebersichtAnsicht === 'liste' ? liste(sichtbar, null) : uebersichtAnsicht === 'zeitplan' ? zeitplan(sichtbar, null) : board(sichtbar, null));
+    }
     document.getElementById('pm-projekte-titel')!.textContent = p ? 'Weitere Projekte' : 'Projekte';
     const andere = daten.projekte.filter((x) => x !== p);
     const raster = document.getElementById('pm-projekte')!;
@@ -567,6 +603,7 @@ import '../../../styles/pm.css';
     if (!knopf) return;
     const aktion = knopf.dataset.aktion;
     if (aktion === 'neues-projekt') projektDialog(null);
+    else if (aktion === 'neue-aufgabe') aufgabeDialog(null, daten.projekte.find((x) => x.id === uebersichtFilter) ?? null);
     else if (aktion === 'schliessen') (knopf.closest('dialog') as HTMLDialogElement).close();
     else if (aktion === 'aufgabe-loeschen' && aktA && confirm(`Aufgabe „${aktA.titel}“ löschen?`)) { daten.aufgaben = daten.aufgaben.filter((a) => a !== aktA); dlgA.close(); speichern(); }
     else if (aktion === 'projekt-loeschen' && aktP) {
@@ -653,7 +690,7 @@ import '../../../styles/pm.css';
   :global(.pm-karte-fuss) { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: .82rem; }
   :global(.pm-karte-status) { display: flex; align-items: center; gap: 6px; font-size: .8rem; color: #5a676d; }
 
-  .pm-alle-matrix { margin-bottom: 28px; }
+  .pm-alle { margin-bottom: 28px; }
   .pm-prio { border: 0; padding: 0; margin: 0; display: flex; gap: 18px; flex-wrap: wrap; }
   .pm-prio legend { font-size: .88rem; font-weight: 600; color: #3f4a4f; margin-bottom: 4px; }
   :global(.pm-eisenhower) { display: grid; grid-template-columns: 28px 1fr; grid-template-rows: auto 1fr auto; gap: 6px 8px; }

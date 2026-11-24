@@ -117,6 +117,8 @@ import '../../../styles/pm.css';
   const speichern = () => { try { localStorage.setItem(SPEICHER, JSON.stringify(kampagnen)); } catch { /* ohne Speicher */ } zeichnen(); };
   const sichtbar = () => kampagnen.filter((k) => filter === 'alle' || k.status === filter);
   const marke = (s: Status) => el('span', { class: `pm-marke ${STATUS[s][1]}` }, STATUS[s][0]);
+  const KANAL_LOGOS: Record<string, string> = { 'Google Ads': '/logos/googleads.svg', Facebook: '/logos/facebook.svg', Instagram: '/logos/instagram.svg', TikTok: '/logos/tiktok.svg', YouTube: '/logos/youtube.svg' };
+  const kanalTag = (c: string) => el('span', { class: 'km-tag' }, KANAL_LOGOS[c] ? el('img', { src: KANAL_LOGOS[c], alt: '', width: 14, height: 14 }) : null, c);
   const kpiText = (k: Kampagne) => (k.kpi ? `${k.kpi}: ${zahl.format(k.kpiIst)} von ${zahl.format(k.kpiZiel)}` : '');
   const kpiAnteil = (k: Kampagne) => (k.kpiZiel ? Math.min(100, Math.round((k.kpiIst / k.kpiZiel) * 100)) : 0);
 
@@ -152,7 +154,7 @@ import '../../../styles/pm.css';
       ...liste.sort((a, b) => anfang(a) - anfang(b)).map((k) => {
         const links = pz(anfang(k)); const breite = Math.max(1, pz(ende(k) + TAG) - links);
         return el('div', { class: 'pm-zeile km-zeile' },
-          el('span', { class: 'pm-zeile-name' }, el('button', { type: 'button', class: 'pm-link', onclick: () => dialog(k) }, k.name), el('br'), el('span', { class: 'pm-klein' }, k.kanaele.join(', ') || 'ohne Kanal')),
+          el('span', { class: 'pm-zeile-name' }, el('button', { type: 'button', class: 'pm-link', onclick: () => dialog(k) }, k.name), el('span', { class: 'km-tags km-tags-klein' }, ...(k.kanaele.length ? k.kanaele.map(kanalTag) : [el('span', { class: 'pm-klein' }, 'ohne Kanal')]))),
           el('div', { class: 'pm-spur' }, heuteLinie(), el('span', { class: `pm-zeitbalken ${statusKlasse[k.status]}${k.status === 'idee' ? ' km-idee' : ''}`, style: `left:${links}%;width:${breite}%`, title: `${k.name}: ${zeige(k.start)} bis ${zeige(k.ende)} · ${STATUS[k.status][0]} · ${euro.format(k.budget)}` })));
       }),
       el('div', { class: 'pm-legende' }, ...(['idee', 'geplant', 'laeuft', 'abgeschlossen'] as Status[]).map((s) => el('span', {}, el('i', { class: `pm-zeitbalken ${statusKlasse[s]}${s === 'idee' ? ' km-idee' : ''}`, style: 'position:static;display:inline-block' }), STATUS[s][0]))));
@@ -168,7 +170,7 @@ import '../../../styles/pm.css';
         k.ziel ? el('div', {}, el('dt', {}, 'Ziel'), el('dd', {}, k.ziel)) : null,
         k.zielgruppe ? el('div', {}, el('dt', {}, 'Zielgruppe'), el('dd', {}, k.zielgruppe)) : null,
         k.botschaft ? el('div', {}, el('dt', {}, 'Botschaft'), el('dd', {}, `„${k.botschaft}“`)) : null),
-      el('div', { class: 'km-tags' }, ...k.kanaele.map((c) => el('span', { class: 'km-tag' }, c))),
+      el('div', { class: 'km-tags' }, ...k.kanaele.map(kanalTag)),
       k.kpi ? el('div', { class: 'km-kpi' }, el('span', { class: 'pm-klein' }, kpiText(k)), el('span', { class: 'pm-balken' }, el('span', { style: `width:${kpiAnteil(k)}%` }))) : null)));
   }
 
@@ -246,7 +248,9 @@ import '../../../styles/pm.css';
   :global(.km-karte dt) { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: #67747a; font-weight: 700; }
   :global(.km-karte dd) { margin: 0; }
   :global(.km-tags) { display: flex; flex-wrap: wrap; gap: 4px; }
-  :global(.km-tag) { font-size: .75rem; background: #eef2f4; border-radius: 999px; padding: 2px 8px; color: #3f4a4f; }
+  :global(.km-tag) { display: inline-flex; align-items: center; gap: 4px; font-size: .75rem; background: #eef2f4; border-radius: 999px; padding: 2px 8px; color: #3f4a4f; }
+  :global(.km-tag img) { width: 14px; height: 14px; }
+  :global(.km-tags-klein) { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
   :global(.km-kpi) { margin-top: auto; display: grid; gap: 4px; }
   .km-kanalwahl { border: 0; padding: 0; margin: 0; }
   .km-kanalwahl legend { font-size: .88rem; font-weight: 600; color: #3f4a4f; margin-bottom: 6px; }

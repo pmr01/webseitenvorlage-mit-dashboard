@@ -1,0 +1,70 @@
+---
+// Reiter Plattform → Skills: die Claude-Skills, mit denen die Vorlage arbeitet.
+// Liste ändern in src/inhalte/skills.json.
+import Dashboard from '../../../layouts/Dashboard.astro';
+import Unterseiten from '../../../components/Unterseiten.astro';
+import { PLATTFORM_SEITEN } from '../../../components/plattform-seiten.mjs';
+import daten from '../../../inhalte/skills.json';
+import '../../../styles/pm.css';
+const farbe: Record<string, string> = { 'im Einsatz': 'gruen', empfohlen: 'blau', optional: '' };
+---
+<Dashboard titel="Plattform" untertitel="Die Skills für Ihr KI-Tool: Arbeitsanleitungen, mit denen Claude die Aufgaben dieser Vorlage so erledigt, wie Sie es wollen.">
+  <Unterseiten seiten={PLATTFORM_SEITEN} />
+
+  <p class="karte skills-intro">{daten.hinweis}</p>
+
+  <ul class="skills">
+    {daten.skills.map((s) => (
+      <li class="karte skill">
+        <div class="skill-kopf">
+          <h2><span class="skill-icon" aria-hidden="true">✦</span>{s.name}</h2>
+          <span class={`pm-marke ${farbe[s.einsatz] ?? ''}`}>{s.einsatz}</span>
+        </div>
+        <p>{s.zweck}</p>
+        <p class="skill-reiter"><span>Genutzt in:</span> {s.reiter.map((r, i) => <>{i > 0 && ', '}<a href={r.pfad}>{r.name}</a></>)}</p>
+        <div class="skill-anweisung">
+          <span>Beispiel-Anweisung</span>
+          <p>„{s.anweisung}“</p>
+          <button type="button" class="pm-link" data-kopieren={s.anweisung}>Kopieren</button>
+        </div>
+      </li>
+    ))}
+  </ul>
+
+  <section class="karte skills-wie">
+    <h2>So nutzen Sie einen Skill</h2>
+    <ol>
+      <li>Den Skill in Ihrem KI-Tool hinzufügen. In Claude geschieht das in den Einstellungen im Bereich für Skills (die genaue Bezeichnung kann sich ändern); in Claude Code liegt jeder Skill als Ordner im Skill-Verzeichnis.</li>
+      <li>Das Projekt (oder die passende Datei) hochladen.</li>
+      <li>Die Beispiel-Anweisung kopieren, die eckigen Klammern ersetzen und abschicken. Das KI-Tool erkennt den passenden Skill selbst oder Sie nennen ihn beim Namen.</li>
+    </ol>
+    <p class="pm-klein">„im Einsatz“ = wird für diese Vorlage bereits genutzt · „empfohlen“ = sinnvolle nächste Ergänzung · „optional“ = bei Bedarf</p>
+  </section>
+</Dashboard>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-kopieren]').forEach((b) => b.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(b.dataset.kopieren!); b.textContent = 'Kopiert'; }
+    catch { b.textContent = 'Bitte von Hand kopieren'; }
+    setTimeout(() => { b.textContent = 'Kopieren'; }, 2000);
+  }));
+</script>
+
+<style>
+  .skills-intro { margin-bottom: 16px; color: #3f4a4f; }
+  .skills { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); }
+  .skill { display: flex; flex-direction: column; gap: 8px; }
+  .skill-kopf { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .skill h2 { font-size: 1.05rem; margin: 0; display: flex; gap: 8px; align-items: center; }
+  .skill-icon { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: color-mix(in srgb, var(--akzent) 30%, white); color: #8a5a17; flex: none; }
+  .skill p { margin: 0; font-size: .93rem; }
+  .skill-reiter { color: #4c595f; }
+  .skill-reiter span { font-weight: 600; }
+  .skill-anweisung { margin-top: auto; background: #fffaf0; border-left: 3px solid var(--akzent); border-radius: 6px; padding: 8px 12px; display: grid; gap: 4px; }
+  .skill-anweisung span { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #8a5a17; }
+  .skill-anweisung p { font-style: italic; }
+  .skill-anweisung .pm-link { justify-self: start; font-size: .85rem; }
+  .skills-wie h2 { font-size: 1.1rem; }
+  .skills-wie ol { padding-left: 1.3em; margin: 0 0 8px; }
+  .skills-wie li { margin-bottom: .4em; }
+</style>

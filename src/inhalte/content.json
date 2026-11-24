@@ -1,0 +1,15 @@
+{
+  "beispiel": true,
+  "hinweis": "Beispielinhalte einer fiktiven Firma. termin = Tage relativ zu heute, wird beim ersten Laden umgerechnet.",
+  "formate": ["Blogartikel", "Reel / Kurzvideo", "Social-Media-Post", "Story", "Newsletter", "Video", "Podcast", "Fallstudie"],
+  "kanaele": ["Website / Blog", "Instagram", "Facebook", "TikTok", "YouTube", "LinkedIn", "Newsletter"],
+  "elemente": ["Painpoints", "Vorstellung (Autorität)", "Plan in 3 Schritten", "Testimonials", "Auszeichnungen / Siegel", "Angebot / Call-to-Action"],
+  "eintraege": [
+    { "id": "c1", "titel": "3 Fehler, die Ihre Startseite Kunden kosten", "format": "Reel / Kurzvideo", "kanal": "Instagram", "status": "veroeffentlicht", "termin": -9, "element": "Painpoints", "zustaendig": "Jakub", "notizen": "Hook in den ersten 2 Sekunden" },
+    { "id": "c2", "titel": "So läuft ein Erstgespräch bei uns ab", "format": "Blogartikel", "kanal": "Website / Blog", "status": "in_arbeit", "termin": 4, "element": "Plan in 3 Schritten", "zustaendig": "Petar", "notizen": "" },
+    { "id": "c3", "titel": "Kundenstimme: Sabines neue Website", "format": "Fallstudie", "kanal": "Website / Blog", "status": "idee", "termin": 18, "element": "Testimonials", "zustaendig": "", "notizen": "Freigabe der Kundin einholen" },
+    { "id": "c4", "titel": "Newsletter Dezember: Jahresrückblick", "format": "Newsletter", "kanal": "Newsletter", "status": "geplant", "termin": 12, "element": "Vorstellung (Autorität)", "zustaendig": "Petar", "notizen": "" },
+    { "id": "c5", "titel": "Hinter den Kulissen: unser Team", "format": "Story", "kanal": "Instagram", "status": "geplant", "termin": 6, "element": "Vorstellung (Autorität)", "zustaendig": "Fabian", "notizen": "" },
+    { "id": "c6", "titel": "Ist meine Website DSGVO-konform? Checkliste", "format": "Social-Media-Post", "kanal": "LinkedIn", "status": "idee", "termin": 25, "element": "Painpoints", "zustaendig": "", "notizen": "" }
+  ]
+}

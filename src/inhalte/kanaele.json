@@ -1,61 +1,264 @@
 {
   "stand": "November 2026",
-  "hinweis": "Angebote, Konditionen und Bezeichnungen der Anbieter ändern sich. Bitte vor der Nutzung auf der jeweiligen Website prüfen.",
+  "hinweis": "Angebote, Konditionen und Bezeichnungen der Anbieter ändern sich. Bitte vor der Nutzung auf der jeweiligen Website prüfen. Logos: Simple Icons (CC0), die Marken gehören den Anbietern. Ohne freies Logo erscheint ein Kürzel; eigene Logos als SVG in public/logos/ ablegen und im Feld \"logo\" eintragen.",
   "kategorien": [
     {
       "name": "Suche",
       "beschreibung": "Menschen suchen aktiv nach einer Lösung. Gefunden werden über gute Inhalte (SEO) oder bezahlte Anzeigen über den Suchergebnissen.",
       "kanaele": [
-        { "name": "Google", "zweck": "Mit Abstand größte Suchmaschine in Europa.", "werkzeuge": [
-          { "name": "Google Search Console", "link": "https://search.google.com/search-console" },
-          { "name": "Google Ads", "link": "https://ads.google.com" },
-          { "name": "Google-Unternehmensprofil", "link": "https://www.google.com/business/" }
-        ] },
-        { "name": "Bing", "zweck": "Suchmaschine von Microsoft, auch in Windows und Edge eingebaut.", "werkzeuge": [
-          { "name": "Bing Webmaster Tools", "link": "https://www.bing.com/webmasters" },
-          { "name": "Microsoft Advertising", "link": "https://ads.microsoft.com" }
-        ] },
-        { "name": "Yahoo", "zweck": "Kleinere Reichweite; Anzeigen laufen in Europa über Microsoft Advertising mit.", "werkzeuge": [
-          { "name": "Microsoft Advertising", "link": "https://ads.microsoft.com" }
-        ] }
+        {
+          "name": "Google",
+          "zweck": "Mit Abstand größte Suchmaschine in Europa.",
+          "werkzeuge": [
+            {
+              "name": "Google Search Console",
+              "link": "https://search.google.com/search-console",
+              "logo": "/logos/googlesearchconsole.svg"
+            },
+            {
+              "name": "Google Ads",
+              "link": "https://ads.google.com",
+              "logo": "/logos/googleads.svg"
+            },
+            {
+              "name": "Google-Unternehmensprofil",
+              "link": "https://www.google.com/business/",
+              "logo": "/logos/google.svg"
+            }
+          ],
+          "logo": "/logos/google.svg"
+        },
+        {
+          "name": "Bing",
+          "zweck": "Suchmaschine von Microsoft, auch in Windows und Edge eingebaut.",
+          "werkzeuge": [
+            {
+              "name": "Bing Webmaster Tools",
+              "link": "https://www.bing.com/webmasters",
+              "logo": ""
+            },
+            {
+              "name": "Microsoft Advertising",
+              "link": "https://ads.microsoft.com",
+              "logo": ""
+            }
+          ],
+          "logo": ""
+        },
+        {
+          "name": "Yahoo",
+          "zweck": "Kleinere Reichweite; Anzeigen laufen in Europa über Microsoft Advertising mit.",
+          "werkzeuge": [
+            {
+              "name": "Microsoft Advertising",
+              "link": "https://ads.microsoft.com",
+              "logo": ""
+            }
+          ],
+          "logo": ""
+        }
       ]
     },
     {
       "name": "Social Media",
       "beschreibung": "Menschen entdecken Angebote nebenbei. Gut für Bekanntheit, Vertrauen und Zielgruppen, die noch nicht suchen.",
       "kanaele": [
-        { "name": "Facebook", "zweck": "Breite Zielgruppe, stark bei Menschen ab etwa 35 und in lokalen Gruppen.", "werkzeuge": [
-          { "name": "Meta Business Suite", "link": "https://business.facebook.com" },
-          { "name": "Meta Ads", "link": "https://www.facebook.com/business/ads" }
-        ] },
-        { "name": "Instagram", "zweck": "Bilder, Reels und Stories; gut für sichtbare Produkte und Marken.", "werkzeuge": [
-          { "name": "Meta Business Suite", "link": "https://business.facebook.com" },
-          { "name": "Meta Ads", "link": "https://www.facebook.com/business/ads" }
-        ] },
-        { "name": "TikTok", "zweck": "Kurze Videos, große Reichweite auch ohne viele Follower; jüngere Zielgruppe.", "werkzeuge": [
-          { "name": "TikTok for Business", "link": "https://www.tiktok.com/business" }
-        ] },
-        { "name": "YouTube", "zweck": "Längere Videos und Shorts; Erklärvideos werden auch über die Suche gefunden.", "werkzeuge": [
-          { "name": "YouTube Studio", "link": "https://studio.youtube.com" },
-          { "name": "Werbung über Google Ads", "link": "https://ads.google.com" }
-        ] }
+        {
+          "name": "Facebook",
+          "zweck": "Breite Zielgruppe, stark bei Menschen ab etwa 35 und in lokalen Gruppen.",
+          "werkzeuge": [
+            {
+              "name": "Meta Business Suite",
+              "link": "https://business.facebook.com",
+              "logo": "/logos/meta.svg"
+            },
+            {
+              "name": "Meta Ads",
+              "link": "https://www.facebook.com/business/ads",
+              "logo": "/logos/meta.svg"
+            }
+          ],
+          "logo": "/logos/facebook.svg"
+        },
+        {
+          "name": "Instagram",
+          "zweck": "Bilder, Reels und Stories; gut für sichtbare Produkte und Marken.",
+          "werkzeuge": [
+            {
+              "name": "Meta Business Suite",
+              "link": "https://business.facebook.com",
+              "logo": "/logos/meta.svg"
+            },
+            {
+              "name": "Meta Ads",
+              "link": "https://www.facebook.com/business/ads",
+              "logo": "/logos/meta.svg"
+            }
+          ],
+          "logo": "/logos/instagram.svg"
+        },
+        {
+          "name": "TikTok",
+          "zweck": "Kurze Videos, große Reichweite auch ohne viele Follower; jüngere Zielgruppe.",
+          "werkzeuge": [
+            {
+              "name": "TikTok for Business",
+              "link": "https://www.tiktok.com/business",
+              "logo": "/logos/tiktok.svg"
+            }
+          ],
+          "logo": "/logos/tiktok.svg"
+        },
+        {
+          "name": "YouTube",
+          "zweck": "Längere Videos und Shorts; Erklärvideos werden auch über die Suche gefunden.",
+          "werkzeuge": [
+            {
+              "name": "YouTube Studio",
+              "link": "https://studio.youtube.com",
+              "logo": "/logos/youtube.svg"
+            },
+            {
+              "name": "Werbung über Google Ads",
+              "link": "https://ads.google.com",
+              "logo": "/logos/googleads.svg"
+            }
+          ],
+          "logo": "/logos/youtube.svg"
+        }
       ]
     }
   ],
   "affiliate": {
     "beschreibung": "Beim Affiliate-Marketing bewerben Partner (Publisher) Ihre Produkte und erhalten eine Provision pro Verkauf oder Anfrage. Ein Netzwerk vermittelt zwischen Ihnen und den Partnern, übernimmt Tracking und Abrechnung. Wählen Sie unten Ihre Produktart, um passende Netzwerke mit Schwerpunkt in der EU zu finden.",
-    "produktarten": ["Mode & Lifestyle", "Elektronik & Technik", "Reisen", "Finanzen & Versicherungen", "Digitale Produkte & Online-Kurse", "Software & SaaS", "Handel allgemein", "Sport & Freizeit"],
+    "produktarten": [
+      "Mode & Lifestyle",
+      "Elektronik & Technik",
+      "Reisen",
+      "Finanzen & Versicherungen",
+      "Digitale Produkte & Online-Kurse",
+      "Software & SaaS",
+      "Handel allgemein",
+      "Sport & Freizeit"
+    ],
     "netzwerke": [
-      { "name": "Awin", "sitz": "Deutschland (Berlin)", "schwerpunkt": "Größtes Affiliate-Netzwerk in Europa, viele Händler und Partner.", "produktarten": ["Mode & Lifestyle", "Elektronik & Technik", "Reisen", "Finanzen & Versicherungen", "Handel allgemein"], "link": "https://www.awin.com/de" },
-      { "name": "Tradedoubler", "sitz": "Schweden", "schwerpunkt": "Europaweit aktiv, stark in Reisen und Handel.", "produktarten": ["Reisen", "Mode & Lifestyle", "Handel allgemein", "Elektronik & Technik"], "link": "https://www.tradedoubler.com" },
-      { "name": "Webgains", "sitz": "Großbritannien, Büros in der EU", "schwerpunkt": "Mittelgroße Händler, Mode und Sport.", "produktarten": ["Mode & Lifestyle", "Sport & Freizeit", "Handel allgemein"], "link": "https://www.webgains.com" },
-      { "name": "Rakuten Advertising", "sitz": "International, Büros in Europa", "schwerpunkt": "Marken und große Händler, auch Premium-Mode.", "produktarten": ["Mode & Lifestyle", "Handel allgemein", "Elektronik & Technik"], "link": "https://rakutenadvertising.com" },
-      { "name": "CJ Affiliate", "sitz": "USA, Büros in Europa", "schwerpunkt": "Große internationale Programme.", "produktarten": ["Handel allgemein", "Reisen", "Software & SaaS", "Finanzen & Versicherungen"], "link": "https://www.cj.com" },
-      { "name": "Amazon PartnerNet", "sitz": "Programm von Amazon.de", "schwerpunkt": "Für Partner, die Amazon-Produkte empfehlen; als Händler verkaufen Sie über den Amazon-Marktplatz.", "produktarten": ["Handel allgemein", "Elektronik & Technik", "Sport & Freizeit"], "link": "https://partnernet.amazon.de" },
-      { "name": "Digistore24", "sitz": "Deutschland", "schwerpunkt": "Marktplatz und Zahlungsabwicklung für digitale Produkte mit eingebautem Partnerprogramm.", "produktarten": ["Digitale Produkte & Online-Kurse"], "link": "https://www.digistore24.com" },
-      { "name": "CopeCart", "sitz": "Deutschland", "schwerpunkt": "Verkaufsplattform für digitale Produkte und Kurse mit Partnerprogramm.", "produktarten": ["Digitale Produkte & Online-Kurse"], "link": "https://www.copecart.com" },
-      { "name": "financeAds", "sitz": "Deutschland", "schwerpunkt": "Spezialisiert auf Banken, Versicherungen und Finanzprodukte.", "produktarten": ["Finanzen & Versicherungen"], "link": "https://www.financeads.com" },
-      { "name": "impact.com", "sitz": "USA, Büros in Europa", "schwerpunkt": "Partner-Plattform, beliebt bei Software- und Abo-Anbietern.", "produktarten": ["Software & SaaS", "Handel allgemein"], "link": "https://impact.com" }
+      {
+        "name": "Awin",
+        "sitz": "Deutschland (Berlin)",
+        "schwerpunkt": "Größtes Affiliate-Netzwerk in Europa, viele Händler und Partner.",
+        "produktarten": [
+          "Mode & Lifestyle",
+          "Elektronik & Technik",
+          "Reisen",
+          "Finanzen & Versicherungen",
+          "Handel allgemein"
+        ],
+        "link": "https://www.awin.com/de",
+        "logo": ""
+      },
+      {
+        "name": "Tradedoubler",
+        "sitz": "Schweden",
+        "schwerpunkt": "Europaweit aktiv, stark in Reisen und Handel.",
+        "produktarten": [
+          "Reisen",
+          "Mode & Lifestyle",
+          "Handel allgemein",
+          "Elektronik & Technik"
+        ],
+        "link": "https://www.tradedoubler.com",
+        "logo": ""
+      },
+      {
+        "name": "Webgains",
+        "sitz": "Großbritannien, Büros in der EU",
+        "schwerpunkt": "Mittelgroße Händler, Mode und Sport.",
+        "produktarten": [
+          "Mode & Lifestyle",
+          "Sport & Freizeit",
+          "Handel allgemein"
+        ],
+        "link": "https://www.webgains.com",
+        "logo": ""
+      },
+      {
+        "name": "Rakuten Advertising",
+        "sitz": "International, Büros in Europa",
+        "schwerpunkt": "Marken und große Händler, auch Premium-Mode.",
+        "produktarten": [
+          "Mode & Lifestyle",
+          "Handel allgemein",
+          "Elektronik & Technik"
+        ],
+        "link": "https://rakutenadvertising.com",
+        "logo": "/logos/rakuten.svg"
+      },
+      {
+        "name": "CJ Affiliate",
+        "sitz": "USA, Büros in Europa",
+        "schwerpunkt": "Große internationale Programme.",
+        "produktarten": [
+          "Handel allgemein",
+          "Reisen",
+          "Software & SaaS",
+          "Finanzen & Versicherungen"
+        ],
+        "link": "https://www.cj.com",
+        "logo": ""
+      },
+      {
+        "name": "Amazon PartnerNet",
+        "sitz": "Programm von Amazon.de",
+        "schwerpunkt": "Für Partner, die Amazon-Produkte empfehlen; als Händler verkaufen Sie über den Amazon-Marktplatz.",
+        "produktarten": [
+          "Handel allgemein",
+          "Elektronik & Technik",
+          "Sport & Freizeit"
+        ],
+        "link": "https://partnernet.amazon.de",
+        "logo": ""
+      },
+      {
+        "name": "Digistore24",
+        "sitz": "Deutschland",
+        "schwerpunkt": "Marktplatz und Zahlungsabwicklung für digitale Produkte mit eingebautem Partnerprogramm.",
+        "produktarten": [
+          "Digitale Produkte & Online-Kurse"
+        ],
+        "link": "https://www.digistore24.com",
+        "logo": ""
+      },
+      {
+        "name": "CopeCart",
+        "sitz": "Deutschland",
+        "schwerpunkt": "Verkaufsplattform für digitale Produkte und Kurse mit Partnerprogramm.",
+        "produktarten": [
+          "Digitale Produkte & Online-Kurse"
+        ],
+        "link": "https://www.copecart.com",
+        "logo": ""
+      },
+      {
+        "name": "financeAds",
+        "sitz": "Deutschland",
+        "schwerpunkt": "Spezialisiert auf Banken, Versicherungen und Finanzprodukte.",
+        "produktarten": [
+          "Finanzen & Versicherungen"
+        ],
+        "link": "https://www.financeads.com",
+        "logo": ""
+      },
+      {
+        "name": "impact.com",
+        "sitz": "USA, Büros in Europa",
+        "schwerpunkt": "Partner-Plattform, beliebt bei Software- und Abo-Anbietern.",
+        "produktarten": [
+          "Software & SaaS",
+          "Handel allgemein"
+        ],
+        "link": "https://impact.com",
+        "logo": ""
+      }
     ]
   }
 }

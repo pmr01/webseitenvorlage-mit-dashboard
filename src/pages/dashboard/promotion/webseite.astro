@@ -1,0 +1,193 @@
+---
+// Reiter Promotion: das Storytelling Framework zum Nachschlagen.
+// Checkliste mit den zwölf Elementen und Aufbauplan der Startseite.
+// Inhalte ändern in src/inhalte/storytelling-checkliste.json.
+// Der Haken "erledigt" wird nur im eigenen Browser gespeichert.
+import Dashboard from '../../../layouts/Dashboard.astro';
+import liste from '../../../inhalte/storytelling-checkliste.json';
+import Unterseiten from '../../../components/Unterseiten.astro';
+import { PROMOTION_SEITEN } from '../../../components/promotion-seiten.mjs';
+---
+<Dashboard titel="Promotion" untertitel="Webseite mit Storytelling Framework: zwölf Elemente in fester Reihenfolge führen Besucher vom Problem zur Lösung. Der Kunde ist der Held, Sie sind sein Wegweiser.">
+  <Unterseiten seiten={PROMOTION_SEITEN} />
+  <div class="promotion">
+    <section class="karte plan" aria-labelledby="plan-titel">
+      <div class="plan-kopf">
+        <h2 id="plan-titel">Aufbauplan der Startseite</h2>
+        <div class="umschalter" role="tablist" aria-label="Ansicht">
+          <button type="button" role="tab" aria-selected="true" data-sicht="wireframe">Wireframe</button>
+          <button type="button" role="tab" aria-selected="false" data-sicht="website">Aktuelle Website</button>
+        </div>
+      </div>
+      <div class="website-sicht" id="website-sicht" hidden>
+        <p class="pruef-ergebnis" id="pruef-ergebnis" aria-live="polite">Website wird geprüft …</p>
+        <div class="vorschau-rahmen"><iframe id="website-vorschau" title="Aktuelle Startseite mit Nummern und markierten Platzhaltern" loading="lazy"></iframe></div>
+        <p class="hinweis">Rot gestrichelt = noch Platzhalter der Vorlage. Die Nummern entsprechen der Checkliste.</p>
+        <a class="bearbeiten-knopf" href="/?bearbeiten" target="_blank" rel="noopener">Website bearbeiten <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="schema" id="wireframe-sicht" aria-label="Schema der Startseite mit den Nummern der Checkliste">
+        <div class="zeile kopfzeile">
+          <span class="block"><b>1</b>Logo</span>
+          <span class="block breit"><b>2</b>Navigation</span>
+          <span class="block cta"><b>9</b>CTA</span>
+        </div>
+        <div class="bereich hero">
+          <span class="block"><b>3</b>Hauptbild / Video</span>
+          <span class="block gross"><b>4</b>Main Headline</span>
+          <span class="block"><b>5</b>Einleitung</span>
+          <span class="block cta"><b>9</b>CTA</span>
+        </div>
+        <div class="bereich">
+          <div class="raster"><span class="block"><b>6</b>Painpoint</span><span class="block"><b>6</b>Painpoint</span><span class="block"><b>6</b>Painpoint</span><span class="block"><b>6</b>Painpoint</span></div>
+          <span class="block cta"><b>9</b>CTA</span>
+        </div>
+        <div class="bereich"><span class="block"><b>7</b>Vorstellung (Autorität): Text und Bild</span><span class="block cta"><b>9</b>CTA</span></div>
+        <div class="bereich">
+          <div class="schritte"><span class="block"><b>8</b>Schritt 1</span><span class="pfeil" aria-hidden="true">›</span><span class="block">Schritt 2</span><span class="pfeil" aria-hidden="true">›</span><span class="block">Schritt 3</span></div>
+          <span class="block cta"><b>9</b>CTA</span>
+        </div>
+        <div class="bereich"><span class="block"><b>10</b>Auszeichnungen / Siegel / Logos</span></div>
+        <div class="bereich">
+          <div class="raster drei"><span class="block"><b>11</b>Testimonial</span><span class="block"><b>11</b>Testimonial</span><span class="block"><b>11</b>Testimonial</span></div>
+          <span class="block cta"><b>9</b>CTA</span>
+        </div>
+        <div class="bereich fuss"><span class="block"><b>12</b>Weitere Elemente &amp; Footer</span></div>
+      </div>
+      <p class="hinweis">Der Call-to-Action (9) steht immer mit demselben Text da. Die Nummern entsprechen der Checkliste.</p>
+    </section>
+
+    <section class="karte checkliste" aria-labelledby="checkliste-titel">
+      <div class="kopf">
+        <h2 id="checkliste-titel">Checkliste</h2>
+        <p class="fortschritt" id="fortschritt" aria-live="polite"></p>
+      </div>
+      <table>
+        <thead>
+          <tr><th scope="col">#</th><th scope="col">Element</th><th scope="col"><span class="visuell-versteckt">Erledigt</span><span aria-hidden="true">✓</span></th></tr>
+        </thead>
+        <tbody>
+          {liste.elemente.map((e) => (
+            <tr data-nr={e.nr}>
+              <td><span class="nr">{e.nr}</span></td>
+              <th scope="row">
+                <span class="name">{e.element}</span>
+                <span class="kommentar">{e.kommentar}</span>
+                <span class="quelle">Quelle: {e.quellen}</span>
+              </th>
+              <td class="haken"><input type="checkbox" data-schluessel={`element-${e.nr}`} aria-label={`${e.element} erledigt`} /></td>
+            </tr>
+          ))}
+          <tr class="trenner"><th colspan="3" scope="colgroup">Vor dem Veröffentlichen</th></tr>
+          {liste.voraussetzungen.map((v, i) => (
+            <tr>
+              <td></td>
+              <th scope="row">
+                <span class="name">{v.element}</span>
+                <span class="kommentar">{v.kommentar}</span>
+                <span class="quelle">Quelle: {v.quellen}</span>
+              </th>
+              <td class="haken"><input type="checkbox" data-schluessel={`voraussetzung-${i}`} aria-label={`${v.element} erledigt`} /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p class="hinweis">Die Haken speichert nur Ihr Browser auf diesem Gerät.</p>
+    </section>
+  </div>
+</Dashboard>
+
+<script>
+  const SPEICHER = 'storytelling-checkliste';
+  const kaesten = Array.from(document.querySelectorAll<HTMLInputElement>('input[data-schluessel]'));
+  let stand: Record<string, boolean> = {};
+  try { stand = JSON.parse(localStorage.getItem(SPEICHER) || '{}'); } catch { stand = {}; }
+
+  function fortschritt() {
+    const erledigt = kaesten.filter((k) => k.checked).length;
+    document.getElementById('fortschritt')!.textContent = `${erledigt} von ${kaesten.length} erledigt`;
+  }
+  kaesten.forEach((k) => {
+    k.checked = !!stand[k.dataset.schluessel!];
+    k.closest('tr')?.classList.toggle('fertig', k.checked);
+    k.addEventListener('change', () => {
+      stand[k.dataset.schluessel!] = k.checked;
+      k.closest('tr')?.classList.toggle('fertig', k.checked);
+      try { localStorage.setItem(SPEICHER, JSON.stringify(stand)); } catch { /* ohne Speicher */ }
+      fortschritt();
+    });
+  });
+  fortschritt();
+
+  // Umschalter Wireframe / aktuelle Website
+  const vorschau = document.getElementById('website-vorschau') as HTMLIFrameElement;
+  document.querySelectorAll<HTMLButtonElement>('[data-sicht]').forEach((b) => b.addEventListener('click', () => {
+    const website = b.dataset.sicht === 'website';
+    document.querySelectorAll('[data-sicht]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    document.getElementById('wireframe-sicht')!.hidden = website;
+    document.getElementById('website-sicht')!.hidden = !website;
+    if (website && !vorschau.src) vorschau.src = '/?markieren';
+    skalieren();
+  }));
+  // Die Startseite wird in 1280 px Breite geladen und auf die Kartenbreite verkleinert
+  function skalieren() { const breite = vorschau.parentElement!.clientWidth; if (breite) vorschau.style.transform = `scale(${breite / 1280})`; }
+  new ResizeObserver(skalieren).observe(vorschau.parentElement!);
+  window.addEventListener('message', (e) => {
+    if (e.origin !== location.origin || e.data?.typ !== 'website-pruefung') return;
+    const n = e.data.offen;
+    document.getElementById('pruef-ergebnis')!.innerHTML = n ? `<strong>${n}</strong> Texte und Bilder sind noch Platzhalter der Vorlage.` : '<strong>Keine Platzhalter mehr.</strong> Alle Texte und Bilder sind eigene.';
+  });
+</script>
+
+<style>
+  .promotion { display: grid; gap: 16px; grid-template-columns: minmax(0, 1.35fr) minmax(300px, 1fr); align-items: start; }
+  .promotion > * { min-width: 0; }
+  @media (max-width: 1000px) { .promotion { grid-template-columns: minmax(0, 1fr); } }
+  .kopf { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .fortschritt { margin: 0; font-weight: 600; color: var(--haupt); font-size: .9rem; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  thead th { text-align: left; background: #3f4a4f; color: #fff; padding: 7px 8px; font-weight: 600; }
+  thead th:last-child { text-align: center; }
+  td, tbody th { padding: 8px; border-bottom: 1px solid #e6eaec; vertical-align: top; text-align: left; }
+  tbody th { font-weight: 400; }
+  .name { display: block; font-weight: 700; }
+  .kommentar { display: block; color: #3f4a4f; line-height: 1.4; }
+  .quelle { display: block; color: #7d898e; font-size: .8rem; line-height: 1.35; margin-top: 2px; }
+  .nr { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #1c2126; color: #fff; font-size: .75rem; font-weight: 700; }
+  .haken { text-align: center; width: 40px; }
+  .haken input { width: 20px; height: 20px; accent-color: var(--haupt); cursor: pointer; margin-top: 2px; }
+  tr.fertig .name { text-decoration: line-through; color: #7d898e; }
+  tr.fertig .kommentar, tr.fertig .quelle { color: #9aa6ab; }
+  .trenner th { background: #e6eaec; color: #3f4a4f; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+  .hinweis { color: #67747a; font-size: .85rem; margin: 12px 0 0; }
+
+  .plan-kopf { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .plan-kopf h2 { margin: 0; }
+  .umschalter { display: flex; border: 1px solid #cfd8dc; border-radius: 8px; overflow: hidden; }
+  .umschalter button { font: inherit; font-size: .88rem; font-weight: 600; padding: 6px 12px; border: 0; background: #fff; color: #47545a; cursor: pointer; }
+  .umschalter button + button { border-left: 1px solid #cfd8dc; }
+  .umschalter button[aria-selected="true"] { background: var(--haupt); color: #fff; }
+  .schema[hidden], .website-sicht[hidden] { display: none; }
+  .pruef-ergebnis { margin: 0 0 10px; padding: 8px 12px; border-radius: 8px; background: #fdecec; color: #8e2f2f; font-size: .92rem; }
+  /* Verkleinerte Startseite: 1280 px breit, auf die Kartenbreite skaliert */
+  .vorschau-rahmen { position: relative; width: 100%; aspect-ratio: 1280 / 1600; overflow: hidden; border: 1px solid #dde3e6; border-radius: 10px; }
+  .vorschau-rahmen iframe { position: absolute; top: 0; left: 0; width: 1280px; height: 1600px; border: 0; transform-origin: 0 0; }
+  .bearbeiten-knopf { display: inline-block; margin-top: 12px; padding: 8px 14px; border-radius: 8px; background: var(--haupt); color: #fff; font-weight: 600; text-decoration: none; }
+  .schema { display: grid; gap: 8px; font-size: .88rem; }
+  .zeile, .bereich { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; border: 1px solid #cfd8dc; border-radius: 8px; background: #fafbfb; }
+  .kopfzeile { background: #fff; align-items: center; }
+  .hero { background: repeating-linear-gradient(135deg, #f1f4f5 0 10px, #fafbfb 10px 20px); flex-direction: column; align-items: center; padding: 22px 10px; }
+  .block { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; background: #fff; border: 1px solid #dde3e6; border-radius: 6px; }
+  .block.breit { flex: 1; justify-content: center; }
+  .block.gross { font-size: 1.05rem; font-weight: 700; padding: 8px 14px; }
+  .block b { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 4px; border-radius: 999px; background: #1c2126; color: #fff; font-size: .72rem; }
+  .block.cta { background: color-mix(in srgb, var(--akzent) 25%, white); border-color: var(--akzent); }
+  .bereich { justify-content: space-between; align-items: center; }
+  .bereich.fuss { background: #eef1f2; }
+  .raster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; flex: 1; }
+  .raster.drei { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .raster .block, .schritte .block { justify-content: center; }
+  .schritte { display: flex; align-items: center; gap: 6px; flex: 1; flex-wrap: wrap; }
+  .pfeil { color: var(--akzent); font-size: 1.3rem; line-height: 1; }
+  @media (max-width: 560px) { .raster.drei { grid-template-columns: 1fr; } .bereich { justify-content: center; } }
+</style>

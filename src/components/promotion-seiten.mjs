@@ -1,6 +1,7 @@
-// Unterseiten des Reiters Promotion
+// Unterseiten des Reiters Promotion (Kanäle & Budget ist die Startseite)
 export const PROMOTION_SEITEN = [
-  { name: 'Webseite mit Storytelling Framework', pfad: '/dashboard/promotion/' },
+  { name: 'Kanäle & Budget', pfad: '/dashboard/promotion/' },
+  { name: 'Content', pfad: '/dashboard/promotion/content/' },
+  { name: 'Webseite mit Storytelling Framework', pfad: '/dashboard/promotion/webseite/' },
   { name: 'Design-System', pfad: '/dashboard/promotion/design/' },
-  { name: 'Kanäle & Budget', pfad: '/dashboard/promotion/kanaele/' },
 ];

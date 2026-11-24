@@ -18,6 +18,10 @@ const reiter = [
   { name: 'Performance', pfad: '/dashboard/performance/' },
 ];
 const aktuell = Astro.url.pathname.replace(/\/?$/, '/');
+// Passende Anleitung zum aktuellen Bereich (anleitungen/bereiche/<bereich>.md)
+const abschnitt = aktuell.split('/')[2] || 'uebersicht';
+const anleitungen: Record<string, string> = { uebersicht: 'Dashboard', produkt: 'Produkt', positionierung: 'Positionierung', promotion: 'Promotion', prozess: 'Prozess', plattform: 'Plattform', performance: 'Performance' };
+const anleitung = anleitungen[abschnitt] ? { pfad: `/dashboard/anleitungen/${abschnitt}/`, name: anleitungen[abschnitt] } : null;
 ---
 <!doctype html>
 <html lang="de">
@@ -56,7 +60,10 @@ const aktuell = Astro.url.pathname.replace(/\/?$/, '/');
 
     <main class="d-breite d-inhalt">
       <div class="d-titel">
-        <h1>{titel}</h1>
+        <div class="d-titel-zeile">
+          <h1>{titel}</h1>
+          {anleitung && <a class="d-anleitung" href={anleitung.pfad}><span aria-hidden="true">?</span> Anleitung zu {anleitung.name}</a>}
+        </div>
         {untertitel && <p>{untertitel}</p>}
       </div>
       <slot />
@@ -89,6 +96,10 @@ const aktuell = Astro.url.pathname.replace(/\/?$/, '/');
 
   .d-inhalt { padding-block: 28px 40px; }
   .d-titel { margin-bottom: 20px; }
+  .d-titel-zeile { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+  .d-anleitung { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: .92rem; text-decoration: none; padding: 6px 12px; border-radius: 999px; border: 1px solid #cfd8dc; background: #fff; }
+  .d-anleitung:hover { border-color: var(--haupt); }
+  .d-anleitung span { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--haupt); color: #fff; font-size: .75rem; font-weight: 700; }
   .d-titel h1 { font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: .25em; }
   .d-titel p { color: #5a676d; margin: 0; max-width: 70ch; }
   .d-fuss { padding-block: 0 32px; color: #67747a; font-size: .85rem; }

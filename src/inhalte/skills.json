@@ -1,0 +1,41 @@
+{
+  "hinweis": "Skills sind gespeicherte Arbeitsanleitungen für ein KI-Tool wie Claude: Das Tool weiß damit, wie eine Aufgabe in Ihrem Unternehmen erledigt wird. Die Liste zeigt die Skills, mit denen diese Vorlage arbeitet; ergänzen oder streichen Sie Einträge in src/inhalte/skills.json.",
+  "skills": [
+    {
+      "name": "6P Business & Marketing Framework", "einsatz": "im Einsatz",
+      "zweck": "Erstellt die fünf Modelle des Dashboards: Business Model Canvas, Strategie-Pyramide, SWOT-Analyse, Porter's 5 Kräfte und Persona / Empathy Map, mit festen Punktzahlen je Feld.",
+      "reiter": [ { "name": "Produkt", "pfad": "/dashboard/produkt/" }, { "name": "Positionierung", "pfad": "/dashboard/positionierung/" } ],
+      "anweisung": "Erstelle die vollständige 6P-Analyse für [Unternehmen, Angebot, Zielgruppe] und trage die Modelle in die Dateien in src/inhalte/ ein."
+    },
+    {
+      "name": "Storytelling Framework", "einsatz": "im Einsatz",
+      "zweck": "Baut und prüft Startseiten nach den zwölf Elementen: der Kunde als Held, die Marke als Wegweiser, ein Call-to-Action mehrfach.",
+      "reiter": [ { "name": "Promotion → Webseite", "pfad": "/dashboard/promotion/webseite/" }, { "name": "Promotion → Content", "pfad": "/dashboard/promotion/content/" } ],
+      "anweisung": "Prüfe meine Startseite gegen das Storytelling Framework und schreibe fehlende Elemente in src/konfiguration.mjs."
+    },
+    {
+      "name": "Astro SEO", "einsatz": "empfohlen",
+      "zweck": "Richtet Titel, Beschreibungen, Vorschaubilder für soziale Netzwerke, strukturierte Daten und die Sitemap für eine Astro-Website ein.",
+      "reiter": [ { "name": "Promotion → Kanäle (Suche)", "pfad": "/dashboard/promotion/" } ],
+      "anweisung": "Richte vollständige SEO für diese Astro-Website ein: Meta-Angaben, Open Graph, Sitemap und robots.txt."
+    },
+    {
+      "name": "Datenschutz-Prüfung für statische Websites", "einsatz": "empfohlen",
+      "zweck": "Prüft die Website auf Dienste, die vor der Einwilligung Daten übertragen, und ob Impressum und Datenschutzerklärung vollständig sind.",
+      "reiter": [ { "name": "Plattform → Tools", "pfad": "/dashboard/plattform/" } ],
+      "anweisung": "Prüfe diese Website auf DSGVO-Risiken: Welche Dienste laden vor der Einwilligung, und fehlt etwas in Impressum oder Datenschutzerklärung?"
+    },
+    {
+      "name": "Astro Delivery Pipeline", "einsatz": "optional",
+      "zweck": "Baut, prüft und liefert Astro-Seiten mit klarer Vorgabe, automatischen Prüfungen und einer Freigabe vor der Veröffentlichung.",
+      "reiter": [ { "name": "Prozess → Updates", "pfad": "/dashboard/prozess/updates/" } ],
+      "anweisung": "Prüfe die Website vor der Veröffentlichung: Build, Links, Darstellung auf dem Smartphone, Datenschutz."
+    },
+    {
+      "name": "Marketing-Skills (Texte, Social Media, E-Mails, Anzeigen)", "einsatz": "optional",
+      "zweck": "Schreiben und prüfen Werbetexte, planen Social-Media-Beiträge, erstellen E-Mail-Folgen und Anzeigentexte.",
+      "reiter": [ { "name": "Promotion → Content", "pfad": "/dashboard/promotion/content/" }, { "name": "Prozess → Kampagnenplanung", "pfad": "/dashboard/prozess/kampagnen/" } ],
+      "anweisung": "Schreibe drei Varianten für einen Instagram-Post zur Kampagne [Name], passend zu unserer Persona."
+    }
+  ]
+}

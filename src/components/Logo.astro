@@ -1,0 +1,15 @@
+---
+// Zeigt das Logo eines Tools oder Kanals. Ohne Logo erscheint ein Kürzel aus dem Namen.
+// Logos liegen in public/logos/ (Simple Icons, CC0; die Marken gehören den Anbietern).
+interface Props { name: string; logo?: string; groesse?: number }
+const { name, logo, groesse = 28 } = Astro.props;
+const kuerzel = name.replace(/[^A-Za-zÄÖÜäöü0-9 ]/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '?';
+---
+{logo
+  ? <img class="logo-bild" src={logo} alt="" width={groesse} height={groesse} loading="lazy" style={`width:${groesse}px;height:${groesse}px`} />
+  : <span class="logo-kuerzel" aria-hidden="true" style={`width:${groesse}px;height:${groesse}px;font-size:${Math.round(groesse * 0.4)}px`}>{kuerzel}</span>}
+
+<style>
+  .logo-bild { flex: none; object-fit: contain; }
+  .logo-kuerzel { flex: none; display: inline-grid; place-items: center; border-radius: 7px; background: color-mix(in srgb, var(--haupt) 12%, white); color: var(--haupt); font-weight: 700; letter-spacing: .02em; }
+</style>

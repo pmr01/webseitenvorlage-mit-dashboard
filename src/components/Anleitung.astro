@@ -1,25 +1,36 @@
 ---
-// Zeigt eine der beiden Anleitungen aus dem Ordner anleitungen/ im Dashboard an.
-// Der Text wird direkt aus den Markdown-Dateien gelesen: Änderungen dort erscheinen automatisch hier.
-interface Props { aktiv: 'website' | 'dashboard' }
+// Rahmen für die Anleitungen im Dashboard: Auswahl aller Anleitungen und der Text.
+// Gesamt-Anleitungen: anleitungen/anleitung-website.md und anleitung-dashboard.md
+// Je Bereich:         anleitungen/bereiche/*.md
+interface Props { aktiv: string }
 const { aktiv } = Astro.props;
-const seiten = [
+const bereiche = Object.entries(import.meta.glob('../../anleitungen/bereiche/*.md', { eager: true }) as Record<string, any>)
+  .map(([pfad, m]) => ({ schluessel: pfad.split('/').pop()!.replace(/\.md$/, ''), name: m.frontmatter.titel as string, reihenfolge: m.frontmatter.reihenfolge as number }))
+  .sort((a, b) => a.reihenfolge - b.reihenfolge);
+const gesamt = [
   { schluessel: 'website', name: 'Website mit dem Storytelling Framework', pfad: '/dashboard/anleitungen/' },
   { schluessel: 'dashboard', name: 'Dashboard und Google Analytics', pfad: '/dashboard/anleitungen/dashboard/' },
 ];
 ---
 <nav class="anleitung-wahl" aria-label="Anleitungen">
-  {seiten.map((s) => (
-    <a href={s.pfad} aria-current={s.schluessel === aktiv ? 'page' : undefined}>{s.name}</a>
-  ))}
+  <div class="gruppe">
+    <span class="gruppe-name">Je Bereich</span>
+    {bereiche.map((b) => <a href={`/dashboard/anleitungen/${b.schluessel}/`} aria-current={b.schluessel === aktiv ? 'page' : undefined}>{b.name}</a>)}
+  </div>
+  <div class="gruppe">
+    <span class="gruppe-name">Gesamt</span>
+    {gesamt.map((s) => <a href={s.pfad} aria-current={s.schluessel === aktiv ? 'page' : undefined}>{s.name}</a>)}
+  </div>
 </nav>
 <article class="karte anleitung">
   <slot />
 </article>
 
 <style>
-  .anleitung-wahl { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-  .anleitung-wahl a { padding: 8px 14px; border-radius: 999px; background: #fff; border: 1px solid #dde3e6; text-decoration: none; font-weight: 600; font-size: .92rem; color: #47545a; }
+  .anleitung-wahl { display: grid; gap: 8px; margin-bottom: 16px; }
+  .gruppe { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .gruppe-name { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #67747a; min-width: 6.5em; }
+  .anleitung-wahl a { padding: 6px 12px; border-radius: 999px; background: #fff; border: 1px solid #dde3e6; text-decoration: none; font-weight: 600; font-size: .88rem; color: #47545a; }
   .anleitung-wahl a[aria-current="page"] { background: var(--haupt); border-color: var(--haupt); color: #fff; }
 
   .anleitung { max-width: 880px; padding: clamp(20px, 4vw, 40px); line-height: 1.65; overflow-wrap: anywhere; }

@@ -30,14 +30,14 @@ const jahr = new Date().getFullYear();
       <div class="inhalt kopf-zeile">
         <a class="logo" href="/" aria-label={`${konfiguration.firma.name}, zur Startseite`}>
           <img src={konfiguration.firma.logo} alt="" width="40" height="40" />
-          <span>{konfiguration.firma.name}</span>
+          <span data-k="firma.name">{konfiguration.firma.name}</span>
         </a>
         <nav class="navigation" aria-label="Hauptnavigation">
           <ul>
-            {konfiguration.navigation.map((n) => <li><a href={link(n.ziel)}>{n.text}</a></li>)}
+            {konfiguration.navigation.map((n, i) => <li><a href={link(n.ziel)} data-k={`navigation.${i}.text`}>{n.text}</a></li>)}
           </ul>
         </nav>
-        <a class="button kopf-cta" href={link(konfiguration.cta.ziel)}>{konfiguration.cta.text}</a>
+        <a class="button kopf-cta" href={link(konfiguration.cta.ziel)} data-k="cta.text">{konfiguration.cta.text}</a>
       </div>
     </header>
 

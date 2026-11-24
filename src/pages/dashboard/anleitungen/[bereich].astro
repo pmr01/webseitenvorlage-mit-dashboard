@@ -1,0 +1,20 @@
+---
+// Eine Anleitung je Bereich des Dashboards, z. B. /dashboard/anleitungen/produkt/
+// Die Texte stehen in anleitungen/bereiche/*.md und werden hier angezeigt.
+import Dashboard from '../../../layouts/Dashboard.astro';
+import Anleitung from '../../../components/Anleitung.astro';
+
+export function getStaticPaths() {
+  const dateien = import.meta.glob('../../../../anleitungen/bereiche/*.md', { eager: true }) as Record<string, any>;
+  return Object.entries(dateien).map(([pfad, modul]) => ({
+    params: { bereich: pfad.split('/').pop()!.replace(/\.md$/, '') },
+    props: { modul },
+  }));
+}
+const { bereich } = Astro.params;
+const { modul } = Astro.props;
+const Inhalt = modul.Content;
+---
+<Dashboard titel="Anleitungen" untertitel={`Anleitung für den Bereich ${modul.frontmatter.titel.replace(/^\d\s/, '')}.`}>
+  <Anleitung aktiv={bereich!}><Inhalt /></Anleitung>
+</Dashboard>

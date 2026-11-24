@@ -1,0 +1,265 @@
+---
+// Reiter Promotion → Content: Redaktionsplan für Inhalte.
+// Ansichten: Kalender (Monat), Board (nach Status), Liste. Jeder Inhalt ist einem Element
+// des Storytelling Frameworks zugeordnet. Startdaten aus src/inhalte/content.json;
+// Änderungen speichert der Browser.
+import Dashboard from '../../../layouts/Dashboard.astro';
+import Unterseiten from '../../../components/Unterseiten.astro';
+import { PROMOTION_SEITEN } from '../../../components/promotion-seiten.mjs';
+import startdaten from '../../../inhalte/content.json';
+import '../../../styles/pm.css';
+---
+<Dashboard titel="Promotion" untertitel="Content planen: Welche Inhalte erscheinen wann, in welchem Format und auf welchem Kanal, und welches Element der Geschichte erzählen sie?">
+  <Unterseiten seiten={PROMOTION_SEITEN} />
+
+  <p class="beispiel-hinweis" role="note"><strong>Beispiel</strong><span>Beispielinhalte einer fiktiven Firma. Änderungen speichert nur dieser Browser; sichern Sie sie über „Als Datei sichern“. Tipp: Ordnen Sie jeden Inhalt einem Element des Storytelling Frameworks zu, damit alle Teile der Geschichte regelmäßig vorkommen.</span></p>
+
+  <div class="pm-kopf">
+    <div class="pm-knoepfe">
+      <div class="pm-ansicht" role="tablist" aria-label="Ansicht">
+        <button type="button" role="tab" data-ansicht="kalender">Kalender</button>
+        <button type="button" role="tab" data-ansicht="board">Board</button>
+        <button type="button" role="tab" data-ansicht="liste">Liste</button>
+      </div>
+      <label class="pm-filter">Kanal <select class="pm-select" id="ct-filter"></select></label>
+    </div>
+    <button type="button" class="pm-btn primaer" id="ct-neu">+ Inhalt</button>
+  </div>
+  <div id="ct-inhalt"></div>
+  <div class="ct-abdeckung karte" id="ct-abdeckung"></div>
+
+  <div class="pm-daten">
+    <button type="button" class="pm-link" id="ct-export">Als Datei sichern</button>
+    <label class="pm-link">Datei laden<input type="file" accept="application/json,.json" id="ct-import" hidden /></label>
+    <button type="button" class="pm-link" id="ct-reset">Beispieldaten wiederherstellen</button>
+  </div>
+
+  <dialog id="ct-dialog" class="pm-dialog" aria-labelledby="ct-dialog-titel">
+    <form method="dialog" id="ct-form">
+      <h2 id="ct-dialog-titel">Inhalt</h2>
+      <label class="breit">Titel<input name="titel" required maxlength="160" /></label>
+      <label>Format<select name="format"></select></label>
+      <label>Kanal<select name="kanal"></select></label>
+      <label>Status<select name="status"></select></label>
+      <label>Veröffentlichung<input name="termin" type="date" /></label>
+      <label>Storytelling-Element<select name="element"></select></label>
+      <label>Zuständig<input name="zustaendig" maxlength="60" /></label>
+      <label class="breit">Notizen<textarea name="notizen" rows="3" maxlength="1000"></textarea></label>
+      <div class="pm-dialog-knoepfe breit">
+        <button type="button" class="pm-btn gefahr" id="ct-loeschen">Löschen</button>
+        <span></span>
+        <button type="button" class="pm-btn" id="ct-abbrechen">Abbrechen</button>
+        <button type="submit" class="pm-btn primaer">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="application/json" id="ct-start" set:html={JSON.stringify(startdaten)}></script>
+</Dashboard>
+
+<script>
+  type Status = 'idee' | 'in_arbeit' | 'geplant' | 'veroeffentlicht';
+  type Inhalt = { id: string; titel: string; format: string; kanal: string; status: Status; termin: string; element: string; zustaendig: string; notizen: string };
+  const ROH = JSON.parse(document.getElementById('ct-start')!.textContent || '{}');
+  const FORMATE: string[] = ROH.formate, KANAELE: string[] = ROH.kanaele, ELEMENTE: string[] = ROH.elemente;
+  const STATUS: Record<Status, [string, string]> = { idee: ['Idee', ''], in_arbeit: ['In Arbeit', 'blau'], geplant: ['Geplant', 'gelb'], veroeffentlicht: ['Veröffentlicht', 'gruen'] };
+  const LOGOS: Record<string, string> = { Instagram: '/logos/instagram.svg', Facebook: '/logos/facebook.svg', TikTok: '/logos/tiktok.svg', YouTube: '/logos/youtube.svg' };
+  const SPEICHER = 'promotion-content';
+  const datum = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const monatName = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' });
+
+  function el<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, any> = {}, ...kinder: (Node | string | null | false | undefined)[]) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v === undefined || v === null || v === false) continue;
+      if (k.startsWith('on') && typeof v === 'function') e.addEventListener(k.slice(2), v);
+      else if (k === 'class') e.className = v; else e.setAttribute(k, v === true ? '' : String(v));
+    }
+    for (const k of kinder) if (k !== null && k !== undefined && k !== false) e.append(k);
+    return e;
+  }
+  const heute = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const verschoben = (t: number) => { const d = heute(); d.setDate(d.getDate() + t); return iso(d); };
+  const zeige = (s: string) => (s ? datum.format(new Date(s + 'T00:00:00')) : '–');
+
+  function pruefe(c: any): Inhalt {
+    return {
+      id: String(c.id || 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5)), titel: String(c.titel || 'Ohne Titel').slice(0, 160),
+      format: FORMATE.includes(c.format) ? c.format : FORMATE[0], kanal: KANAELE.includes(c.kanal) ? c.kanal : KANAELE[0],
+      status: (c.status in STATUS ? c.status : 'idee') as Status, termin: /^\d{4}-\d{2}-\d{2}$/.test(c.termin) ? c.termin : '',
+      element: ELEMENTE.includes(c.element) ? c.element : '', zustaendig: String(c.zustaendig || '').slice(0, 60), notizen: String(c.notizen || '').slice(0, 1000),
+    };
+  }
+  const startdaten = () => (ROH.eintraege || []).map((c: any) => pruefe({ ...c, termin: typeof c.termin === 'number' ? verschoben(c.termin) : c.termin }));
+  function laden(): Inhalt[] {
+    try { const d = JSON.parse(localStorage.getItem(SPEICHER) || 'null'); if (Array.isArray(d)) return d.map(pruefe); } catch { /* kein Speicher */ }
+    return startdaten();
+  }
+  let inhalte = laden();
+  let ansicht = 'kalender';
+  let filter = 'alle';
+  let monat = new Date(heute().getFullYear(), heute().getMonth(), 1);
+  const speichern = () => { try { localStorage.setItem(SPEICHER, JSON.stringify(inhalte)); } catch { /* ohne Speicher */ } zeichnen(); };
+  const sichtbar = () => inhalte.filter((c) => filter === 'alle' || c.kanal === filter);
+  const marke = (s: Status) => el('span', { class: `pm-marke ${STATUS[s][1]}` }, STATUS[s][0]);
+  const kanalIcon = (k: string) => (LOGOS[k] ? el('img', { src: LOGOS[k], alt: '', width: 14, height: 14, class: 'ct-icon' }) : null);
+  const eintragKnopf = (c: Inhalt) => el('button', { type: 'button', class: `ct-eintrag s-${c.status}`, onclick: () => dialog(c, '') }, kanalIcon(c.kanal), el('span', {}, c.titel));
+
+  function kalender() {
+    const erster = new Date(monat); const start = new Date(erster); start.setDate(1 - ((erster.getDay() + 6) % 7)); // Montag davor
+    const tage: HTMLElement[] = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((t) => el('div', { class: 'ct-wochentag' }, t));
+    for (let i = 0; i < 42; i++) {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      if (i >= 35 && d.getMonth() !== erster.getMonth()) break;
+      const tag = iso(d);
+      const liste = sichtbar().filter((c) => c.termin === tag);
+      const zelle = el('div', { class: `ct-tag${d.getMonth() !== erster.getMonth() ? ' fremd' : ''}${tag === iso(heute()) ? ' heute' : ''}`, 'data-tag': tag },
+        el('div', { class: 'ct-tag-kopf' }, el('span', {}, String(d.getDate())), el('button', { type: 'button', class: 'ct-plus', 'aria-label': `Inhalt am ${datum.format(d)} anlegen`, onclick: () => dialog(null, tag) }, '+')),
+        ...liste.map(eintragKnopf));
+      zelle.addEventListener('dragover', (e) => { e.preventDefault(); zelle.classList.add('ziel'); });
+      zelle.addEventListener('dragleave', () => zelle.classList.remove('ziel'));
+      zelle.addEventListener('drop', (e) => { e.preventDefault(); const c = inhalte.find((x) => x.id === e.dataTransfer?.getData('text/plain')); if (c) { c.termin = tag; speichern(); } });
+      zelle.querySelectorAll<HTMLElement>('.ct-eintrag').forEach((b, j) => { b.draggable = true; b.addEventListener('dragstart', (e) => e.dataTransfer?.setData('text/plain', liste[j].id)); });
+      tage.push(zelle);
+    }
+    const ohneTermin = sichtbar().filter((c) => !c.termin);
+    return el('div', { class: 'karte' },
+      el('div', { class: 'ct-monat' },
+        el('button', { type: 'button', class: 'pm-btn', 'aria-label': 'Voriger Monat', onclick: () => { monat.setMonth(monat.getMonth() - 1); zeichnen(); } }, '‹'),
+        el('h2', {}, monatName.format(monat)),
+        el('button', { type: 'button', class: 'pm-btn', 'aria-label': 'Nächster Monat', onclick: () => { monat.setMonth(monat.getMonth() + 1); zeichnen(); } }, '›'),
+        el('button', { type: 'button', class: 'pm-link', onclick: () => { monat = new Date(heute().getFullYear(), heute().getMonth(), 1); zeichnen(); } }, 'Heute')),
+      el('div', { class: 'ct-kalender-rahmen' }, el('div', { class: 'ct-kalender' }, ...tage)),
+      ohneTermin.length ? el('div', { class: 'ct-ohne' }, el('strong', {}, 'Ohne Termin: '), ...ohneTermin.map(eintragKnopf)) : null);
+  }
+
+  function board() {
+    return el('div', { class: 'pm-board' }, ...(Object.keys(STATUS) as Status[]).map((s) => {
+      const liste = sichtbar().filter((c) => c.status === s).sort((a, b) => (a.termin || '9').localeCompare(b.termin || '9'));
+      const spalte = el('div', { class: `pm-spalte ct-spalte-${s}` }, el('h3', {}, STATUS[s][0], el('span', { class: 'pm-anzahl' }, String(liste.length))),
+        ...liste.map((c) => {
+          const k = el('article', { class: 'pm-karte', draggable: 'true' },
+            el('button', { type: 'button', class: 'pm-link', onclick: () => dialog(c, '') }, c.titel),
+            el('span', { class: 'pm-klein ct-meta' }, kanalIcon(c.kanal), `${c.format} · ${c.kanal}`),
+            el('span', { class: 'pm-karte-fuss' }, c.element ? el('span', { class: 'ct-element' }, c.element) : el('span'), el('span', { class: 'pm-faellig' }, c.termin ? zeige(c.termin) : '')));
+          k.addEventListener('dragstart', (e) => e.dataTransfer?.setData('text/plain', c.id));
+          return k;
+        }), liste.length ? null : el('p', { class: 'pm-leer' }, 'Keine Inhalte'));
+      spalte.addEventListener('dragover', (e) => { e.preventDefault(); spalte.classList.add('ziel'); });
+      spalte.addEventListener('dragleave', () => spalte.classList.remove('ziel'));
+      spalte.addEventListener('drop', (e) => { e.preventDefault(); spalte.classList.remove('ziel'); const c = inhalte.find((x) => x.id === e.dataTransfer?.getData('text/plain')); if (c) { c.status = s; speichern(); } });
+      return spalte;
+    }));
+  }
+
+  function liste() {
+    const l = sichtbar().sort((a, b) => (a.termin || '9').localeCompare(b.termin || '9'));
+    if (!l.length) return el('p', { class: 'karte pm-leer' }, 'Noch keine Inhalte.');
+    return el('div', { class: 'karte pm-tabelle-rahmen' }, el('table', { class: 'pm-tabelle' },
+      el('thead', {}, el('tr', {}, ...['Titel', 'Format', 'Kanal', 'Storytelling-Element', 'Status', 'Veröffentlichung', 'Zuständig'].map((t) => el('th', { scope: 'col' }, t)))),
+      el('tbody', {}, ...l.map((c) => el('tr', { class: c.status === 'veroeffentlicht' ? 'erledigt' : '' },
+        el('td', {}, el('button', { type: 'button', class: 'pm-link', onclick: () => dialog(c, '') }, c.titel)), el('td', {}, c.format),
+        el('td', {}, el('span', { class: 'ct-meta' }, kanalIcon(c.kanal), c.kanal)), el('td', {}, c.element || '–'), el('td', {}, marke(c.status)),
+        el('td', {}, zeige(c.termin)), el('td', {}, c.zustaendig || '–'))))));
+  }
+
+  function abdeckung() {
+    const zaehl = Object.fromEntries(ELEMENTE.map((e) => [e, inhalte.filter((c) => c.element === e).length]));
+    document.getElementById('ct-abdeckung')!.replaceChildren(
+      el('h2', {}, 'Welche Teile der Geschichte erzählen Ihre Inhalte?'),
+      el('ul', {}, ...ELEMENTE.map((e) => el('li', { class: zaehl[e] ? '' : 'fehlt' }, el('strong', {}, String(zaehl[e])), e))),
+      el('p', { class: 'pm-klein' }, 'Elemente mit 0 Inhalten sind gelb markiert: Hier fehlt noch etwas in Ihrer Geschichte.'));
+  }
+
+  function zeichnen() {
+    document.querySelectorAll<HTMLButtonElement>('[data-ansicht]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.ansicht === ansicht)));
+    document.getElementById('ct-inhalt')!.replaceChildren(ansicht === 'board' ? board() : ansicht === 'liste' ? liste() : kalender());
+    abdeckung();
+  }
+
+  // Formular
+  const dlg = document.getElementById('ct-dialog') as HTMLDialogElement;
+  const form = document.getElementById('ct-form') as HTMLFormElement;
+  const feld = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
+  const fuellen = (n: string, werte: [string, string][]) => (form.elements.namedItem(n) as HTMLSelectElement).append(...werte.map(([v, t]) => el('option', { value: v }, t)));
+  fuellen('format', FORMATE.map((f) => [f, f])); fuellen('kanal', KANAELE.map((k) => [k, k])); fuellen('status', (Object.keys(STATUS) as Status[]).map((s) => [s, STATUS[s][0]]));
+  fuellen('element', [['', '– keins –'], ...ELEMENTE.map((e) => [e, e] as [string, string])]);
+  const filterFeld = document.getElementById('ct-filter') as HTMLSelectElement;
+  filterFeld.append(el('option', { value: 'alle' }, 'Alle Kanäle'), ...KANAELE.map((k) => el('option', { value: k }, k)));
+  filterFeld.addEventListener('change', () => { filter = filterFeld.value; zeichnen(); });
+  let aktuell: Inhalt | null = null;
+  function dialog(c: Inhalt | null, tag: string) {
+    aktuell = c;
+    const w: any = c ?? { titel: '', format: FORMATE[0], kanal: filter !== 'alle' ? filter : KANAELE[0], status: 'idee', termin: tag, element: '', zustaendig: '', notizen: '' };
+    for (const n of ['titel', 'format', 'kanal', 'status', 'termin', 'element', 'zustaendig', 'notizen']) feld(n).value = String(w[n] ?? '');
+    document.getElementById('ct-dialog-titel')!.textContent = c ? 'Inhalt bearbeiten' : 'Neuer Inhalt';
+    document.getElementById('ct-loeschen')!.hidden = !c;
+    dlg.showModal(); feld('titel').focus();
+  }
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const neu = pruefe({ id: aktuell?.id, ...Object.fromEntries(['titel', 'format', 'kanal', 'status', 'termin', 'element', 'zustaendig', 'notizen'].map((n) => [n, feld(n).value.trim()])) });
+    if (aktuell) Object.assign(aktuell, neu); else inhalte.push(neu);
+    dlg.close(); speichern();
+  });
+  document.getElementById('ct-abbrechen')!.addEventListener('click', () => dlg.close());
+  document.getElementById('ct-loeschen')!.addEventListener('click', () => { if (aktuell && confirm(`„${aktuell.titel}“ löschen?`)) { inhalte = inhalte.filter((x) => x !== aktuell); dlg.close(); speichern(); } });
+  document.getElementById('ct-neu')!.addEventListener('click', () => dialog(null, ''));
+  document.querySelectorAll<HTMLButtonElement>('[data-ansicht]').forEach((b) => b.addEventListener('click', () => { ansicht = b.dataset.ansicht!; zeichnen(); }));
+  document.getElementById('ct-export')!.addEventListener('click', () => {
+    const a = el('a', { href: URL.createObjectURL(new Blob([JSON.stringify(inhalte, null, 2)], { type: 'application/json' })), download: `content-${iso(heute())}.json` }) as HTMLAnchorElement;
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+  document.getElementById('ct-import')!.addEventListener('change', async (e) => {
+    const datei = (e.target as HTMLInputElement).files?.[0]; if (!datei) return;
+    try { const d = JSON.parse(await datei.text()); if (!Array.isArray(d)) throw new Error(); if (confirm(`${d.length} Inhalte laden? Der bisherige Stand wird ersetzt.`)) { inhalte = d.map(pruefe); speichern(); } }
+    catch { alert('Die Datei konnte nicht gelesen werden.'); }
+    (e.target as HTMLInputElement).value = '';
+  });
+  document.getElementById('ct-reset')!.addEventListener('click', () => { if (confirm('Alle eigenen Inhalte in diesem Browser durch die Beispieldaten ersetzen?')) { inhalte = startdaten(); speichern(); } });
+
+  zeichnen();
+</script>
+
+<style>
+  :global(.ct-monat) { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-bottom: 10px; }
+  :global(.ct-monat h2) { font-size: 1.15rem; margin: 0; min-width: min(11em, 100%); text-align: center; }
+  @media (max-width: 480px) { :global(.ct-monat h2) { min-width: 0; flex: 1; } }
+  :global(.ct-kalender-rahmen) { overflow-x: auto; position: relative; }
+  :global(.ct-kalender) { display: grid; grid-template-columns: repeat(7, minmax(110px, 1fr)); gap: 4px; min-width: 780px; }
+  :global(.ct-wochentag) { font-size: .78rem; font-weight: 700; color: #5a676d; text-transform: uppercase; letter-spacing: .05em; padding: 4px 6px; }
+  :global(.ct-tag) { min-height: 96px; border: 1px solid #e3e8ea; border-radius: 8px; padding: 4px; display: flex; flex-direction: column; gap: 3px; background: #fff; }
+  :global(.ct-tag.fremd) { background: #f7f9f9; color: #9aa6ab; }
+  :global(.ct-tag.heute) { border-color: var(--haupt); box-shadow: inset 0 0 0 1px var(--haupt); }
+  :global(.ct-tag.ziel) { background: color-mix(in srgb, var(--haupt) 10%, white); }
+  :global(.ct-tag-kopf) { display: flex; justify-content: space-between; align-items: center; font-size: .8rem; font-weight: 600; }
+  :global(.ct-plus) { font: inherit; border: 0; background: none; color: #9aa6ab; cursor: pointer; width: 20px; height: 20px; border-radius: 50%; line-height: 1; }
+  :global(.ct-tag:hover .ct-plus) { color: var(--haupt); background: #eef2f4; }
+  :global(.ct-eintrag) { font: inherit; font-size: .76rem; text-align: left; border: 0; border-left: 3px solid #9aa6ab; border-radius: 4px; padding: 3px 5px; background: #f1f4f5; cursor: pointer; display: flex; gap: 4px; align-items: flex-start; line-height: 1.25; color: var(--text); }
+  :global(.ct-eintrag.s-in_arbeit) { border-left-color: #2f6fa6; background: #edf4fb; }
+  :global(.ct-eintrag.s-geplant) { border-left-color: #e0a458; background: #fff6e6; }
+  :global(.ct-eintrag.s-veroeffentlicht) { border-left-color: #3d8b5a; background: #eef7f1; }
+  :global(.ct-icon) { width: 14px; height: 14px; flex: none; margin-top: 1px; }
+  :global(.ct-ohne) { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; font-size: .85rem; }
+  :global(.ct-meta) { display: inline-flex; gap: 5px; align-items: center; }
+  :global(.ct-element) { font-size: .75rem; background: #eef2f4; border-radius: 999px; padding: 1px 8px; color: #3f4a4f; }
+  :global(.pm-spalte.ct-spalte-in_arbeit) { border-top-color: #2f6fa6; }
+  :global(.pm-spalte.ct-spalte-geplant) { border-top-color: #e0a458; }
+  :global(.pm-spalte.ct-spalte-veroeffentlicht) { border-top-color: #3d8b5a; }
+  :global(.pm-board) { display: grid; gap: 12px; grid-template-columns: repeat(4, minmax(220px, 1fr)); overflow-x: auto; padding-bottom: 6px; }
+  :global(.pm-spalte) { background: #eaeef0; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 160px; border-top: 4px solid #9aa6ab; }
+  :global(.pm-spalte.ziel) { outline: 2px dashed var(--haupt); outline-offset: -2px; }
+  :global(.pm-spalte h3) { font-size: .95rem; margin: 2px 4px 4px; display: flex; justify-content: space-between; }
+  :global(.pm-anzahl) { font-size: .8rem; background: #fff; border-radius: 999px; padding: 0 8px; color: #5a676d; }
+  :global(.pm-karte) { background: #fff; border: 1px solid #dde3e6; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; cursor: grab; font-size: .92rem; }
+  :global(.pm-karte .pm-link) { font-weight: 600; color: var(--text); text-decoration: none; }
+  :global(.pm-karte-fuss) { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: .82rem; }
+  :global(.pm-filter) { display: inline-flex; align-items: center; gap: 6px; font-size: .9rem; font-weight: 600; color: #4c595f; }
+  .ct-abdeckung { margin-top: 16px; }
+  .ct-abdeckung :global(h2) { font-size: 1.05rem; }
+  .ct-abdeckung :global(ul) { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .ct-abdeckung :global(li) { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: #eef7f1; font-size: .88rem; }
+  .ct-abdeckung :global(li.fehlt) { background: #fff4dd; }
+  .ct-abdeckung :global(li strong) { font-size: 1rem; }
+</style>

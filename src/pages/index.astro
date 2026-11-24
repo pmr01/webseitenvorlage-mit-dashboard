@@ -5,6 +5,7 @@
 import Website from '../layouts/Website.astro';
 import CTA from '../components/CTA.astro';
 import { konfiguration as k } from '../konfiguration.mjs';
+import Bearbeiten from '../components/Bearbeiten.astro';
 ---
 <Website>
   <!-- (3) Hauptbild / Video, (4) Main Headline, (5) Einleitung, (9) CTA -->
@@ -13,8 +14,8 @@ import { konfiguration as k } from '../konfiguration.mjs';
       ? <video class="hero-medium" src={k.hero.video} autoplay muted loop playsinline aria-hidden="true"></video>
       : <img class="hero-medium" src={k.hero.bild} alt={k.hero.bildAlt} width="1600" height="900" />}
     <div class="hero-text inhalt">
-      <h1 id="hero-titel">{k.hero.ueberschrift}</h1>
-      <p class="einleitung">{k.hero.einleitung}</p>
+      <h1 id="hero-titel" data-k="hero.ueberschrift">{k.hero.ueberschrift}</h1>
+      <p class="einleitung" data-k="hero.einleitung">{k.hero.einleitung}</p>
       <CTA hell zentriert={false} />
     </div>
   </section>
@@ -22,10 +23,10 @@ import { konfiguration as k } from '../konfiguration.mjs';
   <!-- (6) Painpoints: 3 bis 6, gemäß Persona -->
   <section id="painpoints" class="abschnitt" aria-labelledby="painpoints-titel">
     <div class="inhalt">
-      <h2 id="painpoints-titel" class="zentriert">{k.painpoints.ueberschrift}</h2>
+      <h2 id="painpoints-titel" class="zentriert" data-k="painpoints.ueberschrift">{k.painpoints.ueberschrift}</h2>
       <ul class="painpoints">
-        {k.painpoints.punkte.map((p) => (
-          <li><h3>{p.titel}</h3><p>{p.text}</p></li>
+        {k.painpoints.punkte.map((p, i) => (
+          <li><h3 data-k={`painpoints.punkte.${i}.titel`}>{p.titel}</h3><p data-k={`painpoints.punkte.${i}.text`}>{p.text}</p></li>
         ))}
       </ul>
       <CTA />
@@ -36,8 +37,8 @@ import { konfiguration as k } from '../konfiguration.mjs';
   <section id="vorstellung" class="abschnitt flaeche" aria-labelledby="vorstellung-titel">
     <div class="inhalt vorstellung">
       <div>
-        <h2 id="vorstellung-titel">{k.vorstellung.ueberschrift}</h2>
-        {k.vorstellung.text.map((absatz) => <p>{absatz}</p>)}
+        <h2 id="vorstellung-titel" data-k="vorstellung.ueberschrift">{k.vorstellung.ueberschrift}</h2>
+        {k.vorstellung.text.map((absatz, i) => <p data-k={`vorstellung.text.${i}`}>{absatz}</p>)}
         <CTA zentriert={false} />
       </div>
       <img src={k.vorstellung.bild} alt={k.vorstellung.bildAlt} width="600" height="600" loading="lazy" />
@@ -47,10 +48,10 @@ import { konfiguration as k } from '../konfiguration.mjs';
   <!-- (8) Plan: So einfach geht es, 3 Schritte -->
   <section id="plan" class="abschnitt" aria-labelledby="plan-titel">
     <div class="inhalt">
-      <h2 id="plan-titel" class="zentriert">{k.plan.ueberschrift}</h2>
+      <h2 id="plan-titel" class="zentriert" data-k="plan.ueberschrift">{k.plan.ueberschrift}</h2>
       <ol class="plan">
         {k.plan.schritte.map((s, i) => (
-          <li><span class="nummer" aria-hidden="true">{i + 1}</span><h3>{s.titel}</h3><p>{s.text}</p></li>
+          <li><span class="nummer" aria-hidden="true">{i + 1}</span><h3 data-k={`plan.schritte.${i}.titel`}>{s.titel}</h3><p data-k={`plan.schritte.${i}.text`}>{s.text}</p></li>
         ))}
       </ol>
       <CTA />
@@ -61,9 +62,9 @@ import { konfiguration as k } from '../konfiguration.mjs';
   {k.auszeichnungen.eintraege.length > 0 && (
     <section id="auszeichnungen" class="abschnitt flaeche schmal" aria-labelledby="auszeichnungen-titel">
       <div class="inhalt">
-        <h2 id="auszeichnungen-titel" class="zentriert klein">{k.auszeichnungen.ueberschrift}</h2>
+        <h2 id="auszeichnungen-titel" class="zentriert klein" data-k="auszeichnungen.ueberschrift">{k.auszeichnungen.ueberschrift}</h2>
         <ul class="siegel">
-          {k.auszeichnungen.eintraege.map((e) => <li>{e}</li>)}
+          {k.auszeichnungen.eintraege.map((e, i) => <li data-k={`auszeichnungen.eintraege.${i}`}>{e}</li>)}
         </ul>
       </div>
     </section>
@@ -72,12 +73,12 @@ import { konfiguration as k } from '../konfiguration.mjs';
   <!-- (11) Testimonials -->
   <section id="testimonials" class="abschnitt" aria-labelledby="testimonials-titel">
     <div class="inhalt">
-      <h2 id="testimonials-titel" class="zentriert">{k.testimonials.ueberschrift}</h2>
+      <h2 id="testimonials-titel" class="zentriert" data-k="testimonials.ueberschrift">{k.testimonials.ueberschrift}</h2>
       <ul class="stimmen">
-        {k.testimonials.stimmen.map((s) => (
+        {k.testimonials.stimmen.map((s, i) => (
           <li>
-            <blockquote><p>„{s.zitat}“</p></blockquote>
-            <p class="person"><strong>{s.name}</strong><br />{s.rolle}</p>
+            <blockquote><p>„<span data-k={`testimonials.stimmen.${i}.zitat`}>{s.zitat}</span>“</p></blockquote>
+            <p class="person"><strong data-k={`testimonials.stimmen.${i}.name`}>{s.name}</strong><br /><span data-k={`testimonials.stimmen.${i}.rolle`}>{s.rolle}</span></p>
           </li>
         ))}
       </ul>
@@ -88,15 +89,16 @@ import { konfiguration as k } from '../konfiguration.mjs';
   <!-- (12) Weitere Elemente: Kontakt (der Footer steht im Layout) -->
   <section id="kontakt" class="abschnitt flaeche" aria-labelledby="kontakt-titel">
     <div class="inhalt kontakt">
-      <h2 id="kontakt-titel">{k.kontakt.ueberschrift}</h2>
-      <p>{k.kontakt.text}</p>
+      <h2 id="kontakt-titel" data-k="kontakt.ueberschrift">{k.kontakt.ueberschrift}</h2>
+      <p data-k="kontakt.text">{k.kontakt.text}</p>
       <ul>
-        <li><span>E-Mail</span><a href={`mailto:${k.kontakt.email}`}>{k.kontakt.email}</a></li>
-        <li><span>Telefon</span><a href={`tel:${k.kontakt.telefon.replace(/\s/g, '')}`}>{k.kontakt.telefon}</a></li>
-        <li><span>Adresse</span>{k.kontakt.adresse}</li>
+        <li><span>E-Mail</span><a href={`mailto:${k.kontakt.email}`} data-k="kontakt.email">{k.kontakt.email}</a></li>
+        <li><span>Telefon</span><a href={`tel:${k.kontakt.telefon.replace(/\s/g, '')}`} data-k="kontakt.telefon">{k.kontakt.telefon}</a></li>
+        <li><span>Adresse</span><span data-k="kontakt.adresse">{k.kontakt.adresse}</span></li>
       </ul>
     </div>
   </section>
+  <Bearbeiten />
 </Website>
 
 <style>

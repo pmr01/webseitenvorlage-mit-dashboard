@@ -64,7 +64,9 @@ Jede Änderung an einer Datei erscheint nach dem Speichern sofort in der Vorscha
 
 ## 3. Anpassen: Texte, Farben, Logo
 
-Öffnen Sie `src/konfiguration.mjs`. Die Datei ist in Abschnitte mit Nummern gegliedert, die zu den zwölf Elementen passen. Ändern Sie nur den Text zwischen den Anführungszeichen.
+**Am einfachsten mit dem Editor:** Öffnen Sie im Dashboard **Promotion → Webseite mit Storytelling Framework** und klicken Sie auf **Website bearbeiten** (oder rufen Sie Ihre Startseite mit `?bearbeiten` am Ende der Adresse auf). Texte anklicken, ändern, dann **Konfiguration herunterladen** und die Datei als `src/konfiguration.mjs` ins Projekt legen. Bilder, Farben und die Navigation-Ziele ändern Sie weiterhin in der Datei.
+
+Von Hand: Öffnen Sie `src/konfiguration.mjs`. Die Datei ist in Abschnitte mit Nummern gegliedert, die zu den zwölf Elementen passen. Ändern Sie nur den Text zwischen den Anführungszeichen.
 
 **Firmenname:** `firma.name`
 

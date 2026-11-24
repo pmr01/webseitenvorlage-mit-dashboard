@@ -3,7 +3,7 @@
 Eine neutrale Vorlage aus Website und Dashboard, die Sie herunterladen, in Ihr KI-Tool hochladen und an Ihr eigenes Unternehmen anpassen.
 
 - **Website** nach dem Storytelling Framework: zwölf Elemente in fester Reihenfolge, dazu Impressum und Datenschutz.
-- **Dashboard** unter `/dashboard/`, geschützt durch ein Passwort: Übersicht mit Beispielzahlen, dann Produkt (Business Model Canvas), Positionierung (Strategie-Pyramide, Porter, SWOT, Persona), Promotion (Storytelling Framework, Design-System, Kanäle & Budget), Prozess (Projekte wasserfall oder agil, Eisenhower-Matrix, Kampagnenplanung, Updates), Plattform (Tools mit Datenschutz und AVV, Abos & Domains) und Performance (Google Analytics).
+- **Dashboard** unter `/dashboard/`, geschützt durch ein Passwort: Übersicht mit Beispielzahlen, dann Produkt (Business Model Canvas mit Post-its), Positionierung (Strategie-Pyramide, Porter, SWOT, Persona), Promotion (Kanäle & Budget, Content, Webseite mit Storytelling Framework samt Editor, Design-System), Prozess (Projekte wasserfall oder agil mit optionaler Eisenhower-Ansicht, Kampagnenplanung, Updates). Jeder Bereich verlinkt seine eigene Anleitung, Plattform (Tools mit Datenschutz und AVV, Skills, Abos & Domains) und Performance (Google Analytics).
 
 ## So geht es los
 

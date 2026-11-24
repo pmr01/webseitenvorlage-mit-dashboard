@@ -1,0 +1,169 @@
+---
+// Einfacher Editor und Prüfansicht für die Startseite. Ohne Parameter passiert nichts.
+//
+//   /?bearbeiten  Bearbeitungsmodus: Texte anklicken und ändern. Der Entwurf bleibt im Browser.
+//                 "Konfiguration herunterladen" erzeugt src/konfiguration.mjs mit den neuen
+//                 Texten; Kommentare und alles andere in der Datei bleiben erhalten.
+//   /?markieren   Prüfansicht (im Dashboard eingebettet): zeigt die Nummern 1–12 des
+//                 Storytelling Frameworks und markiert, was noch Platzhalter der Vorlage ist.
+//
+// Gespeichert wird nichts auf dem Server: Die Website ändert sich erst, wenn die heruntergeladene
+// Datei im Projekt ersetzt und die Website neu veröffentlicht wird.
+import { konfiguration } from '../konfiguration.mjs';
+import quelltext from '../konfiguration.mjs?raw';
+import platzhalter from '../inhalte/vorlage-platzhalter.json';
+const daten = { konfiguration, quelltext, platzhalter: platzhalter.werte };
+---
+<script type="application/json" id="bearbeiten-daten" set:html={JSON.stringify(daten)}></script>
+
+<script>
+  const parameter = new URLSearchParams(location.search);
+  const modus = parameter.has('bearbeiten') ? 'bearbeiten' : parameter.has('markieren') ? 'markieren' : '';
+  if (modus) starten();
+
+  function starten() {
+    const D = JSON.parse(document.getElementById('bearbeiten-daten')!.textContent || '{}');
+    const ENTWURF = 'website-entwurf';
+
+    // Alle Textwerte der Konfiguration in Quellreihenfolge, z. B. "hero.ueberschrift"
+    const flach: [string, string][] = [];
+    const lauf = (o: any, p: string) => {
+      if (typeof o === 'string') { flach.push([p, o]); return; }
+      if (o && typeof o === 'object') for (const [k, v] of Object.entries(o)) lauf(v, p ? `${p}.${k}` : k);
+    };
+    lauf(D.konfiguration, '');
+    const original = new Map(flach);
+    const felder = () => Array.from(document.querySelectorAll<HTMLElement>('[data-k]'));
+
+    const stil = document.createElement('style');
+    stil.textContent = `
+      .ed-leiste { position: fixed; z-index: 100; left: 50%; transform: translateX(-50%); bottom: 16px; width: min(760px, calc(100% - 24px)); background: #1c2126; color: #fff; border-radius: 14px; padding: 12px 14px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,.35); font: 500 .9rem system-ui, sans-serif; }
+      .ed-leiste strong { font-weight: 700; }
+      .ed-leiste .ed-luecke { flex: 1; }
+      .ed-leiste button { font: inherit; font-weight: 600; border-radius: 8px; padding: 7px 12px; border: 1px solid #56636a; background: transparent; color: #fff; cursor: pointer; }
+      .ed-leiste button.ed-haupt { background: #e0a458; border-color: #e0a458; color: #1c2126; }
+      .ed-leiste small { flex-basis: 100%; color: #b8c2c7; font-size: .8rem; }
+      [data-ed] { outline: 2px dashed rgba(224,164,88,.6); outline-offset: 3px; border-radius: 3px; cursor: text; }
+      [data-ed]:hover { outline-color: #e0a458; }
+      [data-ed]:focus { outline: 2px solid #e0a458; background: rgba(224,164,88,.12); }
+      [data-ed].ed-geaendert { outline-color: #3d8b5a; }
+      .mk-nr { position: absolute; z-index: 30; display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 6px; border-radius: 999px; background: #1c2126; color: #fff; font: 700 13px system-ui, sans-serif; box-shadow: 0 0 0 2px #fff; pointer-events: none; }
+      .mk-offen { outline: 3px dashed #d14343 !important; outline-offset: 3px; position: relative; }
+      .mk-offen-bild { outline: 4px dashed #d14343; outline-offset: -4px; }
+    `;
+    document.head.append(stil);
+
+    if (modus === 'markieren') markieren(); else bearbeiten();
+
+    // ---------- Prüfansicht ----------
+    function markieren() {
+      // Links nicht auslösen und das Einwilligungsbanner ausblenden
+      document.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('a,button')) e.preventDefault(); }, true);
+      document.getElementById('einwilligung')?.remove();
+      let offen = 0;
+      for (const el of felder()) {
+        const pfad = el.dataset.k!;
+        if (D.platzhalter[pfad] !== undefined && el.textContent!.trim() === D.platzhalter[pfad].trim()) { el.classList.add('mk-offen'); offen++; }
+      }
+      const bild = (sel: string, pfad: string) => { const b = document.querySelector<HTMLImageElement>(sel); if (b && D.konfiguration && D.platzhalter[pfad] && b.getAttribute('src') === D.platzhalter[pfad]) { b.classList.add('mk-offen-bild'); offen++; } };
+      bild('.hero-medium', 'hero.bild'); bild('.vorstellung img', 'vorstellung.bild'); bild('.logo img', 'firma.logo');
+      // Nummern des Storytelling Frameworks
+      const nummern: [string, string][] = [['.logo', '1'], ['.navigation', '2'], ['.hero', '3'], ['#hero-titel', '4'], ['.einleitung', '5'], ['#painpoints', '6'], ['#vorstellung', '7'], ['#plan', '8'], ['.kopf-cta', '9'], ['#auszeichnungen', '10'], ['#testimonials', '11'], ['#kontakt', '12']];
+      for (const [sel, nr] of nummern) {
+        const ziel = document.querySelector<HTMLElement>(sel); if (!ziel) continue;
+        const r = ziel.getBoundingClientRect();
+        const marke = document.createElement('span'); marke.className = 'mk-nr'; marke.textContent = nr;
+        marke.style.left = `${Math.max(4, r.left + window.scrollX - 14)}px`; marke.style.top = `${Math.max(4, r.top + window.scrollY - 12)}px`;
+        document.body.append(marke);
+      }
+      for (const b of document.querySelectorAll<HTMLElement>('[data-k="cta.text"]')) {
+        const r = b.getBoundingClientRect(); const marke = document.createElement('span'); marke.className = 'mk-nr'; marke.textContent = '9';
+        marke.style.left = `${r.left + window.scrollX - 12}px`; marke.style.top = `${r.top + window.scrollY - 12}px`; document.body.append(marke);
+      }
+      parent.postMessage({ typ: 'website-pruefung', offen }, location.origin);
+    }
+
+    // ---------- Bearbeitungsmodus ----------
+    function bearbeiten() {
+      let entwurf: Record<string, string> = {};
+      try { entwurf = JSON.parse(localStorage.getItem(ENTWURF) || '{}'); } catch { entwurf = {}; }
+      const speichern = () => { try { localStorage.setItem(ENTWURF, JSON.stringify(entwurf)); } catch { /* ohne Speicher */ } zaehlen(); };
+
+      // Links und Buttons nicht auslösen, solange bearbeitet wird
+      document.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('a') && !(e.target as HTMLElement).closest('.ed-leiste')) e.preventDefault(); }, true);
+      document.getElementById('einwilligung')?.remove();
+
+      for (const el of felder()) {
+        const pfad = el.dataset.k!;
+        if (!original.has(pfad)) continue;
+        el.dataset.ed = '';
+        el.setAttribute('contenteditable', 'plaintext-only');
+        if (el.contentEditable !== 'plaintext-only') el.setAttribute('contenteditable', 'true');
+        el.spellcheck = true;
+        if (entwurf[pfad] !== undefined) { el.textContent = entwurf[pfad]; el.classList.add('ed-geaendert'); }
+        el.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
+        el.addEventListener('paste', (e) => { e.preventDefault(); document.execCommand('insertText', false, e.clipboardData?.getData('text/plain').replace(/\s+/g, ' ') ?? ''); });
+        el.addEventListener('input', () => {
+          const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+          if (text === original.get(pfad)) delete entwurf[pfad]; else entwurf[pfad] = text;
+          // Gleiche Texte an anderen Stellen mitziehen (z. B. der Call-to-Action)
+          for (const anderes of felder()) if (anderes !== el && anderes.dataset.k === pfad) anderes.textContent = text;
+          for (const x of felder()) if (x.dataset.k === pfad) x.classList.toggle('ed-geaendert', pfad in entwurf);
+          speichern();
+        });
+      }
+
+      const leiste = document.createElement('div');
+      leiste.className = 'ed-leiste';
+      leiste.setAttribute('role', 'region');
+      leiste.setAttribute('aria-label', 'Bearbeitungsmodus');
+      leiste.innerHTML = `<strong>Bearbeitungsmodus</strong><span id="ed-zahl"></span><span class="ed-luecke"></span>
+        <button type="button" id="ed-verwerfen">Verwerfen</button>
+        <button type="button" class="ed-haupt" id="ed-laden">Konfiguration herunterladen</button>
+        <button type="button" id="ed-ende">Beenden</button>
+        <small>Texte mit gestricheltem Rahmen anklicken und ändern. Der Entwurf bleibt in diesem Browser. Übernehmen: heruntergeladene Datei als src/konfiguration.mjs ins Projekt legen und neu veröffentlichen.</small>`;
+      document.body.append(leiste);
+      document.body.style.paddingBottom = '140px';
+
+      function zaehlen() { const n = Object.keys(entwurf).length; document.getElementById('ed-zahl')!.textContent = n ? `${n} ${n === 1 ? 'Änderung' : 'Änderungen'}` : 'keine Änderungen'; }
+      zaehlen();
+
+      document.getElementById('ed-verwerfen')!.addEventListener('click', () => {
+        if (!confirm('Alle Änderungen dieses Entwurfs verwerfen?')) return;
+        entwurf = {}; speichern();
+        for (const el of felder()) if (original.has(el.dataset.k!)) { el.textContent = original.get(el.dataset.k!)!; el.classList.remove('ed-geaendert'); }
+      });
+      document.getElementById('ed-ende')!.addEventListener('click', () => { location.href = location.pathname; });
+      document.getElementById('ed-laden')!.addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([neueKonfiguration(entwurf)], { type: 'text/javascript' }));
+        a.download = 'konfiguration.mjs';
+        document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      });
+    }
+
+    // Ersetzt die geänderten Texte direkt im Quelltext der Konfiguration (Kommentare bleiben erhalten).
+    // Gleiche Texte an mehreren Stellen werden über ihre Reihenfolge in der Datei unterschieden.
+    function neueKonfiguration(entwurf: Record<string, string>) {
+      let quelle: string = D.quelltext;
+      const ersetzungen: { start: number; ende: number; neu: string }[] = [];
+      for (const [pfad, neu] of Object.entries(entwurf)) {
+        const alt = original.get(pfad); if (alt === undefined) continue;
+        const nr = flach.filter(([p, v]) => v === alt).findIndex(([p]) => p === pfad);
+        for (const zeichen of ["'", '"']) {
+          const literal = zeichen + alt.replace(/\\/g, '\\\\').split(zeichen).join('\\' + zeichen) + zeichen;
+          let pos = -1;
+          for (let i = 0; i <= nr; i++) { pos = quelle.indexOf(literal, pos + 1); if (pos < 0) break; }
+          if (pos >= 0) {
+            const text = "'" + neu.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, ' ') + "'";
+            ersetzungen.push({ start: pos, ende: pos + literal.length, neu: text });
+            break;
+          }
+        }
+      }
+      ersetzungen.sort((a, b) => b.start - a.start);
+      for (const e of ersetzungen) quelle = quelle.slice(0, e.start) + e.neu + quelle.slice(e.ende);
+      return quelle;
+    }
+  }
+</script>

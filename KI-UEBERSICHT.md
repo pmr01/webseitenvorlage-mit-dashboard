@@ -32,6 +32,10 @@ Alle Texte sind auf Deutsch. Bitte Änderungen ebenfalls auf Deutsch formulieren
 | Beispielprojekte und Phasen (Prozess → Projekte) | `src/inhalte/projekte.json` |
 | Beispielkampagnen (Prozess → Kampagnenplanung) | `src/inhalte/kampagnen.json` |
 | Wiederkehrende Updates und Prüfungen (Prozess → Updates) | `src/inhalte/updates.json` |
+| Redaktionsplan (Promotion → Content) | `src/inhalte/content.json` |
+| Skills (Plattform → Skills) | `src/inhalte/skills.json` |
+| Anleitung je Bereich (Link oben rechts in jedem Reiter) | `anleitungen/bereiche/*.md` |
+| Platzhalter der Vorlage für die Prüfansicht (nicht ändern) | `src/inhalte/vorlage-platzhalter.json` |
 | Impressum, Datenschutz | `src/pages/impressum.astro`, `src/pages/datenschutz.astro` |
 | Beispieldaten für Performance | `public/daten/beispieldaten.json` |
 
@@ -86,6 +90,10 @@ anleitungen/                 Anleitungen für Menschen
 - `npm install` – einmalig, lädt Astro
 - `npm run dev` – Vorschau unter http://localhost:4321
 - `npm run build` – erzeugt die fertige Website im Ordner `dist/`
+
+## Website-Editor
+
+`src/components/Bearbeiten.astro` steckt auf der Startseite und ist nur mit Parameter aktiv: `/?bearbeiten` macht alle Elemente mit `data-k="pfad.in.konfiguration"` bearbeitbar und erzeugt eine neue `konfiguration.mjs`, indem es nur die Text-Literale im Quelltext ersetzt. `/?markieren` zeigt die Nummern 1–12 und markiert Texte, die noch den Werten in `vorlage-platzhalter.json` entsprechen (genutzt in Promotion → Webseite). Neue Texte auf der Startseite bekommen deshalb ein `data-k`-Attribut mit ihrem Pfad.
 
 ## Daten im Browser
 

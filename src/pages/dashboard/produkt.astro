@@ -1,60 +1,288 @@
 ---
-// Reiter Produkt: Business Model Canvas.
-// Inhalte ändern in src/inhalte/business-model-canvas.json (höchstens 4 Punkte je Feld).
+// Reiter Produkt: Business Model Canvas mit Post-its.
+// Post-its lassen sich anlegen, farbig markieren, per Maus verschieben (auch in andere Felder),
+// bearbeiten und löschen. Startinhalte aus src/inhalte/business-model-canvas.json;
+// Änderungen speichert der Browser. "Als Datei sichern" erzeugt eine Datei im selben Format,
+// die die Inhaltsdatei ersetzen kann.
 import Dashboard from '../../layouts/Dashboard.astro';
-import BeispielHinweis from '../../components/BeispielHinweis.astro';
 import bmc from '../../inhalte/business-model-canvas.json';
 
 const felder = [
-  { schluessel: 'schluesselpartner', titel: 'Schlüsselpartner', bereich: 'kp' },
-  { schluessel: 'schluesselaktivitaeten', titel: 'Schlüsselaktivitäten', bereich: 'ka' },
-  { schluessel: 'schluesselressourcen', titel: 'Schlüsselressourcen', bereich: 'kr' },
-  { schluessel: 'wertangebote', titel: 'Wertangebote', bereich: 'wa' },
-  { schluessel: 'kundenbeziehungen', titel: 'Kundenbeziehungen', bereich: 'kb' },
-  { schluessel: 'vertriebskanaele', titel: 'Vertriebskanäle', bereich: 'vk' },
-  { schluessel: 'kundensegmente', titel: 'Kundensegmente', bereich: 'ks' },
-  { schluessel: 'kostenstruktur', titel: 'Kostenstruktur', bereich: 'ko' },
-  { schluessel: 'einnahmequellen', titel: 'Einnahmequellen', bereich: 'ei' },
-] as const;
+  { schluessel: 'schluesselpartner', titel: 'Schlüsselpartner', frage: 'Wer hilft uns?', bereich: 'kp' },
+  { schluessel: 'schluesselaktivitaeten', titel: 'Schlüsselaktivitäten', frage: 'Was tun wir?', bereich: 'ka' },
+  { schluessel: 'schluesselressourcen', titel: 'Schlüsselressourcen', frage: 'Was brauchen wir?', bereich: 'kr' },
+  { schluessel: 'wertangebote', titel: 'Wertangebote', frage: 'Welchen Nutzen bieten wir?', bereich: 'wa' },
+  { schluessel: 'kundenbeziehungen', titel: 'Kundenbeziehungen', frage: 'Wie pflegen wir Kontakt?', bereich: 'kb' },
+  { schluessel: 'vertriebskanaele', titel: 'Vertriebskanäle', frage: 'Wie erreichen wir Kunden?', bereich: 'vk' },
+  { schluessel: 'kundensegmente', titel: 'Kundensegmente', frage: 'Für wen?', bereich: 'ks' },
+  { schluessel: 'kostenstruktur', titel: 'Kostenstruktur', frage: 'Was kostet es?', bereich: 'ko' },
+  { schluessel: 'einnahmequellen', titel: 'Einnahmequellen', frage: 'Womit verdienen wir?', bereich: 'ei' },
+];
 ---
 <Dashboard titel="Produkt" untertitel="Das Business Model Canvas: wie das Unternehmen Werte schafft, liefert und damit Geld verdient.">
-  {bmc.beispiel && <BeispielHinweis datei="src/inhalte/business-model-canvas.json" />}
-  {bmc.einleitung && <p class="einleitung">{bmc.einleitung}</p>}
+  {bmc.beispiel && (
+    <p class="beispiel-hinweis" role="note"><strong>Beispiel</strong><span>Post-its einer fiktiven Firma. Ersetzen Sie sie durch Ihre eigenen, zum Beispiel erstellt mit dem 6P-Skill. Änderungen speichert dieser Browser; dauerhaft übernehmen Sie sie mit „Als Datei sichern“ in <code>src/inhalte/business-model-canvas.json</code>.</span></p>
+  )}
 
-  <div class="canvas">
+  <div class="bmc-leiste">
+    <ul class="bmc-legende" id="bmc-legende" aria-label="Bedeutung der Farben"></ul>
+    <p class="bmc-tipp">Post-it anklicken zum Bearbeiten · mit der Maus in ein anderes Feld ziehen · <strong>+</strong> fügt ein neues hinzu</p>
+  </div>
+
+  <div class="canvas" id="bmc">
     {felder.map((f) => (
-      <section class={`karte feld ${f.bereich}`} aria-label={f.titel}>
-        <h2>{f.titel}</h2>
-        <ul class="punkte">
-          {(bmc.felder[f.schluessel] ?? []).slice(0, 4).map((p) => (
-            <li><strong>{p.punkt}</strong><span>{p.begruendung}</span></li>
-          ))}
-        </ul>
+      <section class={`feld ${f.bereich}`} data-feld={f.schluessel} aria-labelledby={`bmc-${f.schluessel}`}>
+        <div class="feld-kopf">
+          <h2 id={`bmc-${f.schluessel}`}>{f.titel}</h2>
+          <button type="button" class="feld-neu" data-neu={f.schluessel} aria-label={`Post-it zu ${f.titel} hinzufügen`} title="Post-it hinzufügen">+</button>
+        </div>
+        <p class="feld-frage">{f.frage}</p>
+        <ul class="zettel" data-liste={f.schluessel}></ul>
       </section>
     ))}
   </div>
   {bmc.fazit && <p class="fazit">{bmc.fazit}</p>}
+
+  <div class="pm-daten-bmc">
+    <button type="button" class="bmc-link" id="bmc-export">Als Datei sichern</button>
+    <label class="bmc-link">Datei laden<input type="file" accept="application/json,.json" id="bmc-import" hidden /></label>
+    <button type="button" class="bmc-link" id="bmc-reset">Beispiel wiederherstellen</button>
+  </div>
+
+  <dialog id="bmc-dialog" class="bmc-dialog" aria-labelledby="bmc-dialog-titel">
+    <form method="dialog" id="bmc-form">
+      <h2 id="bmc-dialog-titel">Post-it</h2>
+      <label>Stichwort<input name="punkt" required maxlength="80" /></label>
+      <label>Begründung<textarea name="begruendung" rows="3" maxlength="300"></textarea></label>
+      <label>Feld<select name="feld">{felder.map((f) => <option value={f.schluessel}>{f.titel}</option>)}</select></label>
+      <fieldset class="bmc-farben"><legend>Markierung</legend><div id="bmc-farbwahl"></div></fieldset>
+      <div class="bmc-knoepfe">
+        <button type="button" class="bmc-btn gefahr" id="bmc-loeschen">Löschen</button>
+        <span></span>
+        <button type="button" class="bmc-btn" id="bmc-abbrechen">Abbrechen</button>
+        <button type="submit" class="bmc-btn primaer">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="application/json" id="bmc-start" set:html={JSON.stringify(bmc)}></script>
 </Dashboard>
 
+<script>
+  type Farbe = 'gelb' | 'gruen' | 'blau' | 'rosa' | 'lila';
+  type Zettel = { id: string; punkt: string; begruendung: string; farbe: Farbe };
+  type Canvas = Record<string, Zettel[]>;
+  const FARBEN: Record<Farbe, string> = { gelb: 'Idee', gruen: 'bestätigt', blau: 'zu prüfen', rosa: 'Risiko / Problem', lila: 'später' };
+  const SPEICHER = 'produkt-bmc';
+  const START = JSON.parse(document.getElementById('bmc-start')!.textContent || '{}');
+  const FELDER = Array.from(document.querySelectorAll<HTMLElement>('[data-feld]')).map((f) => f.dataset.feld!);
+  const neueId = () => 'z' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+  function aus(felder: any): Canvas {
+    const c: Canvas = {};
+    for (const f of FELDER) {
+      c[f] = (Array.isArray(felder?.[f]) ? felder[f] : []).map((z: any) => ({
+        id: String(z.id || neueId()), punkt: String(z.punkt || '').slice(0, 80) || 'Ohne Text', begruendung: String(z.begruendung || '').slice(0, 300),
+        farbe: (z.farbe in FARBEN ? z.farbe : 'gelb') as Farbe,
+      }));
+    }
+    return c;
+  }
+  function laden(): Canvas {
+    try { const d = JSON.parse(localStorage.getItem(SPEICHER) || 'null'); if (d && typeof d === 'object') return aus(d); } catch { /* kein Speicher */ }
+    return aus(START.felder);
+  }
+  let canvas = laden();
+  const speichern = () => { try { localStorage.setItem(SPEICHER, JSON.stringify(canvas)); } catch { /* ohne Speicher */ } zeichnen(); };
+
+  // Legende
+  document.getElementById('bmc-legende')!.append(...(Object.keys(FARBEN) as Farbe[]).map((f) => {
+    const li = document.createElement('li'); li.innerHTML = `<span class="punkt f-${f}"></span>`; li.append(FARBEN[f]); return li;
+  }));
+
+  // ---------- Zeichnen ----------
+  let gezogen: string | null = null;
+  function zeichnen() {
+    for (const f of FELDER) {
+      const liste = document.querySelector<HTMLUListElement>(`[data-liste="${f}"]`)!;
+      liste.replaceChildren(...canvas[f].map((z) => {
+        const li = document.createElement('li');
+        li.className = `zettel-eintrag f-${z.farbe}`;
+        li.draggable = true;
+        li.dataset.id = z.id;
+        li.tabIndex = 0;
+        li.setAttribute('role', 'button');
+        li.setAttribute('aria-label', `${z.punkt}, ${FARBEN[z.farbe]}. Zum Bearbeiten Eingabetaste drücken.`);
+        const titel = document.createElement('strong'); titel.textContent = z.punkt;
+        const text = document.createElement('span'); text.textContent = z.begruendung;
+        li.append(titel, text);
+        li.addEventListener('click', () => dialog(z, f));
+        li.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dialog(z, f); } });
+        li.addEventListener('dragstart', (e) => { gezogen = z.id; e.dataTransfer?.setData('text/plain', z.id); li.classList.add('zieht'); });
+        li.addEventListener('dragend', () => { li.classList.remove('zieht'); gezogen = null; document.querySelectorAll('.ziel, .davor').forEach((x) => x.classList.remove('ziel', 'davor')); });
+        return li;
+      }));
+      const anzahl = canvas[f].length;
+      const feld = document.querySelector<HTMLElement>(`[data-feld="${f}"]`)!;
+      feld.classList.toggle('zu-viele', anzahl > 4);
+      feld.title = anzahl > 4 ? 'Der 6P-Skill empfiehlt höchstens 4 Punkte je Feld.' : '';
+    }
+  }
+
+  // ---------- Verschieben: an die Stelle vor dem Post-it, über dem losgelassen wird ----------
+  function finden(id: string): [string, number] | null {
+    for (const f of FELDER) { const i = canvas[f].findIndex((z) => z.id === id); if (i >= 0) return [f, i]; }
+    return null;
+  }
+  document.querySelectorAll<HTMLElement>('[data-feld]').forEach((feld) => {
+    const ziel = feld.dataset.feld!;
+    feld.addEventListener('dragover', (e) => {
+      if (!gezogen) return;
+      e.preventDefault();
+      feld.classList.add('ziel');
+      document.querySelectorAll('.davor').forEach((x) => x.classList.remove('davor'));
+      (e.target as HTMLElement).closest('.zettel-eintrag')?.classList.add('davor');
+    });
+    feld.addEventListener('dragleave', (e) => { if (!feld.contains(e.relatedTarget as Node)) feld.classList.remove('ziel'); });
+    feld.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const id = e.dataTransfer?.getData('text/plain') || gezogen;
+      const quelle = id ? finden(id) : null;
+      if (!quelle) return;
+      const [z] = canvas[quelle[0]].splice(quelle[1], 1);
+      const vor = (e.target as HTMLElement).closest<HTMLElement>('.zettel-eintrag')?.dataset.id;
+      const index = vor ? canvas[ziel].findIndex((x) => x.id === vor) : -1;
+      if (index >= 0) canvas[ziel].splice(index, 0, z); else canvas[ziel].push(z);
+      speichern();
+    });
+  });
+
+  // ---------- Bearbeiten ----------
+  const dlg = document.getElementById('bmc-dialog') as HTMLDialogElement;
+  const form = document.getElementById('bmc-form') as HTMLFormElement;
+  const feldEl = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
+  let aktuell: { z: Zettel | null; feld: string } = { z: null, feld: FELDER[0] };
+  document.getElementById('bmc-farbwahl')!.append(...(Object.keys(FARBEN) as Farbe[]).map((f) => {
+    const l = document.createElement('label'); l.className = `farbwahl f-${f}`;
+    l.innerHTML = `<input type="radio" name="farbe" value="${f}" />`; l.append(FARBEN[f]); return l;
+  }));
+  function dialog(z: Zettel | null, feld: string) {
+    aktuell = { z, feld };
+    feldEl('punkt').value = z?.punkt ?? '';
+    feldEl('begruendung').value = z?.begruendung ?? '';
+    feldEl('feld').value = feld;
+    (form.querySelector(`input[name="farbe"][value="${z?.farbe ?? 'gelb'}"]`) as HTMLInputElement).checked = true;
+    document.getElementById('bmc-dialog-titel')!.textContent = z ? 'Post-it bearbeiten' : 'Neues Post-it';
+    document.getElementById('bmc-loeschen')!.hidden = !z;
+    dlg.showModal(); feldEl('punkt').focus();
+  }
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const farbe = ((form.querySelector('input[name="farbe"]:checked') as HTMLInputElement)?.value || 'gelb') as Farbe;
+    const neu: Zettel = { id: aktuell.z?.id ?? neueId(), punkt: feldEl('punkt').value.trim().slice(0, 80) || 'Ohne Text', begruendung: feldEl('begruendung').value.trim().slice(0, 300), farbe };
+    const zielFeld = feldEl('feld').value;
+    if (aktuell.z) {
+      const pos = finden(aktuell.z.id)!;
+      if (pos[0] === zielFeld) canvas[zielFeld][pos[1]] = neu;
+      else { canvas[pos[0]].splice(pos[1], 1); canvas[zielFeld].push(neu); }
+    } else canvas[zielFeld].push(neu);
+    dlg.close(); speichern();
+  });
+  document.getElementById('bmc-abbrechen')!.addEventListener('click', () => dlg.close());
+  document.getElementById('bmc-loeschen')!.addEventListener('click', () => {
+    if (!aktuell.z || !confirm(`Post-it „${aktuell.z.punkt}“ löschen?`)) return;
+    const pos = finden(aktuell.z.id); if (pos) canvas[pos[0]].splice(pos[1], 1);
+    dlg.close(); speichern();
+  });
+  document.querySelectorAll<HTMLButtonElement>('[data-neu]').forEach((b) => b.addEventListener('click', () => dialog(null, b.dataset.neu!)));
+
+  // ---------- Sichern und laden ----------
+  document.getElementById('bmc-export')!.addEventListener('click', () => {
+    const felder = Object.fromEntries(FELDER.map((f) => [f, canvas[f].map(({ punkt, begruendung, farbe }) => ({ punkt, begruendung, farbe }))]));
+    const datei = { beispiel: false, einleitung: START.einleitung ?? '', felder, fazit: START.fazit ?? '' };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(datei, null, 2)], { type: 'application/json' }));
+    a.download = 'business-model-canvas.json';
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+  document.getElementById('bmc-import')!.addEventListener('change', async (e) => {
+    const datei = (e.target as HTMLInputElement).files?.[0]; if (!datei) return;
+    try { const d = JSON.parse(await datei.text()); if (!d?.felder) throw new Error(); if (confirm('Business Model Canvas aus der Datei laden? Der bisherige Stand wird ersetzt.')) { canvas = aus(d.felder); speichern(); } }
+    catch { alert('Die Datei konnte nicht gelesen werden. Erwartet wird eine Datei im Format von business-model-canvas.json.'); }
+    (e.target as HTMLInputElement).value = '';
+  });
+  document.getElementById('bmc-reset')!.addEventListener('click', () => { if (confirm('Alle Änderungen in diesem Browser verwerfen und das Beispiel wiederherstellen?')) { canvas = aus(START.felder); speichern(); } });
+
+  zeichnen();
+</script>
+
 <style>
-  .einleitung { max-width: 80ch; }
+  .bmc-leiste { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 20px; margin-bottom: 12px; }
+  .bmc-legende { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .85rem; color: #3f4a4f; }
+  .bmc-legende :global(li) { display: flex; align-items: center; gap: 6px; }
+  .bmc-legende :global(.punkt) { width: 14px; height: 14px; border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+  .bmc-tipp { margin: 0; font-size: .85rem; color: #67747a; }
+
   .canvas {
-    display: grid;
-    gap: 10px;
+    display: grid; gap: 8px;
     grid-template-columns: repeat(10, minmax(0, 1fr));
     grid-template-areas:
       "kp kp ka ka wa wa kb kb ks ks"
       "kp kp kr kr wa wa vk vk ks ks"
       "ko ko ko ko ko ei ei ei ei ei";
+    background: #fff; border: 1px solid #dde3e6; border-radius: 14px; padding: 8px;
   }
-  .feld h2 { font-size: .95rem; text-transform: uppercase; letter-spacing: .04em; color: var(--haupt); }
+  .feld { border: 1px solid #e3e8ea; border-radius: 10px; padding: 10px; min-height: 190px; display: flex; flex-direction: column; background: #fbfcfc; transition: background .15s; }
+  .feld.ziel { background: color-mix(in srgb, var(--haupt) 8%, white); border-color: var(--haupt); }
+  .feld.zu-viele .feld-frage::after { content: " · mehr als 4 Punkte"; color: #b04646; }
+  .feld-kopf { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .feld h2 { font-size: .82rem; text-transform: uppercase; letter-spacing: .05em; color: var(--haupt); margin: 0; }
+  .feld-neu { font: inherit; font-size: 1.1rem; line-height: 1; width: 26px; height: 26px; border-radius: 50%; border: 1px solid #cfd8dc; background: #fff; cursor: pointer; color: var(--haupt); flex: none; }
+  .feld-neu:hover { background: var(--haupt); color: #fff; border-color: var(--haupt); }
+  .feld-frage { margin: 2px 0 8px; font-size: .78rem; color: #67747a; }
   .kp { grid-area: kp; } .ka { grid-area: ka; } .kr { grid-area: kr; } .wa { grid-area: wa; }
   .kb { grid-area: kb; } .vk { grid-area: vk; } .ks { grid-area: ks; } .ko { grid-area: ko; } .ei { grid-area: ei; }
-  .wa { border-top: 4px solid var(--akzent); }
+  .ko, .ei { min-height: 150px; }
+  .ko .zettel, .ei .zettel { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+
+  .zettel { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; align-content: start; flex: 1; }
+  :global(.zettel-eintrag) { padding: 8px 10px 10px; border-radius: 3px; cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,.12), 0 3px 6px rgba(0,0,0,.06); display: flex; flex-direction: column; gap: 3px; font-size: .86rem; line-height: 1.3; transition: transform .1s, box-shadow .1s; }
+  :global(.zettel-eintrag:hover), :global(.zettel-eintrag:focus-visible) { transform: rotate(-.6deg) translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,.15); }
+  :global(.zettel-eintrag strong) { font-size: .9rem; }
+  :global(.zettel-eintrag span) { color: rgba(0,0,0,.66); font-size: .8rem; }
+  :global(.zettel-eintrag.zieht) { opacity: .4; }
+  :global(.zettel-eintrag.davor) { box-shadow: 0 -3px 0 var(--haupt), 0 1px 2px rgba(0,0,0,.12); }
+  :global(.f-gelb) { background: #fff3a8; }
+  :global(.f-gruen) { background: #c9f0c6; }
+  :global(.f-blau) { background: #cde6ff; }
+  :global(.f-rosa) { background: #ffd0dc; }
+  :global(.f-lila) { background: #e2d6fb; }
+
   @media (max-width: 1000px) {
     .canvas { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "wa wa" "ks kb" "vk ka" "kr kp" "ko ei"; }
   }
   @media (max-width: 560px) {
     .canvas { grid-template-columns: 1fr; grid-template-areas: "wa" "ks" "kb" "vk" "ka" "kr" "kp" "ko" "ei"; }
   }
+
+  .pm-daten-bmc { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 16px; font-size: .9rem; }
+  .bmc-link { font: inherit; background: none; border: 0; padding: 0; color: var(--haupt); text-decoration: underline; cursor: pointer; }
+
+  .bmc-dialog { border: 0; border-radius: 14px; padding: 0; width: min(480px, 100% - 32px); box-shadow: 0 10px 40px rgba(0,0,0,.3); }
+  .bmc-dialog::backdrop { background: rgba(28,33,38,.45); }
+  .bmc-dialog form { display: grid; gap: 12px; padding: 22px; }
+  .bmc-dialog h2 { font-size: 1.2rem; margin: 0; }
+  .bmc-dialog label { display: flex; flex-direction: column; gap: 4px; font-size: .88rem; font-weight: 600; color: #3f4a4f; }
+  .bmc-dialog input:not([type="radio"]), .bmc-dialog textarea, .bmc-dialog select { font: inherit; font-weight: 400; padding: 7px 9px; border: 1px solid #cfd8dc; border-radius: 7px; }
+  .bmc-farben { border: 0; padding: 0; margin: 0; }
+  .bmc-farben legend { font-size: .88rem; font-weight: 600; color: #3f4a4f; margin-bottom: 6px; }
+  #bmc-farbwahl { display: flex; flex-wrap: wrap; gap: 6px; }
+  :global(.farbwahl) { flex-direction: row !important; align-items: center; gap: 6px !important; padding: 5px 10px; border-radius: 999px; font-weight: 500 !important; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+  :global(.farbwahl:has(input:checked)) { box-shadow: inset 0 0 0 2px var(--haupt); font-weight: 700 !important; }
+  .bmc-knoepfe { display: flex; gap: 10px; align-items: center; }
+  .bmc-knoepfe span { flex: 1; }
+  .bmc-knoepfe [hidden] { display: none; }
+  .bmc-btn { font: inherit; font-weight: 600; font-size: .92rem; padding: 7px 14px; border-radius: 8px; border: 1px solid #cfd8dc; background: #fff; cursor: pointer; }
+  .bmc-btn.primaer { background: var(--haupt); border-color: var(--haupt); color: #fff; }
+  .bmc-btn.gefahr { color: #a33; border-color: #e3b9b9; }
 </style>

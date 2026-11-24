@@ -9,7 +9,7 @@ const ziel = konfiguration.cta.ziel.startsWith('#') && Astro.url.pathname !== '/
   : konfiguration.cta.ziel;
 ---
 <div class:list={['cta', { zentriert }]}>
-  <a class:list={['button', { hell }]} href={ziel}>{konfiguration.cta.text}</a>
+  <a class:list={['button', { hell }]} href={ziel} data-k="cta.text">{konfiguration.cta.text}</a>
 </div>
 
 <style>
