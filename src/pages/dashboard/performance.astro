@@ -3,33 +3,7 @@
 // Die Werte kommen von der Serverfunktion netlify/functions/kennzahlen.mjs (Adresse /dashboard/api/kennzahlen).
 // Ist sie nicht eingerichtet, zeigt die Seite Beispieldaten aus public/daten/beispieldaten.json.
 import Dashboard from '../../layouts/Dashboard.astro';
-import Logo from '../../components/Logo.astro';
 import kanaele from '../../inhalte/performance-kanaele.json';
-
-// ---------- Kanal-Auswertung nach Monaten (src/inhalte/performance-kanaele.json) ----------
-type Reihe = { impressionen: number[]; klicks: number[]; kosten: number[]; abschluesse: number[] };
-const n = kanaele.monate.length;
-const summe = (feld: keyof Reihe) => Array.from({ length: n }, (_, i) => kanaele.kanaele.reduce((s, k) => s + (k[feld][i] ?? 0), 0));
-const bloecke = [
-  { name: 'Gesamt', logo: undefined as string | undefined, farbe: '', gesamt: true, impressionen: summe('impressionen'), klicks: summe('klicks'), kosten: summe('kosten'), abschluesse: summe('abschluesse') },
-  ...kanaele.kanaele.map((k) => ({ ...k, gesamt: false })),
-];
-const ganz = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 });
-const euro = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
-const proz = new Intl.NumberFormat('de-DE', { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const teil = (a: number, b: number) => (b ? a / b : null);
-const zeilen: { name: string; hilfe: string; abgeleitet?: boolean; wert: (r: { i: number; k: number; e: number; a: number }) => string }[] = [
-  { name: 'Impressionen', hilfe: 'Wie oft die Anzeige gezeigt wurde', wert: (r) => ganz.format(r.i) },
-  { name: 'Klicks', hilfe: 'Klicks auf die Anzeige', wert: (r) => ganz.format(r.k) },
-  { name: 'CTR', hilfe: 'Klickrate: Klicks geteilt durch Impressionen', wert: (r) => { const v = teil(r.k, r.i); return v === null ? '–' : proz.format(v); } },
-  { name: 'Kosten', hilfe: 'Ausgaben im Monat', wert: (r) => euro.format(r.e) },
-  { name: 'Abschlüsse', hilfe: 'Anfragen oder Käufe aus diesem Kanal', wert: (r) => ganz.format(r.a) },
-  { name: 'CVR', hilfe: 'Abschlussrate: Abschlüsse geteilt durch Klicks', wert: (r) => { const v = teil(r.a, r.k); return v === null ? '–' : proz.format(v); } },
-  { name: 'CPM', hilfe: 'Kosten je 1.000 Impressionen', abgeleitet: true, wert: (r) => { const v = teil(r.e * 1000, r.i); return v === null ? '–' : euro.format(v); } },
-  { name: 'CPC', hilfe: 'Kosten je Klick', abgeleitet: true, wert: (r) => { const v = teil(r.e, r.k); return v === null ? '–' : euro.format(v); } },
-  { name: 'CPA', hilfe: 'Kosten je Abschluss', abgeleitet: true, wert: (r) => { const v = teil(r.e, r.a); return v === null ? '–' : euro.format(v); } },
-];
-const sum = (a: number[]) => a.reduce((s, x) => s + x, 0);
 ---
 <Dashboard titel="Performance" untertitel="Die echten Kennzahlen der Website aus Google Analytics: Wie viele Menschen kommen, was sehen sie sich an, und woher kommen sie? Die Einrichtung steht in den Anleitungen unter „Dashboard und Google Analytics“.">
   <div class="steuerung">
@@ -67,31 +41,12 @@ const sum = (a: number[]) => a.reduce((s, x) => s + x, 0);
   <section class="kanal-auswertung" aria-labelledby="ka-titel">
     <h2 id="ka-titel">Kanal-Auswertung nach Monaten</h2>
     <p class="ka-text">Was die bezahlten Kanäle kosten und bringen: gesamt und je Kanal, Monat für Monat. Die drei farbigen Zeilen zeigen die Kosten je 1.000 Impressionen (CPM), je Klick (CPC) und je Abschluss (CPA).</p>
-    {kanaele.beispiel && (
-      <p class="beispiel-hinweis" role="note"><strong>Beispiel</strong><span>{kanaele.hinweis} Datei: <code>src/inhalte/performance-kanaele.json</code>. Google Analytics liefert diese Zahlen für Google Ads, sobald das Google-Ads-Konto mit Analytics verknüpft ist; Kosten anderer Kanäle (z. B. Meta Ads) kommen per Kostendaten-Import in Analytics oder direkt aus dem Werbekonto.</span></p>
-    )}
-    <div class="karte ka-rahmen">
-      <table class="ka-tabelle">
-        {bloecke.map((b) => (
-          <tbody class:list={{ 'ka-gesamt': b.gesamt }} style={b.farbe ? `--ka-farbe:${b.farbe}` : undefined}>
-            <tr class="ka-kopf">
-              <th scope="col"><span class="ka-name">{b.logo !== undefined && <Logo name={b.name} logo={b.logo} groesse={20} />}{b.name}</span></th>
-              {kanaele.monate.map((m) => <th scope="col">{m}</th>)}
-              <th scope="col">Summe</th>
-            </tr>
-            {zeilen.map((z) => (
-              <tr class:list={{ 'ka-abgeleitet': z.abgeleitet }}>
-                <th scope="row" title={z.hilfe}>{z.name}</th>
-                {kanaele.monate.map((_, i) => <td>{z.wert({ i: b.impressionen[i], k: b.klicks[i], e: b.kosten[i], a: b.abschluesse[i] })}</td>)}
-                <td class="ka-summe">{z.wert({ i: sum(b.impressionen), k: sum(b.klicks), e: sum(b.kosten), a: sum(b.abschluesse) })}</td>
-              </tr>
-            ))}
-          </tbody>
-        ))}
-      </table>
-    </div>
+    <p id="ka-quelle" class="quelle ka-quelle" aria-live="polite">Lade Kanal-Zahlen …</p>
+    <p id="ka-fehler" class="fehler" hidden></p>
+    <div class="karte ka-rahmen"><table class="ka-tabelle" id="ka-tabelle"></table></div>
     <p class="ka-legende">CTR = Klicks ÷ Impressionen · CVR = Abschlüsse ÷ Klicks · CPM = Kosten je 1.000 Impressionen · CPC = Kosten ÷ Klicks · CPA = Kosten ÷ Abschlüsse</p>
   </section>
+  <script type="application/json" id="ka-daten" set:html={JSON.stringify(kanaele)}></script>
 </Dashboard>
 
 <script>
@@ -238,24 +193,106 @@ const sum = (a: number[]) => a.reduce((s, x) => s + x, 0);
   anzeigen(30);
 </script>
 
+<script>
+  // ---------- Kanal-Auswertung nach Monaten ----------
+  // Grundlage ist src/inhalte/performance-kanaele.json. Ist Google Analytics verbunden und
+  // Google Ads dort verknüpft, ersetzt der Live-Bericht die Zahlen des Kanals "google-ads".
+  type Kanal = { name: string; quelle?: string; logo?: string; farbe?: string; live?: boolean; impressionen: number[]; klicks: number[]; kosten: number[]; abschluesse: number[] };
+  const DATEI = JSON.parse(document.getElementById('ka-daten')!.textContent || '{}') as { beispiel: boolean; hinweis: string; monate: string[]; kanaele: Kanal[] };
+  const FELDER = ['impressionen', 'klicks', 'kosten', 'abschluesse'] as const;
+  const ganz = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 });
+  const euro = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
+  const proz = new Intl.NumberFormat('de-DE', { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const teil = (a: number, b: number, f: Intl.NumberFormat) => (b ? f.format(a / b) : '–');
+  type R = { i: number; k: number; e: number; a: number };
+  const ZEILEN: { name: string; hilfe: string; abgeleitet?: boolean; wert: (r: R) => string }[] = [
+    { name: 'Impressionen', hilfe: 'Wie oft die Anzeige gezeigt wurde', wert: (r) => ganz.format(r.i) },
+    { name: 'Klicks', hilfe: 'Klicks auf die Anzeige', wert: (r) => ganz.format(r.k) },
+    { name: 'CTR', hilfe: 'Klickrate: Klicks geteilt durch Impressionen', wert: (r) => teil(r.k, r.i, proz) },
+    { name: 'Kosten', hilfe: 'Ausgaben im Monat', wert: (r) => euro.format(r.e) },
+    { name: 'Abschlüsse', hilfe: 'Anfragen oder Käufe aus diesem Kanal', wert: (r) => ganz.format(r.a) },
+    { name: 'CVR', hilfe: 'Abschlussrate: Abschlüsse geteilt durch Klicks', wert: (r) => teil(r.a, r.k, proz) },
+    { name: 'CPM', hilfe: 'Kosten je 1.000 Impressionen', abgeleitet: true, wert: (r) => teil(r.e * 1000, r.i, euro) },
+    { name: 'CPC', hilfe: 'Kosten je Klick', abgeleitet: true, wert: (r) => teil(r.e, r.k, euro) },
+    { name: 'CPA', hilfe: 'Kosten je Abschluss', abgeleitet: true, wert: (r) => teil(r.e, r.a, euro) },
+  ];
+  const h = (tag: string, attr: Record<string, string> = {}, ...kinder: (Node | string)[]) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v); e.append(...kinder); return e; };
+  const summe = (a: number[]) => a.reduce((s, x) => s + (x || 0), 0);
+
+  function zeichneKanaele(monate: string[], kanaele: Kanal[]) {
+    const gesamt: Kanal = { name: 'Gesamt', impressionen: [], klicks: [], kosten: [], abschluesse: [] };
+    for (const f of FELDER) gesamt[f] = monate.map((_, i) => kanaele.reduce((s, k) => s + (k[f][i] || 0), 0));
+    const tabelle = document.getElementById('ka-tabelle')!;
+    tabelle.replaceChildren(...[gesamt, ...kanaele].map((b, nr) => {
+      const name = h('span', { class: 'ka-name' });
+      if (nr > 0 && b.logo) name.append(h('img', { src: b.logo, alt: '', width: '20', height: '20' }));
+      name.append(b.name);
+      if (b.live) name.append(h('span', { class: 'ka-live' }, 'live'));
+      const kopf = h('tr', { class: 'ka-kopf' }, h('th', { scope: 'col' }, name), ...monate.map((m) => h('th', { scope: 'col' }, m)), h('th', { scope: 'col' }, 'Summe'));
+      const tbody = h('tbody', nr === 0 ? { class: 'ka-gesamt' } : b.farbe ? { style: `--ka-farbe:${b.farbe}` } : {}, kopf);
+      for (const z of ZEILEN) {
+        tbody.append(h('tr', z.abgeleitet ? { class: 'ka-abgeleitet' } : {},
+          h('th', { scope: 'row', title: z.hilfe }, z.name),
+          ...monate.map((_, i) => h('td', {}, z.wert({ i: b.impressionen[i] || 0, k: b.klicks[i] || 0, e: b.kosten[i] || 0, a: b.abschluesse[i] || 0 }))),
+          h('td', { class: 'ka-summe' }, z.wert({ i: summe(b.impressionen), k: summe(b.klicks), e: summe(b.kosten), a: summe(b.abschluesse) }))));
+      }
+      return tbody;
+    }));
+  }
+
+  // Zahlen eines Kanals aus der Datei auf andere Monatsspalten umlegen (fehlende Monate = 0)
+  const umlegen = (k: Kanal, monate: string[]): Kanal => {
+    const neu = { ...k };
+    for (const f of FELDER) neu[f] = monate.map((m) => { const i = DATEI.monate.indexOf(m); return i === -1 ? 0 : k[f][i] || 0; });
+    return neu;
+  };
+  const marke = (text: string, live = false) => h('span', { class: live ? 'marke live' : 'marke' }, text);
+
+  (async () => {
+    const quelle = document.getElementById('ka-quelle')!, fehler = document.getElementById('ka-fehler')!;
+    const ausDatei = (grund: string) => {
+      zeichneKanaele(DATEI.monate, DATEI.kanaele);
+      quelle.replaceChildren(marke(DATEI.beispiel ? 'Beispieldaten' : 'Aus Datei'), `${grund} Zahlen aus src/inhalte/performance-kanaele.json.`);
+    };
+    try {
+      const r = await fetch(`/dashboard/api/kennzahlen?bericht=kanaele&monate=${DATEI.monate.length > 6 ? 12 : 6}`, { headers: { accept: 'application/json' }, credentials: 'same-origin' });
+      const json = (r.headers.get('content-type') || '').includes('application/json') ? await r.json() : null;
+      if (r.ok && json?.quelle === 'analytics' && !json.leer) {
+        const kanaele = DATEI.kanaele.map((k) => (k.quelle === 'google-ads' ? { ...k, ...json.googleAds, live: true } : umlegen(k, json.monate)));
+        if (!kanaele.some((k) => k.live)) kanaele.unshift({ name: 'Google Ads', logo: '/logos/googleads.svg', farbe: '#2f7d32', ...json.googleAds, live: true });
+        zeichneKanaele(json.monate, kanaele);
+        const rest = kanaele.filter((k) => !k.live).map((k) => k.name);
+        quelle.replaceChildren(marke('Live', true), `Google Ads kommt aus Google Analytics (Abschlüsse = Schlüsselereignisse aus „google / cpc“).${rest.length ? ` ${rest.join(', ')}: aus der Datei.` : ''}`);
+        return;
+      }
+      if (json?.leer) return ausDatei('Google Analytics ist verbunden, liefert aber keine Google-Ads-Zahlen: Bitte in Analytics unter Verwaltung → Produktverknüpfungen das Google-Ads-Konto verknüpfen.');
+      if (json?.fehler && json.fehler !== 'nicht-eingerichtet') { fehler.hidden = false; fehler.textContent = `Google Analytics: ${json.meldung || json.fehler}`; }
+    } catch { /* keine Serverfunktion erreichbar, z. B. lokal */ }
+    ausDatei('Google Analytics ist noch nicht verbunden.');
+  })();
+</script>
+
 <style>
   .kanal-auswertung { margin-top: 28px; }
   .kanal-auswertung > h2 { font-size: 1.3rem; margin-bottom: .3em; }
   .ka-text { color: #4c595f; max-width: 85ch; }
   .ka-rahmen { padding: 0; overflow-x: auto; position: relative; }
-  .ka-tabelle { border-collapse: collapse; width: 100%; font-size: .92rem; font-variant-numeric: tabular-nums; }
-  .ka-tabelle th, .ka-tabelle td { padding: 7px 14px; border-bottom: 1px solid #eef1f2; text-align: right; white-space: nowrap; }
-  .ka-tabelle th:first-child { text-align: left; position: sticky; left: 0; background: #fff; min-width: 150px; z-index: 1; }
-  .ka-tabelle tbody th[scope="row"] { font-weight: 700; cursor: help; }
-  .ka-kopf th { background: var(--ka-farbe, #e3e8ea); color: #fff; font-weight: 700; border-bottom: 0; }
-  .ka-kopf th:first-child { background: var(--ka-farbe, #e3e8ea); }
-  .ka-gesamt .ka-kopf th { color: #1c2126; font-size: 1rem; }
-  .ka-name { display: inline-flex; align-items: center; gap: 8px; }
-  .ka-abgeleitet th:first-child, .ka-gesamt .ka-abgeleitet th:first-child { background: #fdf1d2; }
-  .ka-summe { font-weight: 700; background: #f7f9fa; border-left: 2px solid #dde3e6; }
-  .ka-kopf th:last-child { border-left: 2px solid rgba(255,255,255,.4); }
+  :global(.ka-tabelle) { border-collapse: collapse; width: 100%; font-size: .92rem; font-variant-numeric: tabular-nums; }
+  :global(.ka-tabelle th), :global(.ka-tabelle td) { padding: 7px 14px; border-bottom: 1px solid #eef1f2; text-align: right; white-space: nowrap; }
+  :global(.ka-tabelle th:first-child) { text-align: left; position: sticky; left: 0; background: #fff; min-width: 150px; z-index: 1; }
+  :global(.ka-tabelle tbody th[scope="row"]) { font-weight: 700; cursor: help; }
+  :global(.ka-kopf th) { background: var(--ka-farbe, #e3e8ea); color: #fff; font-weight: 700; border-bottom: 0; }
+  :global(.ka-kopf th:first-child) { background: var(--ka-farbe, #e3e8ea); }
+  :global(.ka-gesamt .ka-kopf th) { color: #1c2126; font-size: 1rem; }
+  :global(.ka-name) { display: inline-flex; align-items: center; gap: 8px; }
+  :global(.ka-abgeleitet th:first-child), :global(.ka-gesamt .ka-abgeleitet th:first-child) { background: #fdf1d2; }
+  :global(.ka-summe) { font-weight: 700; background: #f7f9fa; border-left: 2px solid #dde3e6; }
+  :global(.ka-kopf th:last-child) { border-left: 2px solid rgba(255,255,255,.4); }
+  .ka-quelle { margin: 0 0 12px; }
+  .ka-tabelle :global(.ka-live) { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; background: #fff; color: #22663a; border-radius: 999px; padding: 1px 7px; margin-left: 4px; }
+  .ka-tabelle :global(img) { background: #fff; border-radius: 4px; padding: 2px; }
   .ka-legende { font-size: .8rem; color: #67747a; margin: 10px 0 0; }
-  @media (max-width: 640px) { .ka-tabelle th, .ka-tabelle td { padding: 6px 10px; font-size: .85rem; } .ka-tabelle th:first-child { min-width: 104px; white-space: normal; } }
+  @media (max-width: 640px) { :global(.ka-tabelle th), :global(.ka-tabelle td) { padding: 6px 10px; font-size: .85rem; } :global(.ka-tabelle th:first-child) { min-width: 104px; white-space: normal; } }
   .steuerung { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
   .quelle { margin: 0; color: #4c595f; }
   .quelle :global(.marke) { display: inline-block; padding: 2px 10px; border-radius: 999px; background: #fff4dd; border: 1px solid #f0d199; font-weight: 700; font-size: .85rem; margin-right: 6px; }

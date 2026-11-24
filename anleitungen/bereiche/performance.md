@@ -30,6 +30,13 @@ Unter den Analytics-Zahlen steht eine Tabelle für die bezahlten Kanäle: **Gesa
 - **CTR** = Klicks ÷ Impressionen, **CVR** = Abschlüsse ÷ Klicks
 - **CPM** = Kosten je 1.000 Impressionen, **CPC** = Kosten je Klick, **CPA** = Kosten je Abschluss
 
-Die Zahlen stehen in `src/inhalte/performance-kanaele.json`. Weitere Kanäle oder Monate ergänzen Sie dort; jede Zahlenreihe braucht so viele Werte wie `monate`. Setzen Sie `"beispiel": false`, wenn Ihre eigenen Zahlen drinstehen. Woher die Werte kommen: aus dem jeweiligen Werbekonto oder aus Google Analytics, wenn Google Ads verknüpft ist und Sie die Kosten anderer Kanäle dort importieren.
+Die Zahlen stehen in `src/inhalte/performance-kanaele.json`. Weitere Kanäle oder Monate ergänzen Sie dort; jede Zahlenreihe braucht so viele Werte wie `monate`. Setzen Sie `"beispiel": false`, wenn Ihre eigenen Zahlen drinstehen. 
+
+**Google Ads kommt automatisch aus Google Analytics**, wenn zwei Dinge erfüllt sind:
+
+1. Google Analytics ist mit dem Dashboard verbunden (Anleitung „Dashboard und Google Analytics“).
+2. In Google Analytics ist das Google-Ads-Konto verknüpft: Verwaltung → Produktverknüpfungen → Google Ads-Verknüpfungen.
+
+Dann ersetzt die Seite die Zahlen des Kanals mit `"quelle": "google-ads"` durch die echten Werte der letzten sechs Monate und kennzeichnet ihn mit „live“. Abschlüsse sind die Schlüsselereignisse (Key Events) aus Sitzungen mit Quelle/Medium „google / cpc“; legen Sie in Analytics fest, was als Schlüsselereignis zählt, zum Beispiel das gesendete Kontaktformular. Alle anderen Kanäle (zum Beispiel Meta Ads) pflegen Sie weiter in der Datei; die Werte finden Sie im jeweiligen Werbekonto.
 
 **Anweisung für Ihr KI-Tool:** *„Trage in src/inhalte/performance-kanaele.json für [Monat] diese Werte ein: Google Ads [Impressionen, Klicks, Kosten, Abschlüsse], Meta Ads [...].“*

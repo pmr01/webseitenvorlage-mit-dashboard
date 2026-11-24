@@ -1,6 +1,7 @@
 // =====================================================================
 //  SERVERFUNKTION: Kennzahlen aus Google Analytics (GA4)
 //  Erreichbar unter /dashboard/api/kennzahlen?tage=30
+//  und /dashboard/api/kennzahlen?bericht=kanaele&monate=6 (Google Ads je Monat)
 //  Sie verlangt dasselbe Passwort wie das Dashboard (DASHBOARD_PASSWORT).
 //
 //  Die Zugangsdaten stehen NICHT im Code, sondern als Umgebungsvariablen
@@ -77,6 +78,47 @@ async function zugriffstoken(email, schluessel) {
 const zahl = (zeile, i = 0) => Number(zeile?.metricValues?.[i]?.value ?? 0);
 const text = (zeile, i = 0) => zeile?.dimensionValues?.[i]?.value ?? '';
 
+// ---------- Bericht "kanaele": Google Ads je Monat ----------
+// Voraussetzung in Google Analytics: Das Google-Ads-Konto ist mit der Property verknüpft.
+// Abschlüsse = Schlüsselereignisse (Key Events) aus Sitzungen mit Quelle/Medium "google / cpc".
+const ERLAUBTE_MONATE = [3, 6, 12];
+
+async function kanalBericht(token, propertyId, monate) {
+  const heute = new Date();
+  const start = new Date(Date.UTC(heute.getUTCFullYear(), heute.getUTCMonth() - (monate - 1), 1));
+  const liste = Array.from({ length: monate }, (_, i) => {
+    const d = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + i, 1));
+    return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+  });
+  const zeitraum = [{ startDate: start.toISOString().slice(0, 10), endDate: 'today' }];
+  const r = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${encodeURIComponent(propertyId)}:batchRunReports`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      requests: [
+        { dateRanges: zeitraum, dimensions: [{ name: 'yearMonth' }], metrics: [{ name: 'advertiserAdImpressions' }, { name: 'advertiserAdClicks' }, { name: 'advertiserAdCost' }] },
+        {
+          dateRanges: zeitraum, dimensions: [{ name: 'yearMonth' }], metrics: [{ name: 'keyEvents' }],
+          dimensionFilter: { filter: { fieldName: 'sessionSourceMedium', stringFilter: { matchType: 'EXACT', value: 'google / cpc' } } },
+        },
+      ],
+    }),
+  });
+  const json = await r.json();
+  if (!r.ok) throw new Error(json.error?.message || `Google Analytics antwortet mit Status ${r.status}`);
+  const [anzeigen, ereignisse] = json.reports || [];
+  const je = (bericht, i) => { const m = Object.fromEntries((bericht?.rows || []).map((z) => [text(z), zahl(z, i)])); return liste.map((ym) => m[ym] ?? 0); };
+  const impressionen = je(anzeigen, 0);
+  return {
+    quelle: 'analytics',
+    monate: liste.map((ym) => `${ym.slice(0, 4)}|${ym.slice(4)}`),
+    waehrung: anzeigen?.metadata?.currencyCode || 'EUR',
+    googleAds: { impressionen, klicks: je(anzeigen, 1), kosten: je(anzeigen, 2).map((x) => Math.round(x * 100) / 100), abschluesse: je(ereignisse, 0).map(Math.round) },
+    // Keine einzige Impression: Google Ads ist vermutlich nicht mit Analytics verknüpft
+    leer: impressionen.every((x) => !x),
+  };
+}
+
 export default async (request) => {
   if (!passwortStimmt(request)) {
     return antwort(401, { fehler: 'nicht-angemeldet', meldung: 'Für die Kennzahlen ist das Dashboard-Passwort nötig.' });
@@ -91,7 +133,17 @@ export default async (request) => {
     return antwort(503, { fehler: 'nicht-eingerichtet', meldung: 'Die Umgebungsvariablen für Google Analytics fehlen.' });
   }
 
-  const gewuenscht = Number(new URL(request.url).searchParams.get('tage'));
+  const parameter = new URL(request.url).searchParams;
+  if (parameter.get('bericht') === 'kanaele') {
+    const m = Number(parameter.get('monate'));
+    try {
+      return antwort(200, await kanalBericht(await zugriffstoken(email, schluessel), propertyId, ERLAUBTE_MONATE.includes(m) ? m : 6));
+    } catch (fehler) {
+      return antwort(502, { fehler: 'abruf-fehlgeschlagen', meldung: String(fehler.message || fehler) });
+    }
+  }
+
+  const gewuenscht = Number(parameter.get('tage'));
   const tage = ERLAUBTE_TAGE.includes(gewuenscht) ? gewuenscht : 30;
   const zeitraum = [{ startDate: `${tage}daysAgo`, endDate: 'today' }];
 
