@@ -7,6 +7,7 @@ import pyramide from '../../inhalte/strategie-pyramide.json';
 import porter from '../../inhalte/porter-5-kraefte.json';
 import swot from '../../inhalte/swot-analyse.json';
 import persona from '../../inhalte/persona-empathy-map.json';
+import Reiter from '../../components/Reiter.astro';
 
 const swotFelder = [
   { titel: 'Stärken', englisch: 'Strengths', punkte: swot.staerken, klasse: 's' },
@@ -16,12 +17,12 @@ const swotFelder = [
 ];
 ---
 <Dashboard titel="Positionierung" untertitel="Wofür das Unternehmen steht, wie der Markt aussieht und für wen es da ist.">
-  <nav class="sprungmarken" aria-label="Modelle auf dieser Seite">
-    <a href="#pyramide">Strategie-Pyramide</a>
-    <a href="#porter">Porter's 5 Kräfte</a>
-    <a href="#swot">SWOT-Analyse</a>
-    <a href="#persona">Persona / Empathy Map</a>
-  </nav>
+  <Reiter beschriftung="Modelle" eintraege={[
+    { id: 'pyramide', name: 'Strategie-Pyramide' },
+    { id: 'porter', name: "Porter's 5 Kräfte" },
+    { id: 'swot', name: 'SWOT-Analyse' },
+    { id: 'persona', name: 'Persona / Empathy Map' },
+  ]} />
 
   <!-- Strategie-Pyramide -->
   <section id="pyramide" class="abschnitt-modell">

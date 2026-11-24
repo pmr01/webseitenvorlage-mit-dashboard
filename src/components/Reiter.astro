@@ -1,0 +1,44 @@
+---
+// Reiter innerhalb einer Seite: zeigt immer nur einen Abschnitt direkt unter den Reitern.
+// Jeder Abschnitt braucht id und data-reiter="…" (Beschriftung).
+// Der gewählte Reiter steht im Adressfeld (#id), so funktionieren Lesezeichen und Zurück-Taste.
+interface Props { eintraege: { id: string; name: string }[]; beschriftung?: string }
+const { eintraege, beschriftung = 'Bereiche' } = Astro.props;
+---
+<div class="reiter-leiste" role="tablist" aria-label={beschriftung} data-reiter-leiste>
+  {eintraege.map((e, i) => (
+    <button type="button" role="tab" id={`reiter-${e.id}`} aria-controls={e.id} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-ziel={e.id}>{e.name}</button>
+  ))}
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-reiter-leiste]').forEach((leiste) => {
+    const knoepfe = Array.from(leiste.querySelectorAll<HTMLButtonElement>('[data-ziel]'));
+    const bereiche = knoepfe.map((k) => document.getElementById(k.dataset.ziel!)).filter(Boolean) as HTMLElement[];
+    bereiche.forEach((b) => { b.setAttribute('role', 'tabpanel'); b.setAttribute('aria-labelledby', `reiter-${b.id}`); });
+
+    function zeigen(id: string, merken: boolean) {
+      if (!knoepfe.some((k) => k.dataset.ziel === id)) id = knoepfe[0].dataset.ziel!;
+      knoepfe.forEach((k) => { const aktiv = k.dataset.ziel === id; k.setAttribute('aria-selected', String(aktiv)); k.tabIndex = aktiv ? 0 : -1; });
+      bereiche.forEach((b) => { b.hidden = b.id !== id; });
+      if (merken) history.replaceState(null, '', `#${id}`);
+      window.dispatchEvent(new Event('resize')); // Diagramme in sichtbar gewordenen Bereichen neu zeichnen
+    }
+    knoepfe.forEach((k, i) => {
+      k.addEventListener('click', () => zeigen(k.dataset.ziel!, true));
+      k.addEventListener('keydown', (e) => {
+        const ziel = e.key === 'ArrowRight' ? knoepfe[(i + 1) % knoepfe.length] : e.key === 'ArrowLeft' ? knoepfe[(i - 1 + knoepfe.length) % knoepfe.length] : null;
+        if (ziel) { e.preventDefault(); ziel.focus(); zeigen(ziel.dataset.ziel!, true); }
+      });
+    });
+    window.addEventListener('hashchange', () => zeigen(location.hash.slice(1), false));
+    zeigen(location.hash.slice(1), false);
+  });
+</script>
+
+<style>
+  .reiter-leiste { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 20px; }
+  .reiter-leiste button { font: inherit; font-weight: 600; font-size: .92rem; padding: 7px 14px; border-radius: 999px; border: 1px solid #dde3e6; background: #fff; color: #47545a; cursor: pointer; }
+  .reiter-leiste button:hover { border-color: var(--haupt); color: var(--haupt); }
+  .reiter-leiste button[aria-selected="true"] { background: var(--haupt); border-color: var(--haupt); color: #fff; }
+</style>

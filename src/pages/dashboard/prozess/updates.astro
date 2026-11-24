@@ -1,0 +1,137 @@
+---
+// Reiter Prozess → Updates.
+// Erinnert an wiederkehrende Updates und Prüfungen (z. B. Astro). Für npm-Pakete wird die
+// neueste Version beim Öffnen von registry.npmjs.org abgefragt und mit der installierten verglichen.
+// Aufgaben ändern in src/inhalte/updates.json. "Zuletzt erledigt" speichert der Browser.
+import Dashboard from '../../../layouts/Dashboard.astro';
+import Unterseiten from '../../../components/Unterseiten.astro';
+import { PROZESS_SEITEN } from '../../../components/prozess-seiten.mjs';
+import updates from '../../../inhalte/updates.json';
+import sperrdatei from '../../../../package-lock.json';
+import '../../../styles/pm.css';
+
+// Installierte Versionen zum Zeitpunkt des Builds
+const installiert: Record<string, string> = {};
+for (const a of updates.aufgaben) {
+  if (a.paket) installiert[a.paket] = (sperrdatei as any).packages?.[`node_modules/${a.paket}`]?.version ?? '';
+}
+---
+<Dashboard titel="Prozess" untertitel="Damit die Website sicher und aktuell bleibt: wiederkehrende Updates und Prüfungen mit Erinnerung.">
+  <Unterseiten seiten={PROZESS_SEITEN} />
+
+  <div class="up-zusammenfassung karte" id="up-zusammenfassung" aria-live="polite"></div>
+
+  <ul class="up-liste">
+    {updates.aufgaben.map((a) => (
+      <li class="karte up-eintrag" data-id={a.id} data-intervall={a.intervall} data-paket={a.paket ?? ''} data-installiert={a.paket ? installiert[a.paket] : ''}>
+        <div class="up-kopf">
+          <h2>{a.titel}</h2>
+          <span class="pm-marke up-status">…</span>
+        </div>
+        <p class="pm-klein up-rhythmus">
+          {a.intervall === 1 ? 'Monatlich' : a.intervall === 3 ? 'Vierteljährlich' : a.intervall === 6 ? 'Halbjährlich' : a.intervall === 12 ? 'Jährlich' : `Alle ${a.intervall} Monate`}
+          <span class="up-zuletzt"></span>
+        </p>
+        {a.paket && (
+          <p class="up-version">
+            <span>Installiert: <strong>{installiert[a.paket] || 'unbekannt'}</strong></span>
+            <span>Neueste: <strong class="up-neueste">wird abgefragt …</strong></span>
+          </p>
+        )}
+        <p>{a.warum}</p>
+        <details>
+          <summary>So geht’s</summary>
+          <p>{a.wie}</p>
+          {a.ki && <p class="up-ki"><strong>Anweisung für Ihr KI-Tool:</strong> „{a.ki}“</p>}
+        </details>
+        <div class="up-fuss">
+          {a.links && a.links.map((l) => <a href={l.url} target="_blank" rel="noopener">{l.name} <span aria-hidden="true">↗</span></a>)}
+          <span class="up-luecke"></span>
+          <button type="button" class="pm-btn up-erledigt">Heute erledigt</button>
+        </div>
+      </li>
+    ))}
+  </ul>
+  <p class="pm-klein">„Zuletzt erledigt“ speichert nur dieser Browser. Die neueste Version wird beim Öffnen der Seite bei npm abgefragt (registry.npmjs.org); dabei werden keine persönlichen Daten übertragen.</p>
+</Dashboard>
+
+<script>
+  const SPEICHER = 'prozess-updates';
+  const datum = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  let erledigt: Record<string, string> = {};
+  try { erledigt = JSON.parse(localStorage.getItem(SPEICHER) || '{}'); } catch { erledigt = {}; }
+  const heute = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const eintraege = Array.from(document.querySelectorAll<HTMLElement>('.up-eintrag'));
+  const neuere = new Set<string>();
+
+  // Vergleicht Versionen wie 7.4.13 und 7.5.0
+  function istNeuer(neu: string, alt: string) {
+    const a = neu.split('.').map(Number), b = alt.split('.').map(Number);
+    for (let i = 0; i < 3; i++) { if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) > (b[i] || 0); }
+    return false;
+  }
+
+  function zeichnen() {
+    let faellig = 0;
+    for (const e of eintraege) {
+      const id = e.dataset.id!;
+      const monate = Number(e.dataset.intervall) || 1;
+      const zuletzt = erledigt[id] ? new Date(erledigt[id] + 'T00:00:00') : null;
+      const naechstes = zuletzt ? new Date(zuletzt.getFullYear(), zuletzt.getMonth() + monate, zuletzt.getDate()) : null;
+      const update = neuere.has(id);
+      const istFaellig = update || !naechstes || naechstes <= heute();
+      if (istFaellig) faellig++;
+      const marke = e.querySelector('.up-status')!;
+      marke.className = `pm-marke up-status ${update ? 'rot' : istFaellig ? 'gelb' : 'gruen'}`;
+      marke.textContent = update ? 'Update verfügbar' : !zuletzt ? 'Noch nie erledigt' : istFaellig ? 'Fällig' : 'Erledigt';
+      e.classList.toggle('faellig', istFaellig);
+      e.querySelector('.up-zuletzt')!.textContent = zuletzt ? ` · zuletzt ${datum.format(zuletzt)} · nächstes Mal ${datum.format(naechstes!)}` : ' · noch nicht erledigt';
+    }
+    document.getElementById('up-zusammenfassung')!.innerHTML = faellig
+      ? `<strong>${faellig} von ${eintraege.length}</strong> Updates und Prüfungen stehen an.`
+      : `<strong>Alles erledigt.</strong> Die nächste Erinnerung erscheint hier, sobald sie fällig ist.`;
+    document.getElementById('up-zusammenfassung')!.classList.toggle('alles-gut', !faellig);
+  }
+
+  for (const e of eintraege) {
+    e.querySelector('.up-erledigt')!.addEventListener('click', () => {
+      erledigt[e.dataset.id!] = iso(heute());
+      neuere.delete(e.dataset.id!);
+      try { localStorage.setItem(SPEICHER, JSON.stringify(erledigt)); } catch { /* ohne Speicher */ }
+      zeichnen();
+    });
+    const paket = e.dataset.paket;
+    if (paket) {
+      const anzeige = e.querySelector('.up-neueste')!;
+      fetch(`https://registry.npmjs.org/${encodeURIComponent(paket)}/latest`, { credentials: 'omit', referrerPolicy: 'no-referrer' })
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then((d) => {
+          anzeige.textContent = d.version;
+          const inst = e.dataset.installiert || '';
+          if (inst && istNeuer(d.version, inst)) { neuere.add(e.dataset.id!); anzeige.classList.add('neu'); }
+          zeichnen();
+        })
+        .catch(() => { anzeige.textContent = 'nicht abrufbar'; });
+    }
+  }
+  zeichnen();
+</script>
+
+<style>
+  .up-zusammenfassung { margin-bottom: 16px; border-left: 4px solid #e0a458; }
+  .up-zusammenfassung.alles-gut { border-left-color: #3d8b5a; }
+  .up-liste { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
+  .up-eintrag { display: flex; flex-direction: column; gap: 8px; }
+  .up-eintrag.faellig { border-color: #f0d199; }
+  .up-kopf { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .up-kopf h2 { font-size: 1.05rem; margin: 0; }
+  .up-eintrag p { margin: 0; font-size: .93rem; }
+  .up-version { display: flex; flex-wrap: wrap; gap: 4px 18px; background: #f4f6f7; border-radius: 8px; padding: 8px 10px; }
+  .up-version :global(.neu) { color: #b04646; }
+  .up-eintrag details summary { cursor: pointer; font-weight: 600; font-size: .9rem; color: var(--haupt); }
+  .up-eintrag details p { margin-top: 6px; }
+  .up-ki { background: #fffaf0; border-left: 3px solid var(--akzent); padding: 6px 10px; }
+  .up-fuss { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: auto; padding-top: 6px; font-size: .9rem; font-weight: 600; }
+  .up-luecke { flex: 1; }
+</style>

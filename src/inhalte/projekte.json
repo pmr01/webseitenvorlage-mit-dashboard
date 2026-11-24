@@ -1,20 +1,30 @@
 {
   "beispiel": true,
-  "hinweis": "Beispielprojekte einer fiktiven Firma. Datumsangaben sind Tage relativ zu heute (negativ = in der Vergangenheit) und werden beim ersten Laden in echte Daten umgerechnet.",
+  "hinweis": "Beispielprojekte einer fiktiven Firma. Datumsangaben sind Tage relativ zu heute (negativ = in der Vergangenheit) und werden beim ersten Laden in echte Daten umgerechnet. vorgehen: wasserfall (Phasen) oder agil (Sprints).",
+  "phasen": ["Projektdefinition", "Planung", "Umsetzung", "Controlling", "Abschluss"],
   "projekte": [
-    { "id": "p1", "name": "Website-Relaunch", "kunde": "Musterfirma", "status": "active", "start": -21, "faellig": 14, "fortschritt": 55, "wert": 4800, "notizen": "Neue Website nach dem Storytelling Framework." },
-    { "id": "p2", "name": "Newsletter-Start", "kunde": "Musterfirma", "status": "planned", "start": 7, "faellig": 35, "fortschritt": 0, "wert": 1200, "notizen": "Monatlicher Newsletter mit Tipps für Kunden." },
-    { "id": "p3", "name": "Google-Unternehmensprofil", "kunde": "Musterfirma", "status": "completed", "start": -40, "faellig": -25, "fortschritt": 100, "wert": 400, "notizen": "" }
+    { "id": "p1", "name": "Website-Relaunch", "kunde": "Musterfirma", "status": "active", "vorgehen": "wasserfall", "start": -21, "faellig": 21, "wert": 4800, "notizen": "Neue Website nach dem Storytelling Framework, fester Termin und fester Umfang." },
+    { "id": "p2", "name": "Newsletter & Social Media", "kunde": "Musterfirma", "status": "active", "vorgehen": "agil", "sprintWochen": 2, "start": -14, "faellig": 42, "wert": 1800, "notizen": "Inhalte in zweiwöchigen Sprints testen und verbessern." },
+    { "id": "p3", "name": "Google-Unternehmensprofil", "kunde": "Musterfirma", "status": "completed", "vorgehen": "wasserfall", "start": -40, "faellig": -25, "wert": 400, "notizen": "" }
   ],
   "aufgaben": [
-    { "id": "a1", "projekt": "p1", "titel": "Persona mit dem 6P-Skill erstellen", "kategorie": "Konzept", "zustaendig": "Petar", "status": "done", "start": -21, "faellig": -17, "fortschritt": 100, "beschreibung": "" },
-    { "id": "a2", "projekt": "p1", "titel": "Texte für die 12 Storytelling-Elemente schreiben", "kategorie": "Konzept", "zustaendig": "Jakub", "status": "done", "start": -16, "faellig": -8, "fortschritt": 100, "beschreibung": "" },
-    { "id": "a3", "projekt": "p1", "titel": "Hauptbild auswählen", "kategorie": "Gestaltung", "zustaendig": "Fabian", "status": "in_progress", "start": -6, "faellig": 2, "fortschritt": 60, "beschreibung": "Etwas Emotionales, Verbindendes aus einer Bilddatenbank." },
-    { "id": "a4", "projekt": "p1", "titel": "Impressum und Datenschutz ausfüllen", "kategorie": "Recht", "zustaendig": "Petar", "status": "blocked", "start": -4, "faellig": 3, "fortschritt": 20, "beschreibung": "Wartet auf Angaben zur Steuernummer." },
-    { "id": "a5", "projekt": "p1", "titel": "Google Analytics verbinden", "kategorie": "Technik", "zustaendig": "Fabian", "status": "todo", "start": 3, "faellig": 8, "fortschritt": 0, "beschreibung": "Nach der Anleitung im Dashboard." },
-    { "id": "a6", "projekt": "p1", "titel": "Website bei Netlify veröffentlichen", "kategorie": "Technik", "zustaendig": "Jakub", "status": "todo", "start": 9, "faellig": 14, "fortschritt": 0, "beschreibung": "" },
-    { "id": "a7", "projekt": "p2", "titel": "Themenplan für 3 Monate", "kategorie": "Konzept", "zustaendig": "Jakub", "status": "todo", "start": 7, "faellig": 15, "fortschritt": 0, "beschreibung": "" },
-    { "id": "a8", "projekt": "p2", "titel": "Anmeldeformular einbauen", "kategorie": "Technik", "zustaendig": "Fabian", "status": "todo", "start": 16, "faellig": 28, "fortschritt": 0, "beschreibung": "" },
-    { "id": "a9", "projekt": "p3", "titel": "Profil anlegen und Fotos hochladen", "kategorie": "Marketing", "zustaendig": "Petar", "status": "done", "start": -40, "faellig": -30, "fortschritt": 100, "beschreibung": "" }
+    { "id": "a1", "projekt": "p1", "titel": "Ziel und Umfang im Project Canvas festhalten", "phase": "Projektdefinition", "zustaendig": "Petar", "status": "done", "start": -21, "faellig": -18, "fortschritt": 100 },
+    { "id": "a2", "projekt": "p1", "titel": "Lastenheft freigegeben", "phase": "Projektdefinition", "meilenstein": true, "zustaendig": "Petar", "status": "done", "start": -17, "faellig": -17, "fortschritt": 100 },
+    { "id": "a3", "projekt": "p1", "titel": "Persona mit dem 6P-Skill erstellen", "phase": "Planung", "zustaendig": "Jakub", "status": "done", "start": -16, "faellig": -12, "fortschritt": 100 },
+    { "id": "a4", "projekt": "p1", "titel": "Texte für die 12 Storytelling-Elemente schreiben", "phase": "Planung", "zustaendig": "Jakub", "status": "done", "start": -11, "faellig": -5, "fortschritt": 100 },
+    { "id": "a5", "projekt": "p1", "titel": "Hauptbild auswählen", "phase": "Umsetzung", "zustaendig": "Fabian", "status": "in_progress", "start": -4, "faellig": 3, "fortschritt": 60, "beschreibung": "Etwas Emotionales, Verbindendes aus einer Bilddatenbank." },
+    { "id": "a6", "projekt": "p1", "titel": "Impressum und Datenschutz ausfüllen", "phase": "Umsetzung", "zustaendig": "Petar", "status": "blocked", "start": -2, "faellig": 4, "fortschritt": 20, "beschreibung": "Wartet auf Angaben zur Steuernummer." },
+    { "id": "a7", "projekt": "p1", "titel": "Google Analytics verbinden", "phase": "Umsetzung", "zustaendig": "Fabian", "status": "todo", "start": 4, "faellig": 9, "fortschritt": 0 },
+    { "id": "a8", "projekt": "p1", "titel": "Abnahmetest mit Testperson", "phase": "Controlling", "zustaendig": "Jakub", "status": "todo", "start": 10, "faellig": 15, "fortschritt": 0 },
+    { "id": "a9", "projekt": "p1", "titel": "Website live", "phase": "Abschluss", "meilenstein": true, "zustaendig": "Petar", "status": "todo", "start": 21, "faellig": 21, "fortschritt": 0 },
+    { "id": "b1", "projekt": "p2", "titel": "Anmeldeformular für den Newsletter", "sprint": 1, "zustaendig": "Fabian", "status": "done", "start": -14, "faellig": -1, "fortschritt": 100 },
+    { "id": "b2", "projekt": "p2", "titel": "Willkommens-Mail schreiben", "sprint": 1, "zustaendig": "Jakub", "status": "done", "start": -14, "faellig": -1, "fortschritt": 100 },
+    { "id": "b3", "projekt": "p2", "titel": "3 Reels zum Thema Storytelling", "sprint": 2, "zustaendig": "Jakub", "status": "in_progress", "start": 0, "faellig": 13, "fortschritt": 30 },
+    { "id": "b4", "projekt": "p2", "titel": "Erster Newsletter versenden", "sprint": 2, "zustaendig": "Petar", "status": "todo", "start": 0, "faellig": 13, "fortschritt": 0 },
+    { "id": "b5", "projekt": "p2", "titel": "Auswertung: Öffnungsrate und Reichweite", "sprint": 2, "zustaendig": "Fabian", "status": "todo", "start": 0, "faellig": 13, "fortschritt": 0 },
+    { "id": "b6", "projekt": "p2", "titel": "Gewinnspiel-Idee prüfen", "sprint": 0, "zustaendig": "", "status": "todo", "start": null, "faellig": null, "fortschritt": 0 },
+    { "id": "b7", "projekt": "p2", "titel": "TikTok-Kanal testen", "sprint": 0, "zustaendig": "", "status": "todo", "start": null, "faellig": null, "fortschritt": 0 },
+    { "id": "c1", "projekt": "p3", "titel": "Profil anlegen und Fotos hochladen", "phase": "Umsetzung", "zustaendig": "Petar", "status": "done", "start": -40, "faellig": -30, "fortschritt": 100 },
+    { "id": "c2", "projekt": "p3", "titel": "Profil verifiziert", "phase": "Abschluss", "meilenstein": true, "zustaendig": "Petar", "status": "done", "start": -25, "faellig": -25, "fortschritt": 100 }
   ]
 }

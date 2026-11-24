@@ -1,0 +1,44 @@
+{
+  "hinweis": "Wiederkehrende Updates und Prüfungen. intervall in Monaten. paket = npm-Paket, dessen neueste Version automatisch abgefragt wird.",
+  "aufgaben": [
+    {
+      "id": "astro", "titel": "Astro aktualisieren", "intervall": 1, "paket": "astro",
+      "warum": "Astro erzeugt die Website. Updates bringen Sicherheitskorrekturen, mehr Tempo und neue Funktionen.",
+      "wie": "Im Projektordner ausführen: npx @astrojs/upgrade – danach npm run build und die Seite in der Vorschau prüfen. Bei einem Sprung der ersten Versionsnummer (z. B. 7 → 8) zuerst die Upgrade-Anleitung lesen.",
+      "ki": "Aktualisiere Astro in diesem Projekt auf die neueste Version, prüfe die Upgrade-Anleitung auf Änderungen, die uns betreffen, und teste den Build.",
+      "links": [
+        { "name": "Versionshinweise", "url": "https://github.com/withastro/astro/releases" },
+        { "name": "Upgrade-Anleitung", "url": "https://docs.astro.build/en/upgrade-astro/" }
+      ]
+    },
+    {
+      "id": "pakete", "titel": "Weitere Pakete und Sicherheitslücken prüfen", "intervall": 1,
+      "warum": "Auch Hilfspakete können Sicherheitslücken haben.",
+      "wie": "Im Projektordner ausführen: npm outdated (zeigt veraltete Pakete) und npm audit (zeigt bekannte Sicherheitslücken).",
+      "ki": "Führe npm outdated und npm audit aus, aktualisiere, was sicher geht, und erkläre mir verbleibende Warnungen.",
+      "links": [ { "name": "npm audit erklärt", "url": "https://docs.npmjs.com/cli/commands/npm-audit" } ]
+    },
+    {
+      "id": "node", "titel": "Node.js-Version prüfen", "intervall": 6,
+      "warum": "Astro und Netlify brauchen eine unterstützte Node.js-Version. Ältere Versionen bekommen keine Sicherheitsupdates mehr.",
+      "wie": "Auf nodejs.org nachsehen, welche Version aktuell als LTS empfohlen wird, und lokal mit node -v vergleichen.",
+      "links": [ { "name": "Node.js-Versionen", "url": "https://nodejs.org/en/about/previous-releases" } ]
+    },
+    {
+      "id": "netlify", "titel": "Netlify: Tarifgrenzen und Hinweise prüfen", "intervall": 3,
+      "warum": "Im kostenlosen Tarif gibt es Grenzen für Aufrufe und Funktionen. Netlify informiert dort auch über Änderungen.",
+      "wie": "Im Netlify-Projekt unter Usage nachsehen und die Hinweise im Team-Bereich lesen.",
+      "links": [ { "name": "Netlify-Preise", "url": "https://www.netlify.com/pricing/" }, { "name": "Netlify-Änderungen", "url": "https://www.netlify.com/changelog/" } ]
+    },
+    {
+      "id": "recht", "titel": "Impressum und Datenschutzerklärung prüfen", "intervall": 6,
+      "warum": "Neue Tools, Formulare oder Anbieter müssen in der Datenschutzerklärung stehen.",
+      "wie": "Datenschutzerklärung mit der Tool-Liste unter Plattform abgleichen; fehlende Dienste ergänzen. Impressum auf aktuelle Angaben prüfen."
+    },
+    {
+      "id": "avv", "titel": "Tools, Abos und Auftragsverarbeitungsverträge prüfen", "intervall": 12,
+      "warum": "Nicht mehr genutzte Tools kosten Geld und verarbeiten unnötig Daten. Für Tools mit personenbezogenen Daten braucht es einen AVV.",
+      "wie": "Unter Plattform die Tool-Liste und die Abos durchgehen: Wird alles noch genutzt? Liegen die AVVs vor?"
+    }
+  ]
+}

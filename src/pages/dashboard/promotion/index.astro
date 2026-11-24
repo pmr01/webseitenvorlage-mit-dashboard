@@ -8,45 +8,9 @@ import liste from '../../../inhalte/storytelling-checkliste.json';
 import Unterseiten from '../../../components/Unterseiten.astro';
 import { PROMOTION_SEITEN } from '../../../components/promotion-seiten.mjs';
 ---
-<Dashboard titel="Promotion" untertitel="Das Storytelling Framework: zwölf Elemente in fester Reihenfolge führen Besucher vom Problem zur Lösung. Der Kunde ist der Held, Sie sind sein Wegweiser.">
+<Dashboard titel="Promotion" untertitel="Webseite mit Storytelling Framework: zwölf Elemente in fester Reihenfolge führen Besucher vom Problem zur Lösung. Der Kunde ist der Held, Sie sind sein Wegweiser.">
   <Unterseiten seiten={PROMOTION_SEITEN} />
   <div class="promotion">
-    <section class="karte checkliste" aria-labelledby="checkliste-titel">
-      <div class="kopf">
-        <h2 id="checkliste-titel">Checkliste</h2>
-        <p class="fortschritt" id="fortschritt" aria-live="polite"></p>
-      </div>
-      <div class="tabelle-rahmen">
-        <table>
-          <thead>
-            <tr><th scope="col">#</th><th scope="col">Element</th><th scope="col">Kommentar</th><th scope="col">Mögliche Quellen</th><th scope="col">Erledigt</th></tr>
-          </thead>
-          <tbody>
-            {liste.elemente.map((e) => (
-              <tr data-nr={e.nr}>
-                <td><span class="nr">{e.nr}</span></td>
-                <th scope="row">{e.element}</th>
-                <td>{e.kommentar}</td>
-                <td>{e.quellen}</td>
-                <td class="haken"><input type="checkbox" data-schluessel={`element-${e.nr}`} aria-label={`${e.element} erledigt`} /></td>
-              </tr>
-            ))}
-            <tr class="trenner"><th colspan="5" scope="colgroup">Voraussetzungen vor dem Veröffentlichen</th></tr>
-            {liste.voraussetzungen.map((v, i) => (
-              <tr>
-                <td></td>
-                <th scope="row">{v.element}</th>
-                <td>{v.kommentar}</td>
-                <td>{v.quellen}</td>
-                <td class="haken"><input type="checkbox" data-schluessel={`voraussetzung-${i}`} aria-label={`${v.element} erledigt`} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p class="hinweis">Die Haken speichert nur Ihr Browser auf diesem Gerät.</p>
-    </section>
-
     <section class="karte plan" aria-labelledby="plan-titel">
       <h2 id="plan-titel">Aufbauplan der Startseite</h2>
       <div class="schema" aria-label="Schema der Startseite mit den Nummern der Checkliste">
@@ -57,18 +21,65 @@ import { PROMOTION_SEITEN } from '../../../components/promotion-seiten.mjs';
         </div>
         <div class="bereich hero">
           <span class="block"><b>3</b>Hauptbild / Video</span>
-          <span class="block"><b>4</b>Main Headline</span>
+          <span class="block gross"><b>4</b>Main Headline</span>
           <span class="block"><b>5</b>Einleitung</span>
           <span class="block cta"><b>9</b>CTA</span>
         </div>
-        <div class="bereich"><span class="block"><b>6</b>Painpoints (3–6)</span><span class="block cta"><b>9</b>CTA</span></div>
-        <div class="bereich"><span class="block"><b>7</b>Vorstellung (Autorität)</span><span class="block cta"><b>9</b>CTA</span></div>
-        <div class="bereich"><span class="block"><b>8</b>Plan: 3 Schritte</span><span class="block cta"><b>9</b>CTA</span></div>
-        <div class="bereich"><span class="block"><b>10</b>Auszeichnungen / Siegel</span></div>
-        <div class="bereich"><span class="block"><b>11</b>Testimonials (×3)</span><span class="block cta"><b>9</b>CTA</span></div>
-        <div class="bereich"><span class="block"><b>12</b>Weitere Elemente &amp; Footer</span></div>
+        <div class="bereich">
+          <div class="raster"><span class="block"><b>6</b>Painpoint</span><span class="block"><b>6</b>Painpoint</span><span class="block"><b>6</b>Painpoint</span><span class="block"><b>6</b>Painpoint</span></div>
+          <span class="block cta"><b>9</b>CTA</span>
+        </div>
+        <div class="bereich"><span class="block"><b>7</b>Vorstellung (Autorität): Text und Bild</span><span class="block cta"><b>9</b>CTA</span></div>
+        <div class="bereich">
+          <div class="schritte"><span class="block"><b>8</b>Schritt 1</span><span class="pfeil" aria-hidden="true">›</span><span class="block">Schritt 2</span><span class="pfeil" aria-hidden="true">›</span><span class="block">Schritt 3</span></div>
+          <span class="block cta"><b>9</b>CTA</span>
+        </div>
+        <div class="bereich"><span class="block"><b>10</b>Auszeichnungen / Siegel / Logos</span></div>
+        <div class="bereich">
+          <div class="raster drei"><span class="block"><b>11</b>Testimonial</span><span class="block"><b>11</b>Testimonial</span><span class="block"><b>11</b>Testimonial</span></div>
+          <span class="block cta"><b>9</b>CTA</span>
+        </div>
+        <div class="bereich fuss"><span class="block"><b>12</b>Weitere Elemente &amp; Footer</span></div>
       </div>
       <p class="hinweis">Der Call-to-Action (9) steht immer mit demselben Text da. Die Nummern entsprechen der Checkliste.</p>
+    </section>
+
+    <section class="karte checkliste" aria-labelledby="checkliste-titel">
+      <div class="kopf">
+        <h2 id="checkliste-titel">Checkliste</h2>
+        <p class="fortschritt" id="fortschritt" aria-live="polite"></p>
+      </div>
+      <table>
+        <thead>
+          <tr><th scope="col">#</th><th scope="col">Element</th><th scope="col"><span class="visuell-versteckt">Erledigt</span><span aria-hidden="true">✓</span></th></tr>
+        </thead>
+        <tbody>
+          {liste.elemente.map((e) => (
+            <tr data-nr={e.nr}>
+              <td><span class="nr">{e.nr}</span></td>
+              <th scope="row">
+                <span class="name">{e.element}</span>
+                <span class="kommentar">{e.kommentar}</span>
+                <span class="quelle">Quelle: {e.quellen}</span>
+              </th>
+              <td class="haken"><input type="checkbox" data-schluessel={`element-${e.nr}`} aria-label={`${e.element} erledigt`} /></td>
+            </tr>
+          ))}
+          <tr class="trenner"><th colspan="3" scope="colgroup">Vor dem Veröffentlichen</th></tr>
+          {liste.voraussetzungen.map((v, i) => (
+            <tr>
+              <td></td>
+              <th scope="row">
+                <span class="name">{v.element}</span>
+                <span class="kommentar">{v.kommentar}</span>
+                <span class="quelle">Quelle: {v.quellen}</span>
+              </th>
+              <td class="haken"><input type="checkbox" data-schluessel={`voraussetzung-${i}`} aria-label={`${v.element} erledigt`} /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p class="hinweis">Die Haken speichert nur Ihr Browser auf diesem Gerät.</p>
     </section>
   </div>
 </Dashboard>
@@ -97,31 +108,43 @@ import { PROMOTION_SEITEN } from '../../../components/promotion-seiten.mjs';
 </script>
 
 <style>
-  .promotion { display: grid; gap: 16px; grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr); align-items: start; }
+  .promotion { display: grid; gap: 16px; grid-template-columns: minmax(0, 1.35fr) minmax(300px, 1fr); align-items: start; }
   .promotion > * { min-width: 0; }
   @media (max-width: 1000px) { .promotion { grid-template-columns: minmax(0, 1fr); } }
   .kopf { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-  .fortschritt { margin: 0; font-weight: 600; color: var(--haupt); }
-  .tabelle-rahmen { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: .93rem; min-width: 560px; }
-  thead th { text-align: left; background: #3f4a4f; color: #fff; padding: 8px 10px; font-weight: 600; }
-  td, tbody th { padding: 9px 10px; border-bottom: 1px solid #e6eaec; vertical-align: top; text-align: left; }
-  tbody th { font-weight: 600; }
-  .nr { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #1c2126; color: #fff; font-size: .8rem; font-weight: 700; }
-  .haken { text-align: center; }
-  .haken input { width: 20px; height: 20px; accent-color: var(--haupt); cursor: pointer; }
-  tr.fertig th, tr.fertig td:not(.haken) { color: #7d898e; }
-  tr.fertig th { text-decoration: line-through; }
-  .trenner th { background: #e6eaec; color: #3f4a4f; font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; }
+  .fortschritt { margin: 0; font-weight: 600; color: var(--haupt); font-size: .9rem; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  thead th { text-align: left; background: #3f4a4f; color: #fff; padding: 7px 8px; font-weight: 600; }
+  thead th:last-child { text-align: center; }
+  td, tbody th { padding: 8px; border-bottom: 1px solid #e6eaec; vertical-align: top; text-align: left; }
+  tbody th { font-weight: 400; }
+  .name { display: block; font-weight: 700; }
+  .kommentar { display: block; color: #3f4a4f; line-height: 1.4; }
+  .quelle { display: block; color: #7d898e; font-size: .8rem; line-height: 1.35; margin-top: 2px; }
+  .nr { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #1c2126; color: #fff; font-size: .75rem; font-weight: 700; }
+  .haken { text-align: center; width: 40px; }
+  .haken input { width: 20px; height: 20px; accent-color: var(--haupt); cursor: pointer; margin-top: 2px; }
+  tr.fertig .name { text-decoration: line-through; color: #7d898e; }
+  tr.fertig .kommentar, tr.fertig .quelle { color: #9aa6ab; }
+  .trenner th { background: #e6eaec; color: #3f4a4f; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
   .hinweis { color: #67747a; font-size: .85rem; margin: 12px 0 0; }
 
-  .schema { display: grid; gap: 6px; font-size: .85rem; }
-  .zeile, .bereich { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border: 1px solid #cfd8dc; border-radius: 8px; background: #fafbfb; }
-  .kopfzeile { background: #fff; }
-  .hero { background: repeating-linear-gradient(135deg, #f1f4f5 0 10px, #fafbfb 10px 20px); flex-direction: column; align-items: center; }
-  .block { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px; background: #fff; border: 1px solid #dde3e6; border-radius: 6px; }
+  .schema { display: grid; gap: 8px; font-size: .88rem; }
+  .zeile, .bereich { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; border: 1px solid #cfd8dc; border-radius: 8px; background: #fafbfb; }
+  .kopfzeile { background: #fff; align-items: center; }
+  .hero { background: repeating-linear-gradient(135deg, #f1f4f5 0 10px, #fafbfb 10px 20px); flex-direction: column; align-items: center; padding: 22px 10px; }
+  .block { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; background: #fff; border: 1px solid #dde3e6; border-radius: 6px; }
   .block.breit { flex: 1; justify-content: center; }
+  .block.gross { font-size: 1.05rem; font-weight: 700; padding: 8px 14px; }
   .block b { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 4px; border-radius: 999px; background: #1c2126; color: #fff; font-size: .72rem; }
   .block.cta { background: color-mix(in srgb, var(--akzent) 25%, white); border-color: var(--akzent); }
   .bereich { justify-content: space-between; align-items: center; }
+  .bereich.fuss { background: #eef1f2; }
+  .raster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; flex: 1; }
+  .raster.drei { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .raster .block, .schritte .block { justify-content: center; }
+  .schritte { display: flex; align-items: center; gap: 6px; flex: 1; flex-wrap: wrap; }
+  .pfeil { color: var(--akzent); font-size: 1.3rem; line-height: 1; }
+  @media (max-width: 560px) { .raster.drei { grid-template-columns: 1fr; } .bereich { justify-content: center; } }
 </style>

@@ -1,0 +1,257 @@
+---
+// Reiter Prozess → Kampagnenplanung.
+// Kampagnen mit Ziel, Zielgruppe, Botschaft, Kanälen, Zeitraum, Budget und Kennzahl (Ziel und Ist).
+// Ansichten: Zeitplan (Jahresübersicht) und Karten. Startdaten aus src/inhalte/kampagnen.json;
+// Änderungen speichert der Browser.
+import Dashboard from '../../../layouts/Dashboard.astro';
+import Unterseiten from '../../../components/Unterseiten.astro';
+import { PROZESS_SEITEN } from '../../../components/prozess-seiten.mjs';
+import startdaten from '../../../inhalte/kampagnen.json';
+import '../../../styles/pm.css';
+---
+<Dashboard titel="Prozess" untertitel="Kampagnen planen: Was wollen wir erreichen, bei wem, über welche Kanäle, wann und mit welchem Budget?">
+  <Unterseiten seiten={PROZESS_SEITEN} />
+
+  <p class="beispiel-hinweis" role="note">
+    <strong>Beispiel</strong>
+    <span>Beispielkampagnen einer fiktiven Firma. Änderungen speichert nur dieser Browser; sichern Sie sie über „Als Datei sichern“. Für die gemeinsame Planung im Team braucht es eine Datenbank wie Neon. Budgets je Kanal planen Sie unter Promotion → Kanäle & Budget.</span>
+  </p>
+
+  <div class="km-kennzahlen" id="km-kennzahlen"></div>
+
+  <div class="pm-kopf">
+    <h2>Kampagnen</h2>
+    <div class="pm-knoepfe">
+      <label class="pm-filter">Status
+        <select class="pm-select" id="km-filter"></select>
+      </label>
+      <div class="pm-ansicht" role="tablist" aria-label="Ansicht">
+        <button type="button" role="tab" data-ansicht="zeitplan" aria-selected="true">Zeitplan</button>
+        <button type="button" role="tab" data-ansicht="karten" aria-selected="false">Karten</button>
+      </div>
+      <button type="button" class="pm-btn primaer" id="km-neu">+ Kampagne</button>
+    </div>
+  </div>
+  <div id="km-inhalt"></div>
+
+  <div class="pm-daten">
+    <button type="button" class="pm-link" id="km-export">Als Datei sichern</button>
+    <label class="pm-link">Datei laden<input type="file" accept="application/json,.json" id="km-import" hidden /></label>
+    <button type="button" class="pm-link" id="km-reset">Beispieldaten wiederherstellen</button>
+  </div>
+
+  <dialog id="km-dialog" class="pm-dialog" aria-labelledby="km-dialog-titel">
+    <form method="dialog" id="km-form">
+      <h2 id="km-dialog-titel">Kampagne</h2>
+      <label class="breit">Name<input name="name" required maxlength="120" /></label>
+      <label class="breit">Ziel<input name="ziel" maxlength="200" placeholder="Was soll die Kampagne erreichen?" /></label>
+      <label class="breit">Zielgruppe<input name="zielgruppe" maxlength="200" placeholder="Für wen? Am besten eine Persona aus Positionierung" /></label>
+      <label class="breit">Kernbotschaft<input name="botschaft" maxlength="200" placeholder="Was soll hängen bleiben?" /></label>
+      <fieldset class="breit km-kanalwahl"><legend>Kanäle</legend><div id="km-kanaele"></div></fieldset>
+      <label>Start<input name="start" type="date" /></label>
+      <label>Ende<input name="ende" type="date" /></label>
+      <label>Status<select name="status"></select></label>
+      <label>Budget in Euro<input name="budget" type="number" min="0" step="50" /></label>
+      <label>Kennzahl<input name="kpi" maxlength="60" placeholder="z. B. Anfragen" /></label>
+      <label>Ziel / Ist<span class="km-paar"><input name="kpiZiel" type="number" min="0" aria-label="Zielwert" /><input name="kpiIst" type="number" min="0" aria-label="Istwert" /></span></label>
+      <div class="pm-dialog-knoepfe breit">
+        <button type="button" class="pm-btn gefahr" id="km-loeschen">Löschen</button>
+        <span></span>
+        <button type="button" class="pm-btn" id="km-abbrechen">Abbrechen</button>
+        <button type="submit" class="pm-btn primaer">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="application/json" id="km-startdaten" set:html={JSON.stringify(startdaten)}></script>
+</Dashboard>
+
+<script>
+  type Status = 'idee' | 'geplant' | 'laeuft' | 'abgeschlossen';
+  type Kampagne = { id: string; name: string; ziel: string; zielgruppe: string; botschaft: string; kanaele: string[]; start: string; ende: string; budget: number; status: Status; kpi: string; kpiZiel: number; kpiIst: number };
+  const ROH = JSON.parse(document.getElementById('km-startdaten')!.textContent || '{}');
+  const KANAELE: string[] = ROH.kanaele || [];
+  const STATUS: Record<Status, [string, string]> = { idee: ['Idee', ''], geplant: ['Geplant', 'blau'], laeuft: ['Läuft', 'gruen'], abgeschlossen: ['Abgeschlossen', 'lila'] };
+  const SPEICHER = 'prozess-kampagnen';
+  const TAG = 86400000;
+  const euro = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  const zahl = new Intl.NumberFormat('de-DE');
+  const datum = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const monat = new Intl.DateTimeFormat('de-DE', { month: 'short', year: '2-digit' });
+
+  function el<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, any> = {}, ...kinder: (Node | string | null | false | undefined)[]) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v === undefined || v === null || v === false) continue;
+      if (k.startsWith('on') && typeof v === 'function') e.addEventListener(k.slice(2), v);
+      else if (k === 'class') e.className = v; else e.setAttribute(k, v === true ? '' : String(v));
+    }
+    for (const k of kinder) if (k !== null && k !== undefined && k !== false) e.append(k);
+    return e;
+  }
+  const heute = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const verschoben = (t: number) => { const d = heute(); d.setDate(d.getDate() + t); return iso(d); };
+  const alsDatum = (s: string) => (s ? new Date(s + 'T00:00:00') : null);
+  const zeige = (s: string) => (s ? datum.format(alsDatum(s)!) : '–');
+  const zahlWert = (v: unknown) => Math.max(0, Number(v) || 0);
+  const tag = (v: unknown) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v)) ? String(v) : '');
+
+  function pruefe(k: any): Kampagne {
+    return {
+      id: String(k.id || 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5)), name: String(k.name || 'Ohne Namen').slice(0, 120),
+      ziel: String(k.ziel || '').slice(0, 200), zielgruppe: String(k.zielgruppe || '').slice(0, 200), botschaft: String(k.botschaft || '').slice(0, 200),
+      kanaele: Array.isArray(k.kanaele) ? k.kanaele.map(String).filter((x: string) => KANAELE.includes(x)) : [],
+      start: tag(k.start), ende: tag(k.ende), budget: zahlWert(k.budget), status: (k.status in STATUS ? k.status : 'idee') as Status,
+      kpi: String(k.kpi || '').slice(0, 60), kpiZiel: zahlWert(k.kpiZiel), kpiIst: zahlWert(k.kpiIst),
+    };
+  }
+  const startdaten = (): Kampagne[] => (ROH.kampagnen || []).map((k: any) => pruefe({ ...k, start: verschoben(k.start), ende: verschoben(k.ende) }));
+  function laden(): Kampagne[] {
+    try { const d = JSON.parse(localStorage.getItem(SPEICHER) || 'null'); if (Array.isArray(d)) return d.map(pruefe); } catch { /* kein Speicher */ }
+    return startdaten();
+  }
+  let kampagnen = laden();
+  let ansicht: 'zeitplan' | 'karten' = 'zeitplan';
+  let filter = 'alle';
+  const speichern = () => { try { localStorage.setItem(SPEICHER, JSON.stringify(kampagnen)); } catch { /* ohne Speicher */ } zeichnen(); };
+  const sichtbar = () => kampagnen.filter((k) => filter === 'alle' || k.status === filter);
+  const marke = (s: Status) => el('span', { class: `pm-marke ${STATUS[s][1]}` }, STATUS[s][0]);
+  const kpiText = (k: Kampagne) => (k.kpi ? `${k.kpi}: ${zahl.format(k.kpiIst)} von ${zahl.format(k.kpiZiel)}` : '');
+  const kpiAnteil = (k: Kampagne) => (k.kpiZiel ? Math.min(100, Math.round((k.kpiIst / k.kpiZiel) * 100)) : 0);
+
+  function kennzahlen() {
+    const laufend = kampagnen.filter((k) => k.status === 'laeuft');
+    const geplant = kampagnen.filter((k) => k.status === 'geplant');
+    const budget = kampagnen.filter((k) => k.status !== 'idee').reduce((s, k) => s + k.budget, 0);
+    const kachel = (titel: string, wert: string, zusatz: string) => el('div', { class: 'karte km-kachel' }, el('span', {}, titel), el('strong', {}, wert), el('small', {}, zusatz));
+    document.getElementById('km-kennzahlen')!.replaceChildren(
+      kachel('Laufend', String(laufend.length), laufend.map((k) => k.name).join(', ') || 'keine'),
+      kachel('Geplant', String(geplant.length), geplant.map((k) => k.name).join(', ') || 'keine'),
+      kachel('Budget (geplant und laufend)', euro.format(budget), `${kampagnen.length} Kampagnen insgesamt`));
+  }
+
+  function zeitplan() {
+    const liste = sichtbar().filter((k) => k.start || k.ende);
+    if (!liste.length) return el('p', { class: 'karte pm-leer' }, 'Keine Kampagnen mit Zeitraum.');
+    const anfang = (k: Kampagne) => alsDatum(k.start || k.ende)!.getTime();
+    const ende = (k: Kampagne) => alsDatum(k.ende || k.start)!.getTime();
+    const ersterMonat = new Date(Math.min(...liste.map(anfang), heute().getTime())); ersterMonat.setDate(1);
+    const letzter = new Date(Math.max(...liste.map(ende), heute().getTime())); const letzterMonat = new Date(letzter.getFullYear(), letzter.getMonth() + 1, 1);
+    const min = ersterMonat.getTime(), max = letzterMonat.getTime();
+    const pz = (t: number) => ((t - min) / (max - min)) * 100;
+    const monate: HTMLElement[] = [];
+    for (const m = new Date(ersterMonat); m.getTime() < max; m.setMonth(m.getMonth() + 1)) {
+      const mitte = new Date(m.getFullYear(), m.getMonth(), 15).getTime();
+      monate.push(el('span', { class: 'pm-woche', style: `left:${pz(mitte)}%` }, monat.format(m)));
+    }
+    const heuteLinie = () => el('span', { class: 'pm-heute-linie', style: `left:${pz(heute().getTime())}%` });
+    const statusKlasse: Record<Status, string> = { idee: '', geplant: 's-todo', laeuft: 'laeuft', abgeschlossen: 'abgeschlossen' };
+    return el('div', { class: 'karte pm-zeitplan' },
+      el('div', { class: 'pm-zeile pm-achse' }, el('span'), el('div', { class: 'pm-spur' }, el('span', { class: 'pm-heute-marke', style: `left:${pz(heute().getTime())}%` }, 'Heute'), ...monate)),
+      ...liste.sort((a, b) => anfang(a) - anfang(b)).map((k) => {
+        const links = pz(anfang(k)); const breite = Math.max(1, pz(ende(k) + TAG) - links);
+        return el('div', { class: 'pm-zeile km-zeile' },
+          el('span', { class: 'pm-zeile-name' }, el('button', { type: 'button', class: 'pm-link', onclick: () => dialog(k) }, k.name), el('br'), el('span', { class: 'pm-klein' }, k.kanaele.join(', ') || 'ohne Kanal')),
+          el('div', { class: 'pm-spur' }, heuteLinie(), el('span', { class: `pm-zeitbalken ${statusKlasse[k.status]}${k.status === 'idee' ? ' km-idee' : ''}`, style: `left:${links}%;width:${breite}%`, title: `${k.name}: ${zeige(k.start)} bis ${zeige(k.ende)} · ${STATUS[k.status][0]} · ${euro.format(k.budget)}` })));
+      }),
+      el('div', { class: 'pm-legende' }, ...(['idee', 'geplant', 'laeuft', 'abgeschlossen'] as Status[]).map((s) => el('span', {}, el('i', { class: `pm-zeitbalken ${statusKlasse[s]}${s === 'idee' ? ' km-idee' : ''}`, style: 'position:static;display:inline-block' }), STATUS[s][0]))));
+  }
+
+  function karten() {
+    const liste = sichtbar();
+    if (!liste.length) return el('p', { class: 'karte pm-leer' }, 'Keine Kampagnen. Legen Sie mit „+ Kampagne“ die erste an.');
+    return el('div', { class: 'km-karten' }, ...liste.map((k) => el('article', { class: 'karte km-karte' },
+      el('div', { class: 'km-karte-kopf' }, el('h3', {}, el('button', { type: 'button', class: 'pm-link', onclick: () => dialog(k) }, k.name)), marke(k.status)),
+      el('p', { class: 'pm-klein' }, `${zeige(k.start)} – ${zeige(k.ende)} · ${euro.format(k.budget)}`),
+      el('dl', {},
+        k.ziel ? el('div', {}, el('dt', {}, 'Ziel'), el('dd', {}, k.ziel)) : null,
+        k.zielgruppe ? el('div', {}, el('dt', {}, 'Zielgruppe'), el('dd', {}, k.zielgruppe)) : null,
+        k.botschaft ? el('div', {}, el('dt', {}, 'Botschaft'), el('dd', {}, `„${k.botschaft}“`)) : null),
+      el('div', { class: 'km-tags' }, ...k.kanaele.map((c) => el('span', { class: 'km-tag' }, c))),
+      k.kpi ? el('div', { class: 'km-kpi' }, el('span', { class: 'pm-klein' }, kpiText(k)), el('span', { class: 'pm-balken' }, el('span', { style: `width:${kpiAnteil(k)}%` }))) : null)));
+  }
+
+  function zeichnen() {
+    kennzahlen();
+    document.querySelectorAll<HTMLButtonElement>('[data-ansicht]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.ansicht === ansicht)));
+    document.getElementById('km-inhalt')!.replaceChildren(ansicht === 'zeitplan' ? zeitplan() : karten());
+  }
+
+  // ---------- Formular ----------
+  const dlg = document.getElementById('km-dialog') as HTMLDialogElement;
+  const form = document.getElementById('km-form') as HTMLFormElement;
+  const feld = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
+  let aktuell: Kampagne | null = null;
+  (form.elements.namedItem('status') as HTMLSelectElement).append(...(Object.keys(STATUS) as Status[]).map((s) => el('option', { value: s }, STATUS[s][0])));
+  document.getElementById('km-kanaele')!.append(...KANAELE.map((c) => el('label', { class: 'km-check' }, el('input', { type: 'checkbox', value: c, name: 'kanal' }), c)));
+  const filterFeld = document.getElementById('km-filter') as HTMLSelectElement;
+  filterFeld.append(el('option', { value: 'alle' }, 'Alle'), ...(Object.keys(STATUS) as Status[]).map((s) => el('option', { value: s }, STATUS[s][0])));
+  filterFeld.addEventListener('change', () => { filter = filterFeld.value; zeichnen(); });
+
+  function dialog(k: Kampagne | null) {
+    aktuell = k;
+    const w: any = k ?? { name: '', ziel: '', zielgruppe: '', botschaft: '', kanaele: [], start: iso(heute()), ende: '', status: 'idee', budget: '', kpi: '', kpiZiel: '', kpiIst: '' };
+    for (const n of ['name', 'ziel', 'zielgruppe', 'botschaft', 'start', 'ende', 'status', 'budget', 'kpi', 'kpiZiel', 'kpiIst']) feld(n).value = String(w[n] ?? '');
+    form.querySelectorAll<HTMLInputElement>('input[name="kanal"]').forEach((c) => { c.checked = w.kanaele.includes(c.value); });
+    document.getElementById('km-dialog-titel')!.textContent = k ? 'Kampagne bearbeiten' : 'Neue Kampagne';
+    document.getElementById('km-loeschen')!.hidden = !k;
+    dlg.showModal(); feld('name').focus();
+  }
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const neu = pruefe({ id: aktuell?.id, name: feld('name').value.trim(), ziel: feld('ziel').value.trim(), zielgruppe: feld('zielgruppe').value.trim(), botschaft: feld('botschaft').value.trim(),
+      kanaele: [...form.querySelectorAll<HTMLInputElement>('input[name="kanal"]:checked')].map((c) => c.value), start: feld('start').value, ende: feld('ende').value,
+      status: feld('status').value, budget: feld('budget').value, kpi: feld('kpi').value.trim(), kpiZiel: feld('kpiZiel').value, kpiIst: feld('kpiIst').value });
+    if (aktuell) Object.assign(aktuell, neu); else kampagnen.push(neu);
+    dlg.close(); speichern();
+  });
+  document.getElementById('km-abbrechen')!.addEventListener('click', () => dlg.close());
+  document.getElementById('km-loeschen')!.addEventListener('click', () => { if (aktuell && confirm(`Kampagne „${aktuell.name}“ löschen?`)) { kampagnen = kampagnen.filter((k) => k !== aktuell); dlg.close(); speichern(); } });
+  document.getElementById('km-neu')!.addEventListener('click', () => dialog(null));
+  document.querySelectorAll<HTMLButtonElement>('[data-ansicht]').forEach((b) => b.addEventListener('click', () => { ansicht = b.dataset.ansicht as typeof ansicht; zeichnen(); }));
+  document.getElementById('km-export')!.addEventListener('click', () => {
+    const a = el('a', { href: URL.createObjectURL(new Blob([JSON.stringify(kampagnen, null, 2)], { type: 'application/json' })), download: `kampagnen-${iso(heute())}.json` }) as HTMLAnchorElement;
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+  document.getElementById('km-import')!.addEventListener('change', async (e) => {
+    const datei = (e.target as HTMLInputElement).files?.[0]; if (!datei) return;
+    try { const d = JSON.parse(await datei.text()); if (!Array.isArray(d)) throw new Error(); if (confirm(`${d.length} Kampagnen laden? Der bisherige Stand wird ersetzt.`)) { kampagnen = d.map(pruefe); speichern(); } }
+    catch { alert('Die Datei konnte nicht gelesen werden.'); }
+    (e.target as HTMLInputElement).value = '';
+  });
+  document.getElementById('km-reset')!.addEventListener('click', () => { if (confirm('Alle eigenen Kampagnen in diesem Browser durch die Beispieldaten ersetzen?')) { kampagnen = startdaten(); speichern(); } });
+
+  zeichnen();
+</script>
+
+<style>
+  .km-kennzahlen { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); margin-bottom: 24px; }
+  :global(.km-kachel) { display: flex; flex-direction: column; gap: 2px; }
+  :global(.km-kachel span) { font-size: .85rem; color: #5a676d; font-weight: 600; }
+  :global(.km-kachel strong) { font-size: 1.8rem; font-variant-numeric: tabular-nums; }
+  :global(.km-kachel small) { color: #5a676d; font-size: .82rem; }
+  :global(.km-zeile) { min-height: 48px; }
+  :global(.km-zeile .pm-spur) { height: 28px; }
+  :global(.km-zeile .pm-zeitbalken) { top: 6px; height: 16px; }
+  :global(.pm-zeitbalken.km-idee) { background: repeating-linear-gradient(135deg, #dfe5e8 0 6px, #f1f4f5 6px 12px); border: 1px dashed #9aa6ab; }
+  :global(.km-karten) { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+  :global(.km-karte) { display: flex; flex-direction: column; gap: 8px; }
+  :global(.km-karte-kopf) { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  :global(.km-karte h3) { font-size: 1.05rem; margin: 0; }
+  :global(.km-karte .pm-link) { color: var(--text); text-decoration: none; font-weight: 700; }
+  :global(.km-karte .pm-link:hover) { color: var(--haupt); text-decoration: underline; }
+  :global(.km-karte p) { margin: 0; }
+  :global(.km-karte dl) { margin: 0; display: grid; gap: 6px; font-size: .9rem; }
+  :global(.km-karte dt) { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: #67747a; font-weight: 700; }
+  :global(.km-karte dd) { margin: 0; }
+  :global(.km-tags) { display: flex; flex-wrap: wrap; gap: 4px; }
+  :global(.km-tag) { font-size: .75rem; background: #eef2f4; border-radius: 999px; padding: 2px 8px; color: #3f4a4f; }
+  :global(.km-kpi) { margin-top: auto; display: grid; gap: 4px; }
+  .km-kanalwahl { border: 0; padding: 0; margin: 0; }
+  .km-kanalwahl legend { font-size: .88rem; font-weight: 600; color: #3f4a4f; margin-bottom: 6px; }
+  #km-kanaele { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  :global(.km-check) { flex-direction: row !important; align-items: center; gap: 6px !important; font-weight: 400 !important; }
+  .km-paar { display: flex; gap: 6px; }
+  .km-paar input { width: 50%; }
+</style>
