@@ -3,10 +3,582 @@
   "hinweis": "Beispielzahlen für die Übersicht. Ersetzen Sie sie durch Ihre eigenen Werte, sobald Sie sie kennen.",
   "zeitraum": "letzte 30 Tage",
   "kennzahlen": [
-    { "name": "Besucher", "wert": 2276, "einheit": "", "vorher": 1980, "quelle": "Performance (Google Analytics)" },
-    { "name": "Anfragen", "wert": 27, "einheit": "", "vorher": 21, "quelle": "Kontaktformular und E-Mail" },
-    { "name": "Neue Kunden", "wert": 6, "einheit": "", "vorher": 4, "quelle": "eigene Zählung" },
-    { "name": "Umsatz", "wert": 8400, "einheit": "€", "vorher": 7100, "quelle": "Buchhaltung" },
-    { "name": "Marketingbudget", "wert": 1350, "einheit": "€", "vorher": 1200, "quelle": "Promotion → Kanäle & Budget" }
-  ]
+    {
+      "name": "Besucher",
+      "wert": 2276,
+      "einheit": "",
+      "vorher": 1980,
+      "quelle": "Performance (Google Analytics)"
+    },
+    {
+      "name": "Anfragen",
+      "wert": 27,
+      "einheit": "",
+      "vorher": 21,
+      "quelle": "Kontaktformular und E-Mail"
+    },
+    {
+      "name": "Neue Kunden",
+      "wert": 6,
+      "einheit": "",
+      "vorher": 4,
+      "quelle": "eigene Zählung"
+    },
+    {
+      "name": "Umsatz",
+      "wert": 8400,
+      "einheit": "€",
+      "vorher": 7100,
+      "quelle": "Buchhaltung"
+    },
+    {
+      "name": "Marketingbudget",
+      "wert": 1350,
+      "einheit": "€",
+      "vorher": 1200,
+      "quelle": "Promotion → Kanäle & Budget"
+    }
+  ],
+  "auswertungen": {
+    "Besucher": {
+      "typ": "funnel",
+      "titel": "Besucher-Funnel",
+      "beschreibung": "Woher Besucher kommen, auf welcher Seite sie einsteigen, wohin sie weiterklicken und wie oft sie ein Ziel erreichen. Linienstärke = Sitzungen bzw. Seitenwechsel. Maus auf eine Karte hebt ihre Wege hervor.",
+      "quellen": [
+        {
+          "id": "google",
+          "name": "Google (organisch, SEO)",
+          "wert": 910,
+          "logo": "/logos/google.svg",
+          "farbe": "#4285f4"
+        },
+        {
+          "id": "direkt",
+          "name": "Direkt",
+          "wert": 520,
+          "logo": "",
+          "farbe": "#8a97a0"
+        },
+        {
+          "id": "facebook",
+          "name": "Facebook",
+          "wert": 290,
+          "logo": "/logos/facebook.svg",
+          "farbe": "#0866ff"
+        },
+        {
+          "id": "instagram",
+          "name": "Instagram",
+          "wert": 240,
+          "logo": "/logos/instagram.svg",
+          "farbe": "#d6249f"
+        },
+        {
+          "id": "gads",
+          "name": "Google Ads",
+          "wert": 180,
+          "logo": "/logos/googleads.svg",
+          "farbe": "#f4b400"
+        },
+        {
+          "id": "andere",
+          "name": "Andere Suchmaschinen",
+          "wert": 76,
+          "logo": "",
+          "farbe": "#2a9d8f"
+        },
+        {
+          "id": "ki",
+          "name": "KI-Assistenten",
+          "wert": 60,
+          "logo": "",
+          "farbe": "#10a37f"
+        }
+      ],
+      "einstieg": [
+        {
+          "id": "start",
+          "name": "Startseite",
+          "pfad": "/",
+          "wert": 1490
+        },
+        {
+          "id": "ratgeber",
+          "name": "Ratgeber-Artikel",
+          "pfad": "/ratgeber/",
+          "wert": 520
+        },
+        {
+          "id": "angebot",
+          "name": "Angebotsseite",
+          "pfad": "/angebot/",
+          "wert": 266
+        }
+      ],
+      "weitere": [
+        {
+          "id": "ueber",
+          "name": "Über uns",
+          "pfad": "/ueber-uns/",
+          "wert": 310
+        },
+        {
+          "id": "preise",
+          "name": "Preise",
+          "pfad": "/preise/",
+          "wert": 240
+        }
+      ],
+      "ziele": [
+        {
+          "id": "formular",
+          "name": "Kontaktformular gesendet",
+          "pfad": "/#kontakt",
+          "wert": 19
+        },
+        {
+          "id": "anruf",
+          "name": "Auf Telefonnummer geklickt",
+          "pfad": "tel:",
+          "wert": 5
+        },
+        {
+          "id": "email",
+          "name": "Auf E-Mail geklickt",
+          "pfad": "mailto:",
+          "wert": 3
+        }
+      ],
+      "wege": [
+        [
+          "google",
+          "start",
+          480
+        ],
+        [
+          "google",
+          "ratgeber",
+          380
+        ],
+        [
+          "google",
+          "angebot",
+          50
+        ],
+        [
+          "direkt",
+          "start",
+          470
+        ],
+        [
+          "direkt",
+          "angebot",
+          50
+        ],
+        [
+          "facebook",
+          "start",
+          190
+        ],
+        [
+          "facebook",
+          "ratgeber",
+          60
+        ],
+        [
+          "facebook",
+          "angebot",
+          40
+        ],
+        [
+          "instagram",
+          "start",
+          180
+        ],
+        [
+          "instagram",
+          "ratgeber",
+          40
+        ],
+        [
+          "instagram",
+          "angebot",
+          20
+        ],
+        [
+          "gads",
+          "angebot",
+          100
+        ],
+        [
+          "gads",
+          "start",
+          80
+        ],
+        [
+          "andere",
+          "start",
+          50
+        ],
+        [
+          "andere",
+          "ratgeber",
+          26
+        ],
+        [
+          "ki",
+          "start",
+          40
+        ],
+        [
+          "ki",
+          "ratgeber",
+          14
+        ],
+        [
+          "ki",
+          "angebot",
+          6
+        ],
+        [
+          "start",
+          "ueber",
+          210
+        ],
+        [
+          "start",
+          "preise",
+          150
+        ],
+        [
+          "ratgeber",
+          "ueber",
+          100
+        ],
+        [
+          "angebot",
+          "preise",
+          90
+        ],
+        [
+          "start",
+          "formular",
+          6
+        ],
+        [
+          "preise",
+          "formular",
+          9
+        ],
+        [
+          "angebot",
+          "formular",
+          4
+        ],
+        [
+          "ueber",
+          "anruf",
+          3
+        ],
+        [
+          "start",
+          "anruf",
+          2
+        ],
+        [
+          "ueber",
+          "email",
+          2
+        ],
+        [
+          "ratgeber",
+          "email",
+          1
+        ]
+      ]
+    },
+    "Anfragen": {
+      "typ": "balken",
+      "titel": "Anfragen im Detail",
+      "beschreibung": "Auf welchem Weg Anfragen ankommen und über welchen Kanal die Menschen zu Ihnen gefunden haben.",
+      "gruppen": [
+        {
+          "titel": "Nach Weg",
+          "einheit": "",
+          "reihen": [
+            {
+              "name": "Kontaktformular",
+              "wert": 19
+            },
+            {
+              "name": "Anruf",
+              "wert": 5
+            },
+            {
+              "name": "E-Mail",
+              "wert": 3
+            }
+          ]
+        },
+        {
+          "titel": "Nach Kanal",
+          "einheit": "",
+          "reihen": [
+            {
+              "name": "Google (organisch)",
+              "wert": 11,
+              "logo": "/logos/google.svg"
+            },
+            {
+              "name": "Direkt",
+              "wert": 6
+            },
+            {
+              "name": "Facebook",
+              "wert": 4,
+              "logo": "/logos/facebook.svg"
+            },
+            {
+              "name": "Google Ads",
+              "wert": 3,
+              "logo": "/logos/googleads.svg"
+            },
+            {
+              "name": "Instagram",
+              "wert": 2,
+              "logo": "/logos/instagram.svg"
+            },
+            {
+              "name": "Sonstige",
+              "wert": 1
+            }
+          ]
+        }
+      ]
+    },
+    "Neue Kunden": {
+      "typ": "balken",
+      "titel": "Neue Kunden im Detail",
+      "beschreibung": "Über welchen Kanal die neuen Kunden gekommen sind und wie viele Anfragen zu einem Auftrag wurden.",
+      "gruppen": [
+        {
+          "titel": "Nach Kanal",
+          "einheit": "",
+          "reihen": [
+            {
+              "name": "Google (organisch)",
+              "wert": 3,
+              "logo": "/logos/google.svg"
+            },
+            {
+              "name": "Empfehlung / Direkt",
+              "wert": 2
+            },
+            {
+              "name": "Facebook",
+              "wert": 1,
+              "logo": "/logos/facebook.svg"
+            }
+          ]
+        },
+        {
+          "titel": "Von der Anfrage zum Kunden",
+          "einheit": "",
+          "reihen": [
+            {
+              "name": "Anfragen",
+              "wert": 27
+            },
+            {
+              "name": "Angebote verschickt",
+              "wert": 14,
+              "hinweis": "52 % der Anfragen"
+            },
+            {
+              "name": "Neue Kunden",
+              "wert": 6,
+              "hinweis": "22 % der Anfragen"
+            }
+          ]
+        }
+      ]
+    },
+    "Umsatz": {
+      "typ": "balken",
+      "titel": "Umsatz im Detail",
+      "beschreibung": "Entwicklung der letzten sechs Monate und Verteilung auf Angebote.",
+      "gruppen": [
+        {
+          "titel": "Letzte 6 Monate",
+          "einheit": "€",
+          "reihen": [
+            {
+              "name": "Juni",
+              "wert": 5200
+            },
+            {
+              "name": "Juli",
+              "wert": 5900
+            },
+            {
+              "name": "August",
+              "wert": 6400
+            },
+            {
+              "name": "September",
+              "wert": 6800
+            },
+            {
+              "name": "Oktober",
+              "wert": 7100
+            },
+            {
+              "name": "November",
+              "wert": 8400
+            }
+          ]
+        },
+        {
+          "titel": "Nach Angebot",
+          "einheit": "€",
+          "reihen": [
+            {
+              "name": "Paket Standard",
+              "wert": 4200
+            },
+            {
+              "name": "Paket Premium",
+              "wert": 3000
+            },
+            {
+              "name": "Einzelleistungen",
+              "wert": 1200
+            }
+          ]
+        }
+      ]
+    },
+    "Marketingbudget": {
+      "typ": "balken",
+      "titel": "Marketingbudget im Detail",
+      "beschreibung": "Wofür das Budget eingesetzt wird. Die Planung pflegen Sie unter Promotion → Kanäle & Budget.",
+      "link": {
+        "text": "Zur Budgetplanung",
+        "ziel": "/dashboard/promotion/#budget"
+      },
+      "gruppen": [
+        {
+          "titel": "Nach Kanal",
+          "einheit": "€",
+          "reihen": [
+            {
+              "name": "Google Ads",
+              "wert": 600,
+              "logo": "/logos/googleads.svg"
+            },
+            {
+              "name": "Meta Ads",
+              "wert": 400,
+              "logo": "/logos/meta.svg"
+            },
+            {
+              "name": "Content und SEO",
+              "wert": 250
+            },
+            {
+              "name": "Tools",
+              "wert": 100
+            }
+          ]
+        }
+      ]
+    },
+    "Anfragequote": {
+      "typ": "balken",
+      "titel": "Anfragequote im Detail",
+      "beschreibung": "Wie viele Besucher zu Anfragen und Kunden werden, und wie sich die Quote je Kanal unterscheidet.",
+      "gruppen": [
+        {
+          "titel": "Vom Besucher zum Kunden",
+          "einheit": "",
+          "reihen": [
+            {
+              "name": "Besucher",
+              "wert": 2276
+            },
+            {
+              "name": "Anfragen",
+              "wert": 27,
+              "hinweis": "1,2 % der Besucher"
+            },
+            {
+              "name": "Neue Kunden",
+              "wert": 6,
+              "hinweis": "0,3 % der Besucher"
+            }
+          ]
+        },
+        {
+          "titel": "Anfragequote je Kanal",
+          "einheit": "%",
+          "reihen": [
+            {
+              "name": "Google Ads",
+              "wert": 1.7,
+              "logo": "/logos/googleads.svg"
+            },
+            {
+              "name": "Facebook",
+              "wert": 1.4,
+              "logo": "/logos/facebook.svg"
+            },
+            {
+              "name": "Google (organisch)",
+              "wert": 1.2,
+              "logo": "/logos/google.svg"
+            },
+            {
+              "name": "Direkt",
+              "wert": 1.2
+            },
+            {
+              "name": "Instagram",
+              "wert": 0.8,
+              "logo": "/logos/instagram.svg"
+            }
+          ]
+        }
+      ]
+    },
+    "Kosten pro Anfrage": {
+      "typ": "balken",
+      "titel": "Kosten pro Anfrage im Detail",
+      "beschreibung": "Was eine Anfrage je Kanal kostet: Budget des Kanals geteilt durch seine Anfragen. Niedriger ist besser.",
+      "gruppen": [
+        {
+          "titel": "Je Kanal",
+          "einheit": "€",
+          "reihen": [
+            {
+              "name": "Google Ads",
+              "wert": 200,
+              "logo": "/logos/googleads.svg",
+              "hinweis": "600 € für 3 Anfragen"
+            },
+            {
+              "name": "Meta Ads",
+              "wert": 67,
+              "logo": "/logos/meta.svg",
+              "hinweis": "400 € für 6 Anfragen"
+            },
+            {
+              "name": "Content und SEO",
+              "wert": 23,
+              "hinweis": "250 € für 11 Anfragen"
+            }
+          ]
+        }
+      ]
+    }
+  }
 }

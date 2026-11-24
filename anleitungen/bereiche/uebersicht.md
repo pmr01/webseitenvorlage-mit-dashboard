@@ -9,7 +9,7 @@ Die Übersicht ist die Startseite des Dashboards. Sie zeigt auf einen Blick, wo 
 ## Was Sie sehen
 
 - **Kennzahlen:** Besucher, Anfragen, neue Kunden, Umsatz und Marketingbudget der letzten 30 Tage, jeweils mit Vergleich zum Vormonat. Daraus berechnet: **Anfragequote** (Anfragen je 100 Besucher) und **Kosten pro Anfrage** (Budget geteilt durch Anfragen).
-- **Stand der sechs Bereiche:** je eine Karte für Produkt, Positionierung, Promotion, Prozess, Plattform und Performance. Ein Klick führt in den Bereich.
+- **Auswertung je Kennzahl:** Ein Klick auf eine Kennzahl zeigt darunter ihre Auswertung. Bei **Besucher** ist das ein Funnel: Traffic-Quellen → Einstiegsseiten → weitere Seiten → Ziele; die Linienstärke zeigt die Sitzungen, die Maus auf einer Karte hebt ihre Wege hervor. Die anderen Kennzahlen zeigen Balken, zum Beispiel Anfragen nach Kanal oder Umsatz der letzten sechs Monate.
 
 ## So pflegen Sie die Zahlen
 
@@ -17,7 +17,7 @@ Die Übersicht ist die Startseite des Dashboards. Sie zeigt auf einen Blick, wo 
 2. Tragen Sie bei jeder Kennzahl den aktuellen Wert (`wert`) und den Vormonat (`vorher`) ein.
 3. Setzen Sie `"beispiel": false`, sobald es Ihre echten Zahlen sind. Dann verschwindet der gelbe Hinweis.
 
-Die Karten zum Stand der Bereiche füllen sich von selbst aus dem, was Sie in den anderen Reitern pflegen, zum Beispiel offene Aufgaben, laufende Kampagnen oder Abo-Kosten.
+Die Auswertungen sind Beispiele. Sie stehen in `src/inhalte/dashboard-kennzahlen.json` unter `auswertungen`: je Kennzahl entweder `"typ": "funnel"` (Quellen, Einstiegsseiten, weitere Seiten, Ziele und die Wege dazwischen) oder `"typ": "balken"` (Gruppen mit Reihen aus Name und Wert).
 
 ## Tipp
 

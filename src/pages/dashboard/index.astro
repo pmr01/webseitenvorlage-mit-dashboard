@@ -1,111 +1,223 @@
 ---
-// Reiter Dashboard: Startansicht mit Beispielzahlen und dem Stand aller sechs P.
-// Die Kennzahlen oben kommen aus src/inhalte/dashboard-kennzahlen.json.
-// Der Stand der Bereiche liest, was im Browser in den anderen Reitern gepflegt wurde
-// (Projekte, Kampagnen, Abos, Updates, Checkliste); sonst die Beispieldaten.
+// Reiter Dashboard: Startansicht mit Beispielzahlen.
+// Kennzahlen und ihre Auswertungen kommen aus src/inhalte/dashboard-kennzahlen.json.
+// Ein Klick auf eine Kennzahl zeigt darunter ihre Auswertung:
+//   typ "funnel"  = Wege der Besucher (Quellen → Einstiegsseiten → weitere Seiten → Ziele)
+//   typ "balken"  = eine oder mehrere Gruppen mit Balken
 import Dashboard from '../../layouts/Dashboard.astro';
+import Logo from '../../components/Logo.astro';
 import kennzahlen from '../../inhalte/dashboard-kennzahlen.json';
-import bmc from '../../inhalte/business-model-canvas.json';
-import tools from '../../inhalte/plattform-tools.json';
-import projekte from '../../inhalte/projekte.json';
-import kampagnen from '../../inhalte/kampagnen.json';
-import abos from '../../inhalte/abos.json';
-import updates from '../../inhalte/updates.json';
 import { konfiguration } from '../../konfiguration.mjs';
 
-const zahl = new Intl.NumberFormat('de-DE');
+const zahl = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 });
 const k = Object.fromEntries(kennzahlen.kennzahlen.map((x) => [x.name, x]));
 const anfragen = k['Anfragen']?.wert ?? 0, besucher = k['Besucher']?.wert ?? 0, budget = k['Marketingbudget']?.wert ?? 0;
-const abgeleitet = [
-  { name: 'Anfragequote', wert: besucher ? `${(anfragen / besucher * 100).toFixed(1).replace('.', ',')} %` : '–', text: 'Anfragen je 100 Besucher' },
-  { name: 'Kosten pro Anfrage', wert: anfragen ? `${zahl.format(Math.round(budget / anfragen))} €` : '–', text: 'Marketingbudget geteilt durch Anfragen' },
+const kennung = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const kacheln = [
+  ...kennzahlen.kennzahlen.map((x) => ({
+    name: x.name, wert: `${zahl.format(x.wert)}${x.einheit ? ` ${x.einheit}` : ''}`,
+    diff: x.vorher ? Math.round(((x.wert - x.vorher) / x.vorher) * 100) : null, text: `Quelle: ${x.quelle}`, abgeleitet: false,
+  })),
+  { name: 'Anfragequote', wert: besucher ? `${(anfragen / besucher * 100).toFixed(1).replace('.', ',')} %` : '–', diff: null, text: 'Anfragen je 100 Besucher', abgeleitet: true },
+  { name: 'Kosten pro Anfrage', wert: anfragen ? `${zahl.format(Math.round(budget / anfragen))} €` : '–', diff: null, text: 'Marketingbudget geteilt durch Anfragen', abgeleitet: true },
 ];
-const bmcBefuellt = Object.values(bmc.felder).filter((f: any) => f.length).length;
-const startdaten = { projekte, kampagnen, abos, updates: updates.aufgaben.map((a) => ({ id: a.id, intervall: a.intervall })) };
+const auswertungen = kennzahlen.auswertungen as Record<string, any>;
+const mit = (wert: number, einheit: string) => `${zahl.format(wert)}${einheit ? ` ${einheit}` : ''}`;
+const spalten = [
+  ['quellen', 'Traffic-Quellen', 'Sitzungen'], ['einstieg', 'Einstiegsseiten', 'Aufrufe'],
+  ['weitere', 'Weitere Seiten', 'Aufrufe'], ['ziele', 'Ziele', 'mal erreicht'],
+] as const;
 ---
-<Dashboard titel="Dashboard" untertitel={`Der Überblick für ${konfiguration.firma.name}: die wichtigsten Zahlen und der Stand in allen sechs Bereichen des 6P-Prinzips.`}>
+<Dashboard titel="Dashboard" untertitel={`Der Überblick für ${konfiguration.firma.name}: die wichtigsten Zahlen. Klicken Sie auf eine Kennzahl, um ihre Auswertung zu sehen.`}>
   {kennzahlen.beispiel && (
     <p class="beispiel-hinweis" role="note"><strong>Beispielzahlen</strong><span>{kennzahlen.hinweis} Datei: <code>src/inhalte/dashboard-kennzahlen.json</code>. Echte Besucherzahlen zeigt der Reiter Performance, sobald Google Analytics verbunden ist.</span></p>
   )}
 
   <h2 class="db-h2">Kennzahlen <small>{kennzahlen.zeitraum}</small></h2>
-  <div class="db-kacheln">
-    {kennzahlen.kennzahlen.map((x) => {
-      const diff = x.vorher ? Math.round(((x.wert - x.vorher) / x.vorher) * 100) : null;
-      return (
-        <div class="karte db-kachel">
-          <span class="db-name">{x.name}</span>
-          <strong>{zahl.format(x.wert)}{x.einheit ? ` ${x.einheit}` : ''}</strong>
-          {diff !== null && <span class:list={['db-trend', diff >= 0 ? 'hoch' : 'runter']}>{diff >= 0 ? '▲' : '▼'} {Math.abs(diff)} % zum Vormonat</span>}
-          <small>Quelle: {x.quelle}</small>
-        </div>
-      );
-    })}
-    {abgeleitet.map((x) => (
-      <div class="karte db-kachel abgeleitet">
+  <div class="db-kacheln" role="tablist" aria-label="Kennzahlen">
+    {kacheln.map((x, i) => (
+      <button type="button" role="tab" class:list={['karte db-kachel', { abgeleitet: x.abgeleitet }]} id={`kachel-${kennung(x.name)}`}
+        aria-controls={`aw-${kennung(x.name)}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-ziel={`aw-${kennung(x.name)}`}>
         <span class="db-name">{x.name}</span>
         <strong>{x.wert}</strong>
+        {x.diff !== null && <span class:list={['db-trend', x.diff >= 0 ? 'hoch' : 'runter']}>{x.diff >= 0 ? '▲' : '▼'} {Math.abs(x.diff)} % zum Vormonat</span>}
         <small>{x.text}</small>
-      </div>
+      </button>
     ))}
   </div>
 
-  <h2 class="db-h2">Stand der sechs Bereiche</h2>
-  <div class="db-bereiche">
-    <a class="karte db-bereich" href="/dashboard/produkt/"><span class="db-nr">1</span><strong>Produkt</strong><span>Business Model Canvas: {bmcBefuellt} von 9 Feldern gefüllt</span></a>
-    <a class="karte db-bereich" href="/dashboard/positionierung/"><span class="db-nr">2</span><strong>Positionierung</strong><span>Strategie-Pyramide, Porter, SWOT und Persona</span></a>
-    <a class="karte db-bereich" href="/dashboard/promotion/"><span class="db-nr">3</span><strong>Promotion</strong><span id="db-promotion">Storytelling-Checkliste: …</span></a>
-    <a class="karte db-bereich" href="/dashboard/prozess/"><span class="db-nr">4</span><strong>Prozess</strong><span id="db-prozess">…</span></a>
-    <a class="karte db-bereich" href="/dashboard/plattform/"><span class="db-nr">5</span><strong>Plattform</strong><span id="db-plattform">{tools.tools.length} Tools · Abos: …</span></a>
-    <a class="karte db-bereich" href="/dashboard/performance/"><span class="db-nr">6</span><strong>Performance</strong><span id="db-performance">Google Analytics: wird geprüft …</span></a>
-  </div>
+  {kacheln.map((x, i) => {
+    const a = auswertungen[x.name];
+    return (
+      <section class="karte db-auswertung" id={`aw-${kennung(x.name)}`} role="tabpanel" aria-labelledby={`kachel-${kennung(x.name)}`} hidden={i !== 0}>
+        {!a && <p class="db-leer">Für „{x.name}“ ist noch keine Auswertung hinterlegt. Ergänzen Sie sie in <code>src/inhalte/dashboard-kennzahlen.json</code> unter <code>auswertungen</code>.</p>}
+        {a && (
+          <header class="aw-kopf">
+            <h2>{a.titel} <small>{kennzahlen.beispiel ? 'Beispiel · ' : ''}{kennzahlen.zeitraum}</small></h2>
+            <p>{a.beschreibung}</p>
+            {a.link && <a class="aw-link" href={a.link.ziel}>{a.link.text} →</a>}
+          </header>
+        )}
 
-  <script type="application/json" id="db-start" set:html={JSON.stringify(startdaten)}></script>
+        {a?.typ === 'funnel' && (
+          <div class="fn" data-funnel data-wege={JSON.stringify(a.wege)}>
+            <svg class="fn-linien" aria-hidden="true"></svg>
+            <div class="fn-raster">
+              {spalten.map(([feld, titel, einheit]) => (
+                <div class="fn-spalte">
+                  <h3>{titel}</h3>
+                  {(a[feld] as any[]).map((n) => (
+                    <div class:list={['fn-karte', `fn-${feld}`]} data-id={n.id} data-name={n.name} style={n.farbe ? `--fn-farbe:${n.farbe}` : undefined} tabindex="0">
+                      {feld === 'quellen' ? <Logo name={n.name} logo={n.logo} groesse={30} /> : <span class="fn-bild" aria-hidden="true"><i></i><i></i><i></i></span>}
+                      <span class="fn-text">
+                        <strong>{n.name}</strong>
+                        {n.pfad && <code>{n.pfad}</code>}
+                        <span>{zahl.format(n.wert)} {einheit}</span>
+                        <small class="fn-wege"></small>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {a?.typ === 'balken' && (
+          <div class="bk-gruppen">
+            {(a.gruppen as any[]).map((g) => {
+              const max = Math.max(...g.reihen.map((r: any) => r.wert), 1);
+              return (
+                <div class="bk-gruppe">
+                  <h3>{g.titel}</h3>
+                  <ul>
+                    {g.reihen.map((r: any) => (
+                      <li>
+                        <span class="bk-name">{r.logo !== undefined && <Logo name={r.name} logo={r.logo} groesse={20} />}{r.name}</span>
+                        <span class="bk-balken"><span style={`width:${Math.max(2, r.wert / max * 100)}%`}></span></span>
+                        <span class="bk-wert">{mit(r.wert, g.einheit)}</span>
+                        {r.hinweis && <small>{r.hinweis}</small>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    );
+  })}
 </Dashboard>
 
 <script>
-  const START = JSON.parse(document.getElementById('db-start')!.textContent || '{}');
-  const lesen = (schluessel: string) => { try { return JSON.parse(localStorage.getItem(schluessel) || 'null'); } catch { return null; } };
-  const euro = (n: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n);
-  const setze = (id: string, text: string) => { document.getElementById(id)!.textContent = text; };
+  // ---------- Kennzahl anklicken: Auswertung darunter zeigen ----------
+  const kacheln = Array.from(document.querySelectorAll<HTMLButtonElement>('.db-kachel'));
+  function zeigen(k: HTMLButtonElement, merken = true) {
+    kacheln.forEach((x) => { const an = x === k; x.setAttribute('aria-selected', String(an)); x.tabIndex = an ? 0 : -1; document.getElementById(x.dataset.ziel!)!.hidden = !an; });
+    if (merken) history.replaceState(null, '', `#${k.dataset.ziel!.replace('aw-', '')}`);
+    zeichneAlle();
+  }
+  kacheln.forEach((k, i) => {
+    k.addEventListener('click', () => {
+      zeigen(k);
+      // Liegt die Auswertung unterhalb des sichtbaren Bereichs (z. B. auf dem Smartphone), dorthin rollen
+      const feld = document.getElementById(k.dataset.ziel!)!;
+      if (feld.getBoundingClientRect().top > innerHeight * 0.75) feld.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    k.addEventListener('keydown', (e) => {
+      const ziel = e.key === 'ArrowRight' ? kacheln[(i + 1) % kacheln.length] : e.key === 'ArrowLeft' ? kacheln[(i - 1 + kacheln.length) % kacheln.length] : null;
+      if (ziel) { e.preventDefault(); ziel.focus(); zeigen(ziel); }
+    });
+  });
 
-  // Promotion: Checkliste
-  const haken = lesen('storytelling-checkliste') || {};
-  setze('db-promotion', `Storytelling-Checkliste: ${Object.values(haken).filter(Boolean).length} von 15 erledigt`);
+  // ---------- Funnel: Linien zwischen den Karten zeichnen ----------
+  const NS = 'http://www.w3.org/2000/svg';
+  const zahl = new Intl.NumberFormat('de-DE');
+  function zeichne(fn: HTMLElement) {
+    const svg = fn.querySelector<SVGSVGElement>('.fn-linien')!;
+    const wege: [string, string, number][] = JSON.parse(fn.dataset.wege || '[]');
+    const karte = (id: string) => fn.querySelector<HTMLElement>(`.fn-karte[data-id="${id}"]`);
+    const rahmen = fn.getBoundingClientRect();
+    if (!rahmen.width) return;
+    svg.setAttribute('viewBox', `0 0 ${rahmen.width} ${rahmen.height}`);
+    svg.replaceChildren();
+    const max = Math.max(...wege.map((w) => w[2]), 1);
+    // Texte für schmale Bildschirme (dort gibt es keine Linien)
+    fn.querySelectorAll<HTMLElement>('.fn-karte').forEach((k) => {
+      const ab = wege.filter((w) => w[0] === k.dataset.id);
+      k.querySelector('.fn-wege')!.textContent = ab.length ? '→ ' + ab.map((w) => `${karte(w[1])?.dataset.name} ${zahl.format(w[2])}`).join(' · ') : '';
+    });
+    // Anschlusspunkte je Karte gleichmäßig verteilen, damit Linien nicht übereinander starten
+    const zaehler: Record<string, number> = {};
+    const punkt = (id: string, seite: 'aus' | 'ein', gesamt: number) => {
+      const r = karte(id)!.getBoundingClientRect();
+      const n = zaehler[`${id}-${seite}`] = (zaehler[`${id}-${seite}`] ?? 0) + 1;
+      return { x: (seite === 'aus' ? r.right : r.left) - rahmen.left, y: r.top - rahmen.top + r.height * n / (gesamt + 1) };
+    };
+    for (const [von, nach, wert] of wege) {
+      const a = karte(von), b = karte(nach);
+      if (!a || !b) continue;
+      const p1 = punkt(von, 'aus', wege.filter((w) => w[0] === von).length);
+      const p2 = punkt(nach, 'ein', wege.filter((w) => w[1] === nach).length);
+      const dx = (p2.x - p1.x) * 0.5;
+      const ziel = b.classList.contains('fn-ziele');
+      const farbe = ziel ? '#2fbf8f' : getComputedStyle(a).getPropertyValue('--fn-farbe').trim() || '#9aa6ab';
+      const g = document.createElementNS(NS, 'g');
+      g.dataset.von = von; g.dataset.nach = nach;
+      const pfad = document.createElementNS(NS, 'path');
+      pfad.setAttribute('d', `M${p1.x},${p1.y} C${p1.x + dx},${p1.y} ${p2.x - dx},${p2.y} ${p2.x},${p2.y}`);
+      pfad.setAttribute('stroke', farbe);
+      pfad.setAttribute('stroke-width', String(ziel ? 2.5 : Math.max(1.5, Math.sqrt(wert / max) * 14)));
+      // Zahl auf der Linie: bei Zielen kurz vor dem Ziel (dort liegt keine Karte darüber), sonst in der Mitte
+      const t = ziel ? 0.86 : 0.5, u = 1 - t;
+      const bez = (a0: number, a1: number, a2: number, a3: number) => u * u * u * a0 + 3 * u * u * t * a1 + 3 * u * t * t * a2 + t * t * t * a3;
+      const mx = bez(p1.x, p1.x + dx, p2.x - dx, p2.x), my = bez(p1.y, p1.y, p2.y, p2.y);
+      const text = document.createElementNS(NS, 'text');
+      text.setAttribute('x', String(mx)); text.setAttribute('y', String(my + 4)); text.textContent = zahl.format(wert);
+      const breite = 14 + String(zahl.format(wert)).length * 7;
+      const feld = document.createElementNS(NS, 'rect');
+      feld.setAttribute('x', String(mx - breite / 2)); feld.setAttribute('y', String(my - 10)); feld.setAttribute('width', String(breite)); feld.setAttribute('height', '20'); feld.setAttribute('rx', '10'); feld.setAttribute('stroke', farbe);
+      const marke = document.createElementNS(NS, 'g'); marke.setAttribute('class', ziel ? 'fn-zahl immer' : 'fn-zahl'); marke.append(feld, text);
+      g.append(pfad, marke); svg.append(g);
+    }
+  }
+  function hervorheben(fn: HTMLElement, id: string | null) {
+    fn.classList.toggle('aktiv', !!id);
+    const an = new Set<string>(id ? [id] : []);
+    fn.querySelectorAll<SVGGElement>('.fn-linien > g').forEach((g) => {
+      const trifft = !!id && (g.dataset.von === id || g.dataset.nach === id);
+      g.classList.toggle('an', trifft);
+      if (trifft) { an.add(g.dataset.von!); an.add(g.dataset.nach!); }
+    });
+    fn.querySelectorAll<HTMLElement>('.fn-karte').forEach((k) => k.classList.toggle('an', an.has(k.dataset.id!)));
+  }
+  const funnel = Array.from(document.querySelectorAll<HTMLElement>('[data-funnel]'));
+  function zeichneAlle() { funnel.forEach(zeichne); }
+  funnel.forEach((fn) => {
+    new ResizeObserver(() => zeichne(fn)).observe(fn);
+    fn.querySelectorAll<HTMLElement>('.fn-karte').forEach((k) => {
+      k.addEventListener('mouseenter', () => hervorheben(fn, k.dataset.id!));
+      k.addEventListener('mouseleave', () => hervorheben(fn, null));
+      k.addEventListener('focus', () => hervorheben(fn, k.dataset.id!));
+      k.addEventListener('blur', () => hervorheben(fn, null));
+    });
+  });
 
-  // Prozess: offene Aufgaben, laufende Kampagnen, fällige Updates
-  const pm = lesen('prozess-projektmanagement-v2');
-  const aufgaben: any[] = pm?.aufgaben ?? START.projekte.aufgaben;
-  const offen = aufgaben.filter((a) => a.status !== 'done').length;
-  const blockiert = aufgaben.filter((a) => a.status === 'blocked').length;
-  const kampagnen: any[] = lesen('prozess-kampagnen') ?? START.kampagnen.kampagnen;
-  const laufend = kampagnen.filter((k) => k.status === 'laeuft').length;
-  const erledigt = lesen('prozess-updates') || {};
-  const heute = new Date(); heute.setHours(0, 0, 0, 0);
-  const faellig = START.updates.filter((u: any) => {
-    if (!erledigt[u.id]) return true;
-    const z = new Date(erledigt[u.id] + 'T00:00:00'); return new Date(z.getFullYear(), z.getMonth() + u.intervall, z.getDate()) <= heute;
-  }).length;
-  setze('db-prozess', `${offen} offene Aufgaben${blockiert ? ` (${blockiert} blockiert)` : ''} · ${laufend} ${laufend === 1 ? 'laufende Kampagne' : 'laufende Kampagnen'} · ${faellig} Updates fällig`);
-
-  // Plattform: Abo-Kosten pro Monat (aktive Einträge in Euro)
-  const eintraege: any[] = lesen('plattform-abos') ?? START.abos.eintraege;
-  const monat = eintraege.filter((e) => e.status === 'aktiv' && (e.waehrung || 'EUR') === 'EUR').reduce((s, e) => s + (e.zyklus === 'jaehrlich' ? e.preis / 12 : e.preis), 0);
-  const p = document.getElementById('db-plattform')!;
-  p.textContent = p.textContent!.replace('Abos: …', `Abos und Domains: ${euro(monat)} pro Monat`);
-
-  // Performance: ist Google Analytics verbunden?
-  fetch('/dashboard/api/kennzahlen?tage=7', { credentials: 'same-origin', headers: { accept: 'application/json' } })
-    .then((r) => (r.headers.get('content-type') || '').includes('json') ? r.json() : null)
-    .then((d) => setze('db-performance', d?.quelle === 'analytics' ? 'Google Analytics verbunden' : d?.fehler && d.fehler !== 'nicht-eingerichtet' ? 'Google Analytics: Verbindung fehlerhaft' : 'Google Analytics noch nicht verbunden (Beispieldaten)'))
-    .catch(() => setze('db-performance', 'Google Analytics noch nicht verbunden (Beispieldaten)'));
+  const ausAdresse = () => { const k = kacheln.find((x) => x.dataset.ziel === `aw-${location.hash.slice(1)}`); if (k) zeigen(k, false); else zeichneAlle(); };
+  window.addEventListener('hashchange', ausAdresse);
+  ausAdresse();
 </script>
 
 <style>
   .db-h2 { font-size: 1.2rem; margin: 8px 0 12px; }
   .db-h2 small { font-size: .85rem; font-weight: 500; color: #67747a; margin-left: 6px; }
-  .db-kacheln { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); margin-bottom: 28px; }
-  .db-kachel { display: flex; flex-direction: column; gap: 2px; }
+  .db-kacheln { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); margin-bottom: 16px; }
+  @media (max-width: 1099px) { .db-kachel { padding: 12px; } .db-kachel strong { font-size: 1.5rem; } }
+  .db-kachel { font: inherit; color: var(--text); text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px; position: relative; transition: border-color .15s, box-shadow .15s; }
+  .db-kachel:hover { border-color: var(--haupt); }
+  .db-kachel[aria-selected="true"] { border-color: var(--haupt); box-shadow: inset 0 -4px 0 var(--haupt); }
+  .db-kachel[aria-selected="true"]::after { content: ''; position: absolute; left: 50%; bottom: -9px; width: 14px; height: 14px; background: var(--haupt); transform: translateX(-50%) rotate(45deg); border-radius: 2px; z-index: -1; }
   .db-kachel.abgeleitet { background: #f9fbfb; }
   .db-name { font-size: .85rem; font-weight: 600; color: #5a676d; }
   .db-kachel strong { font-size: 1.9rem; font-variant-numeric: tabular-nums; line-height: 1.2; }
@@ -122,9 +234,58 @@ const startdaten = { projekte, kampagnen, abos, updates: updates.aufgaben.map((a
     .db-trend { font-size: .76rem; }
     .db-kachel small { font-size: .74rem; }
   }
-  .db-bereiche { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
-  .db-bereich { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: center; text-decoration: none; color: var(--text); transition: border-color .15s; }
-  .db-bereich:hover { border-color: var(--haupt); }
-  .db-bereich > span:last-child { grid-column: 2; font-size: .9rem; color: #4c595f; }
-  .db-nr { grid-row: span 2; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--haupt); color: #fff; font-weight: 700; }
+
+  /* ---------- Auswertung ---------- */
+  .db-auswertung { border-top: 4px solid var(--haupt); scroll-margin-top: 120px; }
+  .db-auswertung[hidden] { display: none; }
+  .aw-kopf h2 { font-size: 1.3rem; margin: 0 0 .3em; }
+  .aw-kopf h2 small { font-size: .78rem; font-weight: 600; color: #5a676d; border: 1px solid #cfd8dc; border-radius: 999px; padding: 2px 10px; margin-left: 8px; vertical-align: middle; white-space: nowrap; }
+  .aw-kopf p { color: #4c595f; max-width: 85ch; margin: 0 0 6px; }
+  .aw-link { font-weight: 600; font-size: .92rem; }
+  .db-leer { color: #5a676d; margin: 0; }
+
+  /* Funnel */
+  .fn { position: relative; margin-top: 16px; }
+  .fn-linien { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .fn-linien :global(path) { fill: none; stroke-linecap: round; opacity: .55; transition: opacity .15s; }
+  .fn-linien :global(.fn-zahl) { opacity: 0; transition: opacity .15s; }
+  .fn-linien :global(.fn-zahl.immer), .fn-linien :global(g.an .fn-zahl) { opacity: 1; }
+  .fn-linien :global(rect) { fill: #fff; stroke-width: 1.5; }
+  .fn-linien :global(text) { font-size: 11px; font-weight: 700; text-anchor: middle; fill: #1c2126; }
+  .fn.aktiv .fn-linien :global(g:not(.an)) { opacity: .12; }
+  .fn.aktiv .fn-linien :global(g.an path) { opacity: .95; }
+  .fn-raster { position: relative; display: grid; grid-template-columns: 1.25fr 1fr 1fr 1fr; column-gap: clamp(60px, 9vw, 150px); align-items: start; }
+  .fn-spalte { display: grid; gap: 10px; }
+  .fn-spalte h3 { font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: #5a676d; margin: 0 0 2px; }
+  .fn-karte { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid #dde3e6; border-left: 4px solid var(--fn-farbe, #9aa6ab); border-radius: 10px; padding: 9px 12px; transition: opacity .15s, border-color .15s, box-shadow .15s; outline-offset: 2px; }
+  .fn-karte:hover, .fn-karte:focus-visible { box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+  .fn.aktiv .fn-karte:not(.an) { opacity: .4; }
+  .fn-einstieg, .fn-weitere { --fn-farbe: #9aa6ab; }
+  .fn-ziele { --fn-farbe: #2fbf8f; border-bottom: 3px solid #2fbf8f; }
+  .fn-text { display: grid; min-width: 0; line-height: 1.3; }
+  .fn-text strong { font-size: .93rem; }
+  .fn-text code { font-size: .76rem; color: #67747a; background: none; padding: 0; }
+  .fn-text > span { font-size: .82rem; color: #5a676d; }
+  .fn-wege { display: none; font-size: .78rem; color: #47545a; margin-top: 3px; }
+  .fn-bild { flex: none; width: 34px; height: 30px; border-radius: 5px; background: color-mix(in srgb, var(--haupt) 88%, black); display: grid; align-content: center; justify-items: center; gap: 3px; }
+  .fn-bild i { display: block; height: 3px; border-radius: 2px; background: rgba(255,255,255,.75); width: 20px; }
+  .fn-bild i:nth-child(2) { width: 14px; background: var(--akzent); }
+  .fn-bild i:nth-child(3) { width: 9px; }
+  @media (max-width: 900px) {
+    .fn-linien { display: none; }
+    .fn-raster { grid-template-columns: 1fr; row-gap: 18px; }
+    .fn-wege { display: block; }
+  }
+
+  /* Balken */
+  .bk-gruppen { display: grid; gap: 20px 40px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); margin-top: 16px; }
+  .bk-gruppe h3 { font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: #5a676d; margin: 0 0 8px; }
+  .bk-gruppe ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .bk-gruppe li { display: grid; grid-template-columns: minmax(110px, 190px) 1fr auto; gap: 2px 12px; align-items: center; font-size: .93rem; }
+  .bk-name { display: flex; align-items: center; gap: 8px; font-weight: 600; min-width: 0; }
+  .bk-balken { height: 12px; border-radius: 999px; background: #eef1f2; overflow: hidden; }
+  .bk-balken span { display: block; height: 100%; border-radius: 999px; background: var(--haupt); }
+  .bk-wert { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; min-width: 64px; }
+  .bk-gruppe small { grid-column: 2 / -1; font-size: .78rem; color: #67747a; }
+  @media (max-width: 480px) { .bk-gruppe li { grid-template-columns: 1fr auto; } .bk-balken { grid-column: 1 / -1; grid-row: 2; } .bk-gruppe small { grid-column: 1 / -1; } }
 </style>
